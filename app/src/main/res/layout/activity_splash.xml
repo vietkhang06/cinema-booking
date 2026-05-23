@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#1B141E"
+    tools:context=".ui.auth.SplashActivity">
+
+    <LinearLayout
+        android:id="@+id/containerCenter"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/ivLogo"
+            android:layout_width="220dp"
+            android:layout_height="220dp"
+            android:contentDescription="@null"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_cinemax_logo" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tvCine"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-medium"
+                android:letterSpacing="0.02"
+                android:text="CINE"
+                android:textColor="#FFFFFF"
+                android:textSize="36sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvMax"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-medium"
+                android:letterSpacing="0.02"
+                android:text="MAX"
+                android:textColor="#B33C57"
+                android:textSize="36sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvTagline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:fontFamily="sans-serif-medium"
+            android:letterSpacing="0.04"
+            android:text="PHIM NHƯ SỐNG | SỐNG NHƯ PHIM"
+            android:textColor="#C9C0C9"
+            android:textSize="12sp" />
+
+        <LinearLayout
+            android:id="@+id/dotContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="22dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <View
+                android:id="@+id/dot1"
+                android:layout_width="6dp"
+                android:layout_height="6dp"
+                android:layout_marginHorizontal="3dp"
+                android:background="@drawable/bg_splash_dot" />
+
+            <View
+                android:id="@+id/dot2"
+                android:layout_width="6dp"
+                android:layout_height="6dp"
+                android:layout_marginHorizontal="3dp"
+                android:background="@drawable/bg_splash_dot" />
+
+            <View
+                android:id="@+id/dot3"
+                android:layout_width="6dp"
+                android:layout_height="6dp"
+                android:layout_marginHorizontal="3dp"
+                android:background="@drawable/bg_splash_dot" />
+
+            <View
+                android:id="@+id/dot4"
+                android:layout_width="6dp"
+                android:layout_height="6dp"
+                android:layout_marginHorizontal="3dp"
+                android:background="@drawable/bg_splash_dot" />
+
+            <View
+                android:id="@+id/dot5"
+                android:layout_width="6dp"
+                android:layout_height="6dp"
+                android:layout_marginHorizontal="3dp"
+                android:background="@drawable/bg_splash_dot" />
+
+            <View
+                android:id="@+id/dot6"
+                android:layout_width="6dp"
+                android:layout_height="6dp"
+                android:layout_marginHorizontal="3dp"
+                android:background="@drawable/bg_splash_dot" />
+
+            <View
+                android:id="@+id/dot7"
+                android:layout_width="6dp"
+                android:layout_height="6dp"
+                android:layout_marginHorizontal="3dp"
+                android:background="@drawable/bg_splash_dot" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
