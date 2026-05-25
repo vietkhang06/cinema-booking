@@ -1,6 +1,7 @@
 package com.example.cinemabooking.core.base;
 
 import com.example.cinemabooking.core.navigation.AppNavigator;
+import com.example.cinemabooking.di.ServiceProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
