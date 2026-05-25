@@ -1,0 +1,22 @@
+<!--
+  ~ Copyright (C) 2026 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:height="24dp" android:viewportHeight="24" android:viewportWidth="24" android:width="24dp">
+      
+    <path android:fillColor="#00000000" android:fillType="evenOdd" android:pathData="M6.313,12.463C6.2,9.292 8.61,6.625 11.701,6.5C14.792,6.625 17.202,9.292 17.089,12.463C17.089,13.78 18.484,15.063 18.525,16.383C18.525,16.402 18.525,16.42 18.525,16.439C18.555,17.285 17.912,17.996 17.088,18.029H13.976C13.979,18.677 13.74,19.302 13.31,19.776C12.896,20.237 12.312,20.5 11.701,20.5C11.09,20.5 10.506,20.237 10.092,19.776C9.662,19.302 9.423,18.677 9.426,18.029H6.313C5.489,17.996 4.846,17.285 4.876,16.439C4.876,16.42 4.876,16.402 4.876,16.383C4.918,15.067 6.313,13.781 6.313,12.463Z" android:strokeColor="#000000" android:strokeLineCap="round" android:strokeLineJoin="round" android:strokeWidth="1.5"/>
+      
+    <path android:fillColor="#000000" android:pathData="M9.426,17.279C9.012,17.279 8.676,17.615 8.676,18.029C8.676,18.443 9.012,18.779 9.426,18.779V17.279ZM13.976,18.779C14.39,18.779 14.726,18.443 14.726,18.029C14.726,17.615 14.39,17.279 13.976,17.279V18.779ZM12.676,5.25C13.09,5.25 13.426,4.914 13.426,4.5C13.426,4.086 13.09,3.75 12.676,3.75V5.25ZM10.726,3.75C10.312,3.75 9.976,4.086 9.976,4.5C9.976,4.914 10.312,5.25 10.726,5.25V3.75ZM9.426,18.779H13.976V17.279H9.426V18.779ZM12.676,3.75H10.726V5.25H12.676V3.75Z"/>
+    
+</vector>
