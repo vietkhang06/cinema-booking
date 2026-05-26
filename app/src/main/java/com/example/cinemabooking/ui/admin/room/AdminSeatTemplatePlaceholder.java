@@ -1,8 +1,8 @@
-package com.example.cinemabookingapp.ui.admin.room;
+package com.example.cinemabooking.ui.admin.room;
 
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
-import com.example.cinemabookingapp.R;
+import com.example.cinemabooking.R;
 
 public class AdminSeatTemplatePlaceholder extends AppCompatActivity {
     @Override

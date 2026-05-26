@@ -1,4 +1,4 @@
-package com.example.cinemabookingapp.ui.admin.room;
+package com.example.cinemabooking.ui.admin.room;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,15 +11,15 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.cinemabookingapp.R;
-import com.example.cinemabookingapp.core.base.BaseActivity;
-import com.example.cinemabookingapp.data.repository.CinemaRepositoryImpl;
-import com.example.cinemabookingapp.data.repository.RoomRepositoryImpl;
-import com.example.cinemabookingapp.domain.common.ResultCallback;
-import com.example.cinemabookingapp.domain.model.Cinema;
-import com.example.cinemabookingapp.domain.model.Room;
-import com.example.cinemabookingapp.domain.repository.CinemaRepository;
-import com.example.cinemabookingapp.domain.repository.RoomRepository;
+import com.example.cinemabooking.R;
+import com.example.cinemabooking.core.base.BaseActivity;
+import com.example.cinemabooking.data.repository.CinemaRepositoryImpl;
+import com.example.cinemabooking.data.repository.RoomRepositoryImpl;
+import com.example.cinemabooking.domain.common.ResultCallback;
+import com.example.cinemabooking.domain.model.Cinema;
+import com.example.cinemabooking.domain.model.Room;
+import com.example.cinemabooking.domain.repository.CinemaRepository;
+import com.example.cinemabooking.domain.repository.RoomRepository;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 
@@ -36,7 +36,7 @@ public class AdminRoomListActivity extends BaseActivity {
     private CinemaRepository cinemaRepository;
     private RoomRepository roomRepository;
 
-    private com.example.cinemabookingapp.ui.admin.room.AdminRoomAdapter roomAdapter;
+    private com.example.cinemabooking.ui.admin.room.AdminRoomAdapter roomAdapter;
     private List<Cinema> cinemaList = new ArrayList<>();
     private Cinema selectedCinema;
 
@@ -63,7 +63,7 @@ public class AdminRoomListActivity extends BaseActivity {
         rvRooms = findViewById(R.id.rvRooms);
         tvEmptyRooms = findViewById(R.id.tvEmptyRooms);
 
-        roomAdapter = new com.example.cinemabookingapp.ui.admin.room.AdminRoomAdapter();
+        roomAdapter = new com.example.cinemabooking.ui.admin.room.AdminRoomAdapter();
         rvRooms.setLayoutManager(new LinearLayoutManager(this));
         rvRooms.setAdapter(roomAdapter);
     }
@@ -80,7 +80,7 @@ public class AdminRoomListActivity extends BaseActivity {
             }
         });
 
-        roomAdapter.setListener(new com.example.cinemabookingapp.ui.admin.room.AdminRoomAdapter.OnRoomActionListener() {
+        roomAdapter.setListener(new com.example.cinemabooking.ui.admin.room.AdminRoomAdapter.OnRoomActionListener() {
             @Override
             public void onEditClick(Room room) {
                 showRoomFormDialog(room);

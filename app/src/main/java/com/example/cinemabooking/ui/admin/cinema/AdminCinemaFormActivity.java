@@ -1,15 +1,15 @@
-package com.example.cinemabookingapp.ui.admin.cinema;
+package com.example.cinemabooking.ui.admin.cinema;
 
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-import com.example.cinemabookingapp.R;
-import com.example.cinemabookingapp.core.base.BaseActivity;
-import com.example.cinemabookingapp.data.repository.CinemaRepositoryImpl;
-import com.example.cinemabookingapp.domain.common.ResultCallback;
-import com.example.cinemabookingapp.domain.model.Cinema;
+import com.example.cinemabooking.R;
+import com.example.cinemabooking.core.base.BaseActivity;
+import com.example.cinemabooking.data.repository.CinemaRepositoryImpl;
+import com.example.cinemabooking.domain.common.ResultCallback;
+import com.example.cinemabooking.domain.model.Cinema;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputEditText;
