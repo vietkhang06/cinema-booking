@@ -1,4 +1,4 @@
-package com.example.cinemabookingapp.ui.admin.cinema.adapter;
+package com.example.cinemabooking.ui.admin.cinema.adapter;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,8 +8,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.cinemabookingapp.R;
-import com.example.cinemabookingapp.domain.model.Cinema;
+import com.example.cinemabooking.R;
+import com.example.cinemabooking.domain.model.Cinema;
 
 import java.util.ArrayList;
 import java.util.List;

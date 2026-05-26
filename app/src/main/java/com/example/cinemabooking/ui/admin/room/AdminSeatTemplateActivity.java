@@ -1,4 +1,4 @@
-package com.example.cinemabookingapp.ui.admin.room;
+package com.example.cinemabooking.ui.admin.room;
 
 import android.os.Bundle;
 import android.widget.Button;
@@ -10,13 +10,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.cinemabookingapp.R;
-import com.example.cinemabookingapp.data.repository.SeatRepositoryImpl;
-import com.example.cinemabookingapp.domain.model.SeatTemplate;
-import com.example.cinemabookingapp.domain.repository.SeatRepository;
-import com.example.cinemabookingapp.ui.admin.room.seatplan.SeatPlanCell;
-import com.example.cinemabookingapp.ui.admin.room.seatplan.SeatPlanRow;
-import com.example.cinemabookingapp.ui.admin.room.seatplan.SeatPlanRowAdapter;
+import com.example.cinemabooking.R;
+import com.example.cinemabooking.data.repository.SeatRepositoryImpl;
+import com.example.cinemabooking.domain.model.SeatTemplate;
+import com.example.cinemabooking.domain.repository.SeatRepository;
+import com.example.cinemabooking.ui.admin.room.seatplan.SeatPlanCell;
+import com.example.cinemabooking.ui.admin.room.seatplan.SeatPlanRow;
+import com.example.cinemabooking.ui.admin.room.seatplan.SeatPlanRowAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -164,7 +164,7 @@ public class AdminSeatTemplateActivity extends AppCompatActivity {
     private void loadSeatTemplates() {
         if (roomId == null) return;
 
-        seatRepository.getSeatTemplatesByRoomId(roomId, new com.example.cinemabookingapp.domain.common.ResultCallback<List<SeatTemplate>>() {
+        seatRepository.getSeatTemplatesByRoomId(roomId, new com.example.cinemabooking.domain.common.ResultCallback<List<SeatTemplate>>() {
             @Override
             public void onSuccess(List<SeatTemplate> templates) {
                 if (isFinishing() || isDestroyed()) return;
@@ -276,7 +276,7 @@ public class AdminSeatTemplateActivity extends AppCompatActivity {
             }
         }
 
-        seatRepository.createSeatTemplates(roomId, templates, new com.example.cinemabookingapp.domain.common.ResultCallback<Void>() {
+        seatRepository.createSeatTemplates(roomId, templates, new com.example.cinemabooking.domain.common.ResultCallback<Void>() {
             @Override
             public void onSuccess(Void data) {
                 Toast.makeText(AdminSeatTemplateActivity.this, "Đã lưu sơ đồ ghế thành công", Toast.LENGTH_SHORT).show();
