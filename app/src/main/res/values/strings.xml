@@ -1,6 +1,6 @@
 <resources>
     <string name="default_web_client_id">1023773456036-gcals62av6u0l8mit2uj9ofcl3mrrlve.apps.googleusercontent.com</string>
-    <string name="app_name">CinemaBookingApp</string>
+    <string name="app_name">cinemabooking</string>
     <string name="cinemax_text">
     <font color="#FFFFFF">CINE</font><font color="#B33C57">MAX</font>
 </string>

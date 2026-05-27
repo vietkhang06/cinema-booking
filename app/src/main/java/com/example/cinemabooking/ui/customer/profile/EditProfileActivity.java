@@ -1,4 +1,4 @@
-package com.example.cinemabookingapp.ui.customer.profile;
+package com.example.cinemabooking.ui.customer.profile;
 
 import android.app.DatePickerDialog;
 import android.net.Uri;
@@ -17,12 +17,12 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 
 import com.bumptech.glide.Glide;
-import com.example.cinemabookingapp.R;
-import com.example.cinemabookingapp.core.base.AuthActivity;
-import com.example.cinemabookingapp.di.ServiceProvider;
-import com.example.cinemabookingapp.domain.common.ResultCallback;
-import com.example.cinemabookingapp.domain.model.User;
-import com.example.cinemabookingapp.service.ProfileService;
+import com.example.cinemabooking.R;
+import com.example.cinemabooking.core.base.AuthActivity;
+import com.example.cinemabooking.di.ServiceProvider;
+import com.example.cinemabooking.domain.common.ResultCallback;
+import com.example.cinemabooking.domain.model.User;
+import com.example.cinemabooking.service.ProfileService;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.textfield.TextInputEditText;

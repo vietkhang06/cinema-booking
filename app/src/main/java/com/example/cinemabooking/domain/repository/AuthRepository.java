@@ -1,7 +1,7 @@
-package com.example.cinemabookingapp.domain.repository;
+package com.example.cinemabooking.domain.repository;
 
-import com.example.cinemabookingapp.domain.common.ResultCallback;
-import com.example.cinemabookingapp.domain.model.User;
+import com.example.cinemabooking.domain.common.ResultCallback;
+import com.example.cinemabooking.domain.model.User;
 
 public interface AuthRepository {
     void register(String name, String email, String phone, String password, ResultCallback<User> callback);

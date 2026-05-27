@@ -1,4 +1,4 @@
-package com.example.cinemabookingapp.ui.customer.profile;
+package com.example.cinemabooking.ui.customer.profile;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -15,14 +15,14 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
-import com.example.cinemabookingapp.R;
-import com.example.cinemabookingapp.core.navigation.AppNavigator;
-import com.example.cinemabookingapp.di.ServiceProvider;
-import com.example.cinemabookingapp.domain.common.ResultCallback;
-import com.example.cinemabookingapp.domain.model.User;
-import com.example.cinemabookingapp.service.AuthenticationService;
-import com.example.cinemabookingapp.service.ProfileService;
-import com.example.cinemabookingapp.ui.component.AchievementProgressBar;
+import com.example.cinemabooking.R;
+import com.example.cinemabooking.core.navigation.AppNavigator;
+import com.example.cinemabooking.di.ServiceProvider;
+import com.example.cinemabooking.domain.common.ResultCallback;
+import com.example.cinemabooking.domain.model.User;
+import com.example.cinemabooking.service.AuthenticationService;
+import com.example.cinemabooking.service.ProfileService;
+import com.example.cinemabooking.ui.component.AchievementProgressBar;
 import com.google.android.material.card.MaterialCardView;
 
 import java.util.Arrays;
