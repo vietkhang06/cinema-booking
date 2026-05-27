@@ -1,4 +1,4 @@
-package com.example.cinemabookingapp.ui.customer.profile;
+package com.example.cinemabooking.ui.customer.profile;
 
 import android.os.Bundle;
 import android.widget.ImageView;
@@ -8,7 +8,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.cinemabookingapp.R;
+import com.example.cinemabooking.R;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 
 public class SettingsActivity extends AppCompatActivity {

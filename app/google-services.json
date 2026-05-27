@@ -46,7 +46,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:1023773456036:android:10e7b40eb64ab6475b1831",
         "android_client_info": {
-          "package_name": "com.example.cinemabookingapp"
+          "package_name": "com.example.cinemabooking"
         }
       },
       "oauth_client": [
@@ -54,7 +54,7 @@
           "client_id": "1023773456036-kn5ri2k8pufuposf1acjk70bo34i5ee9.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.cinemabookingapp",
+            "package_name": "com.example.cinemabooking",
             "certificate_hash": "f6218bed88dca196aed9c63a8ddaf03c01971e0e"
           }
         },
