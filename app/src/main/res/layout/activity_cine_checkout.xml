@@ -1,0 +1,515 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF">
+
+    <!-- ── HEADER ── -->
+    <LinearLayout
+        android:id="@+id/checkoutHeader"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="4dp"
+        android:background="#FFFFFF"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/btnCheckoutBack"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:padding="12dp"
+            android:src="@drawable/chevron_left_solid_full"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:tint="#111111" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Thanh toán"
+            android:textColor="#111111"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-medium" />
+    </LinearLayout>
+
+    <View
+        android:id="@+id/checkoutHeaderDivider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#F0F0F0"
+        app:layout_constraintTop_toBottomOf="@id/checkoutHeader" />
+
+    <!-- ── SCROLL CONTENT ── -->
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/checkoutScroll"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/checkoutHeaderDivider"
+        app:layout_constraintBottom_toTopOf="@id/checkoutBottomBar">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- ── ORDER SUMMARY ── -->
+            <LinearLayout
+                android:id="@+id/layoutOrderSummary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="16dp"
+                android:paddingTop="12dp"
+                android:paddingBottom="4dp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="8dp"
+                android:background="#F2F2F7" />
+
+            <!-- ── PAYMENT METHODS ── -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="16dp"
+                android:paddingTop="16dp"
+                android:paddingBottom="8dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Phương thức thanh toán"
+                    android:textColor="#111111"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-medium"
+                    android:layout_marginBottom="12dp" />
+
+                <!-- Zalopay -->
+                <LinearLayout
+                    android:id="@+id/paymentZalopay"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingVertical="8dp"
+                    android:background="?attr/selectableItemBackground">
+
+                    <View
+                        android:id="@+id/radioZalopay"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:background="@drawable/bg_radio_unselected_cine" />
+
+                    <!-- ZaloPay Logo placeholder -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:layout_marginStart="12dp"
+                        app:cardCornerRadius="8dp"
+                        app:cardElevation="0dp"
+                        app:cardBackgroundColor="#005FE0">
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:text="Z"
+                            android:textColor="#FFFFFF"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="12dp"
+                        android:text="Zalopay"
+                        android:textColor="#222222"
+                        android:textSize="15sp" />
+                </LinearLayout>
+
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#F0F0F0" />
+
+                <!-- MoMo -->
+                <LinearLayout
+                    android:id="@+id/paymentMomo"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingVertical="8dp"
+                    android:background="?attr/selectableItemBackground">
+
+                    <View
+                        android:id="@+id/radioMomo"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:background="@drawable/bg_radio_unselected_cine" />
+
+                    <!-- MoMo Logo placeholder -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:layout_marginStart="12dp"
+                        app:cardCornerRadius="8dp"
+                        app:cardElevation="0dp"
+                        app:cardBackgroundColor="#A3166C">
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:text="M"
+                            android:textColor="#FFFFFF"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="12dp"
+                        android:text="Ví Điện Tử MoMo"
+                        android:textColor="#222222"
+                        android:textSize="15sp" />
+                </LinearLayout>
+
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#F0F0F0" />
+
+                <!-- OnePay -->
+                <LinearLayout
+                    android:id="@+id/paymentOnepay"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingVertical="8dp"
+                    android:minHeight="60dp"
+                    android:background="?attr/selectableItemBackground">
+
+                    <View
+                        android:id="@+id/radioOnepay"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:background="@drawable/bg_radio_unselected_cine" />
+
+                    <!-- OnePay Logo placeholder -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:layout_marginStart="12dp"
+                        app:cardCornerRadius="8dp"
+                        app:cardElevation="0dp"
+                        app:cardBackgroundColor="#E87722">
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:text="1"
+                            android:textColor="#FFFFFF"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="12dp"
+                        android:text="OnePay - Visa, Master, JCB,… / ATM / QR Ngân hàng / Apple Pay"
+                        android:textColor="#222222"
+                        android:textSize="15sp" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="8dp"
+                android:background="#F2F2F7" />
+
+            <!-- ── KHUYẾN MÃI ── -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="16dp"
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Khuyến mãi"
+                    android:textColor="#111111"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-medium"
+                    android:layout_marginBottom="12dp" />
+
+                <!-- Mã voucher row header -->
+                <LinearLayout
+                    android:id="@+id/rowVoucherHeader"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:background="@drawable/bg_promo_header"
+                    android:paddingHorizontal="10dp"
+                    android:layout_marginBottom="8dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🏷"
+                        android:textSize="16sp" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:text="Mã voucher"
+                        android:textColor="#E8640C"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvVoucherToggle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="▲"
+                        android:textColor="#E8640C"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <!-- Voucher input row -->
+                <LinearLayout
+                    android:id="@+id/layoutVoucherInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="12dp">
+
+                    <EditText
+                        android:id="@+id/etVoucherCode"
+                        android:layout_width="0dp"
+                        android:layout_height="44dp"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="8dp"
+                        android:background="@drawable/bg_input_orange"
+                        android:paddingHorizontal="12dp"
+                        android:hint="Nhập mã voucher"
+                        android:textColorHint="#BBBBBB"
+                        android:textColor="#111111"
+                        android:textSize="14sp"
+                        android:inputType="text"
+                        android:singleLine="true"
+                        android:imeOptions="actionDone" />
+
+                    <TextView
+                        android:id="@+id/btnApplyVoucher"
+                        android:layout_width="90dp"
+                        android:layout_height="44dp"
+                        android:gravity="center"
+                        android:background="@drawable/bg_btn_orange_filled"
+                        android:text="Áp dụng"
+                        android:textColor="#FFFFFF"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- Điểm Star row header -->
+                <LinearLayout
+                    android:id="@+id/rowStarHeader"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:background="@drawable/bg_promo_header"
+                    android:paddingHorizontal="10dp"
+                    android:layout_marginBottom="4dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🎁"
+                        android:textSize="16sp" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:text="Sử dụng điểm Star"
+                        android:textColor="#E8640C"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvStarToggle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="▲"
+                        android:textColor="#E8640C"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <!-- Star input -->
+                <LinearLayout
+                    android:id="@+id/layoutStarInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="6dp"
+                        android:text="Điểm hiện có: 0"
+                        android:textColor="#888888"
+                        android:textSize="13sp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <EditText
+                            android:id="@+id/etStarPoints"
+                            android:layout_width="0dp"
+                            android:layout_height="44dp"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="8dp"
+                            android:background="@drawable/bg_input_orange"
+                            android:paddingHorizontal="12dp"
+                            android:hint="Nhập Số Stars"
+                            android:textColorHint="#BBBBBB"
+                            android:textColor="#111111"
+                            android:textSize="14sp"
+                            android:inputType="number"
+                            android:singleLine="true"
+                            android:imeOptions="actionDone" />
+
+                        <TextView
+                            android:id="@+id/btnApplyStar"
+                            android:layout_width="90dp"
+                            android:layout_height="44dp"
+                            android:gravity="center"
+                            android:background="@drawable/bg_btn_orange_filled"
+                            android:text="Áp dụng"
+                            android:textColor="#FFFFFF"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="8dp"
+                android:background="#F2F2F7" />
+
+            <!-- ── NƠI NHẬN HÀNG ── -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="16dp"
+                android:paddingTop="16dp"
+                android:paddingBottom="24dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Nơi nhận hàng"
+                    android:textColor="#111111"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-medium"
+                    android:layout_marginBottom="12dp" />
+
+                <!-- Province Spinner -->
+                <Spinner
+                    android:id="@+id/spinnerProvince"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:background="@drawable/bg_dropdown_cine"
+                    android:paddingHorizontal="12dp"
+                    android:layout_marginBottom="10dp" />
+
+                <!-- Cinema Spinner -->
+                <Spinner
+                    android:id="@+id/spinnerCinema"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:background="@drawable/bg_dropdown_cine"
+                    android:paddingHorizontal="12dp" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- ── BOTTOM BAR ── -->
+    <View
+        android:id="@+id/checkoutDivider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#F0F0F0"
+        app:layout_constraintBottom_toTopOf="@id/checkoutBottomBar" />
+
+    <LinearLayout
+        android:id="@+id/checkoutBottomBar"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="16dp"
+        android:background="#FFFFFF"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tổng cộng: "
+                android:textColor="#888888"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/tvCheckoutTotal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0đ"
+                android:textColor="#E8640C"
+                android:textSize="17sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/btnCheckoutPay"
+            android:layout_width="130dp"
+            android:layout_height="46dp"
+            android:gravity="center"
+            android:background="@drawable/bg_btn_orange_filled"
+            android:text="Thanh Toán"
+            android:textColor="#FFFFFF"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
