@@ -4,7 +4,5 @@
   <component name="Kotlin2JsCompilerArguments">
     <option name="moduleKind" value="plain" />
   </component>
-  <component name="Kotlin2JvmCompilerArguments">
-    <option name="jvmTarget" value="1.8" />
-  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_21" project-jdk-name="jbr-21" project-jdk-type="JavaSDK" />
 </project>
