@@ -1,4 +1,4 @@
-package com.example.cinemabooking.ui.customer.movie;
+package com.example.cinemabooking.ui.customer;
 
 import android.content.Intent;
 import android.content.res.ColorStateList;
@@ -33,7 +33,6 @@ import com.example.cinemabooking.domain.model.Movie;
 import com.example.cinemabooking.domain.model.Showtime;
 import com.example.cinemabooking.domain.repository.MovieRepository;
 import com.example.cinemabooking.domain.usecase.movie.GetMovieByIdUseCase;
-import com.example.cinemabooking.ui.customer.SeatSelectionActivity;
 import com.example.cinemabooking.ui.customer.model.MovieDetailScheduleCatalog;
 import com.example.cinemabooking.ui.customer.model.MovieDetailScheduleCatalog.CinemaSection;
 import com.example.cinemabooking.ui.customer.model.MovieDetailScheduleCatalog.DateOption;

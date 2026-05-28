@@ -31,7 +31,7 @@ import com.example.cinemabooking.domain.model.Showtime;
 import com.example.cinemabooking.domain.repository.CinemaRepository;
 import com.example.cinemabooking.domain.repository.MovieRepository;
 import com.example.cinemabooking.domain.repository.ShowtimeRepository;
-import com.example.cinemabooking.ui.customer.movie.MovieDetailActivity;
+import com.example.cinemabooking.ui.customer.MovieDetailActivity;
 import com.example.cinemabooking.ui.customer.SeatSelectionActivity;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
