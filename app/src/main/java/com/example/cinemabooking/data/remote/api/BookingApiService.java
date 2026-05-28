@@ -35,4 +35,8 @@ public interface BookingApiService {
 
     @retrofit2.http.PUT("bookings/payment/{id}/failed")
     Call<ApiResponse<Void>> cancelBooking(@Path("id") String bookingId);
+    Call<ApiResponse<Void>> confirmPayment(@retrofit2.http.Path("id") String bookingId);
+
+    @retrofit2.http.PUT("bookings/payment/{id}/failed")
+    Call<ApiResponse<Void>> cancelBooking(@retrofit2.http.Path("id") String bookingId);
 }

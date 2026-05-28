@@ -61,7 +61,7 @@
             android:orientation="vertical">
 
             <!-- Electronic Invoice Component View -->
-            <com.example.cinemabookingapp.ui.component.EInvoice.EInvoiceView
+            <com.example.cinemabooking.ui.component.EInvoice.EInvoiceView
                 android:id="@+id/staff_einvoice"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
