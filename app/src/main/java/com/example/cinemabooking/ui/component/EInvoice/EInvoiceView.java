@@ -9,10 +9,11 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.example.cinemabookingapp.R;
-import com.example.cinemabookingapp.service.InvoiceService;
-import com.example.cinemabookingapp.utils.DateTimeConverter;
-import com.example.cinemabookingapp.utils.QRCodeGenerator;
+import com.example.cinemabooking.R;
+import com.example.cinemabooking.domain.model.Booking;
+import com.example.cinemabooking.service.InvoiceService;
+import com.example.cinemabooking.utils.DateTimeConverter;
+import com.example.cinemabooking.utils.QRCodeGenerator;
 
 import java.util.Locale;
 

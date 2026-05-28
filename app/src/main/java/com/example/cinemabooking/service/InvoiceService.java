@@ -11,13 +11,19 @@ import com.example.cinemabooking.domain.model.Movie;
 import com.example.cinemabooking.domain.model.Showtime;
 import com.example.cinemabooking.domain.model.Snack;
 import com.example.cinemabooking.domain.model.SnackOrder;
+import com.example.cinemabooking.domain.model.SnackOrderItem;
 import com.example.cinemabooking.domain.repository.MovieRepository;
+import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
 
+import java.lang.Record;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class InvoiceService {

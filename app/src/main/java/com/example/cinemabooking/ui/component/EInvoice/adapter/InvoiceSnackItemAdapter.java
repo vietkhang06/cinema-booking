@@ -8,8 +8,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.cinemabookingapp.R;
-import com.example.cinemabookingapp.ui.component.EInvoice.model.InvoiceSnackItem;
+import com.example.cinemabooking.R;
+import com.example.cinemabooking.ui.component.EInvoice.model.InvoiceSnackItem;
 
 import java.util.List;
 
