@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0F172A">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Thêm phim"
+            android:textColor="@android:color/white"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:boxBackgroundMode="filled"
+            app:boxBackgroundColor="#111827">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Tên phim"
+                android:textColor="@android:color/white"
+                android:textColorHint="#94A3B8" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:boxBackgroundMode="filled"
+            app:boxBackgroundColor="#111827">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Mô tả"
+                android:minLines="4"
+                android:gravity="top"
+                android:textColor="@android:color/white"
+                android:textColorHint="#94A3B8" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilGenres"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:boxBackgroundMode="filled"
+            app:boxBackgroundColor="#111827">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtGenres"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Thể loại (cách nhau bởi dấu phẩy)"
+                android:textColor="@android:color/white"
+                android:textColorHint="#94A3B8" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilLanguage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:boxBackgroundMode="filled"
+            app:boxBackgroundColor="#111827">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtLanguage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Ngôn ngữ"
+                android:textColor="@android:color/white"
+                android:textColorHint="#94A3B8" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilDuration"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:boxBackgroundMode="filled"
+            app:boxBackgroundColor="#111827">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtDuration"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Thời lượng (phút)"
+                android:inputType="number"
+                android:textColor="@android:color/white"
+                android:textColorHint="#94A3B8" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilReleaseDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:boxBackgroundMode="filled"
+            app:boxBackgroundColor="#111827">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtReleaseDate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Ngày phát hành (dd/MM/yyyy)"
+                android:textColor="@android:color/white"
+                android:textColorHint="#94A3B8" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilAgeRating"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:endIconMode="dropdown_menu"
+            app:boxBackgroundMode="filled"
+            app:boxBackgroundColor="#111827">
+
+            <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                android:id="@+id/actvAgeRating"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Độ tuổi"
+                android:textColor="@android:color/white"
+                android:textColorHint="#94A3B8" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:endIconMode="dropdown_menu"
+            app:boxBackgroundMode="filled"
+            app:boxBackgroundColor="#111827">
+
+            <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                android:id="@+id/actvStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Trạng thái"
+                android:textColor="@android:color/white"
+                android:textColorHint="#94A3B8" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilPosterUrl"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:boxBackgroundMode="filled"
+            app:boxBackgroundColor="#111827">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtPosterUrl"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Poster URL"
+                android:textColor="@android:color/white"
+                android:textColorHint="#94A3B8" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilTrailerUrl"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:boxBackgroundMode="filled"
+            app:boxBackgroundColor="#111827">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtTrailerUrl"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Trailer URL"
+                android:textColor="@android:color/white"
+                android:textColorHint="#94A3B8" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSave"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:backgroundTint="#B33C57"
+            android:text="Lưu phim"
+            android:textColor="@android:color/white" />
+
+    </LinearLayout>
+</ScrollView>

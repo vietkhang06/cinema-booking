@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="52dp"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingHorizontal="20dp"
+    android:foreground="?attr/selectableItemBackground">
+
+    <ImageView
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:src="@android:drawable/ic_menu_mylocation"
+        android:contentDescription="@null"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        app:tint="#D1D5DB" />
+
+    <TextView
+        android:id="@+id/tvLocationName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="14dp"
+        android:layout_weight="1"
+        android:textColor="#111827"
+        android:textSize="15sp" />
+
+    <ImageView
+        android:id="@+id/ivLocationCheck"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:src="@drawable/ic_check"
+        android:contentDescription="@null"
+        android:visibility="gone"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        app:tint="#C62B3F" />
+</LinearLayout>
