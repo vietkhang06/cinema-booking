@@ -1,35 +1,67 @@
 package com.example.cinemabooking.data.repository;
 
+import com.example.cinemabooking.data.dto.ApiResponse;
+import com.example.cinemabooking.data.dto.BookingDTO;
+import com.example.cinemabooking.data.mapper.BookingMapper;
+import com.example.cinemabooking.data.remote.api.BookingApiService;
+import com.example.cinemabooking.data.remote.api.RetrofitClient;
 import com.example.cinemabooking.data.remote.datasource.BookingRemoteDataSource;
 import com.example.cinemabooking.domain.common.ResultCallback;
 import com.example.cinemabooking.domain.model.Booking;
 import com.example.cinemabooking.domain.repository.BookingRepository;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class BookingRepositoryImpl implements BookingRepository {
     private final BookingRemoteDataSource remoteDataSource;
+    private final BookingApiService bookingApiService;
 
     public BookingRepositoryImpl() {
         this.remoteDataSource = new BookingRemoteDataSource();
+        this.bookingApiService = RetrofitClient.getInstance().create(BookingApiService.class);
     }
 
     public BookingRepositoryImpl(BookingRemoteDataSource remoteDataSource) {
         this.remoteDataSource = remoteDataSource;
+        this.bookingApiService = RetrofitClient.getInstance().create(BookingApiService.class);
     }
 
     @Override
     public void createBooking(Booking booking, ResultCallback<Booking> callback) {
-        // Bookings are created directly via confirmBooking in BookingConfirmActivity
         if (callback != null) callback.onError("Tính năng tạo vé mới đang được bảo trì.");
     }
 
     @Override
     public void getBookingById(String bookingId, ResultCallback<Booking> callback) {
+        // Thử REST API trước — chuẩn và đồng bộ nhất
+        bookingApiService.getBookingById(bookingId).enqueue(new Callback<ApiResponse<BookingDTO>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<BookingDTO>> call, Response<ApiResponse<BookingDTO>> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
+                    Booking booking = BookingMapper.toDomain(response.body().getData());
+                    if (callback != null) callback.onSuccess(booking);
+                } else {
+                    // Fallback: Firestore
+                    getBookingByIdFromFirestore(bookingId, callback);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<BookingDTO>> call, Throwable t) {
+                // Fallback: Firestore
+                getBookingByIdFromFirestore(bookingId, callback);
+            }
+        });
+    }
+
+    private void getBookingByIdFromFirestore(String bookingId, ResultCallback<Booking> callback) {
         FirebaseFirestore.getInstance()
                 .collection("bookings")
                 .document(bookingId)
@@ -54,8 +86,41 @@ public class BookingRepositoryImpl implements BookingRepository {
 
     @Override
     public void getBookingsByUserId(String userId, ResultCallback<List<Booking>> callback) {
-        String currentUid = FirebaseAuth.getInstance().getCurrentUser() != null
-                ? FirebaseAuth.getInstance().getCurrentUser().getUid()
+        // Gọi REST API /bookings/my — dùng auth token, đảm bảo đúng user, đồng bộ nhất
+        // userId param được ignore vì API dùng token
+        bookingApiService.getMyBookings().enqueue(new Callback<ApiResponse<List<BookingDTO>>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<List<BookingDTO>>> call, Response<ApiResponse<List<BookingDTO>>> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
+                    List<BookingDTO> dtos = response.body().getData();
+                    List<Booking> bookings = new ArrayList<>();
+                    for (BookingDTO dto : dtos) {
+                        Booking b = BookingMapper.toDomain(dto);
+                        if (b != null && !b.deleted) {
+                            bookings.add(b);
+                        }
+                    }
+                    // Sắp xếp theo ngày tạo mới nhất lên đầu
+                    bookings.sort((b1, b2) -> Long.compare(b2.createdAt, b1.createdAt));
+                    if (callback != null) callback.onSuccess(bookings);
+                } else {
+                    // Fallback: Firestore nếu API lỗi (token hết hạn, mạng, ...)
+                    android.util.Log.w("BOOKING_REPO", "REST API failed (code=" + response.code() + "), falling back to Firestore");
+                    getBookingsByUserIdFromFirestore(callback);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<List<BookingDTO>>> call, Throwable t) {
+                android.util.Log.w("BOOKING_REPO", "REST API network error, falling back to Firestore: " + t.getMessage());
+                getBookingsByUserIdFromFirestore(callback);
+            }
+        });
+    }
+
+    private void getBookingsByUserIdFromFirestore(ResultCallback<List<Booking>> callback) {
+        String currentUid = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() != null
+                ? com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid()
                 : null;
         if (currentUid == null) {
             if (callback != null) callback.onError("Người dùng chưa đăng nhập.");
@@ -75,7 +140,6 @@ public class BookingRepositoryImpl implements BookingRepository {
                             bookings.add(booking);
                         }
                     }
-                    // Sắp xếp theo ngày tạo mới nhất lên đầu
                     bookings.sort((b1, b2) -> Long.compare(b2.createdAt, b1.createdAt));
                     if (callback != null) callback.onSuccess(bookings);
                 })

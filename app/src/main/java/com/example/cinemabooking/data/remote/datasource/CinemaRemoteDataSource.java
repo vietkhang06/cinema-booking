@@ -38,27 +38,53 @@ public class CinemaRemoteDataSource {
                 Log.d(TAG, "Response Code: " + response.code());
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                     List<Cinema> data = response.body().getData();
-                    Log.d(TAG, "Cinemas fetched: " + (data != null ? data.size() : 0));
-                    if (callback != null) callback.onSuccess(data != null ? data : new ArrayList<>());
+                    Log.d(TAG, "Cinemas fetched from API: " + (data != null ? data.size() : 0));
+                    if (data != null && !data.isEmpty()) {
+                        // Filter out deleted cinemas
+                        List<Cinema> active = new ArrayList<>();
+                        for (Cinema c : data) {
+                            if (!c.deleted) active.add(c);
+                        }
+                        if (callback != null) callback.onSuccess(active);
+                        return;
+                    }
+                    // API trả empty — fallback Firestore
+                    Log.w(TAG, "API returned empty cinemas, falling back to Firestore");
+                    getAllCinemasFromFirestore(callback);
                 } else {
                     String msg = (response.body() != null) ? response.body().getMessage() : "Lỗi tải rạp (Code: " + response.code() + ")";
-                    Log.e(TAG, "API Error: " + msg);
-                    if (callback != null) {
-                        callback.onSuccess(new ArrayList<>());
-                        callback.onError(msg);
-                    }
+                    Log.w(TAG, "API error: " + msg + ". Falling back to Firestore");
+                    getAllCinemasFromFirestore(callback);
                 }
             }
 
             @Override
             public void onFailure(Call<ApiResponse<List<Cinema>>> call, Throwable t) {
-                Log.e(TAG, "Network Failure: " + t.getMessage());
-                if (callback != null) {
-                    callback.onSuccess(new ArrayList<>());
-                    callback.onError("Không thể tải danh sách rạp phim.");
-                }
+                Log.w(TAG, "Network failure, falling back to Firestore: " + t.getMessage());
+                getAllCinemasFromFirestore(callback);
             }
         });
+    }
+
+    private void getAllCinemasFromFirestore(ResultCallback<List<Cinema>> callback) {
+        Log.d(TAG, "Loading cinemas from Firestore");
+        db.collection(COLLECTION)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<Cinema> result = new ArrayList<>();
+                    for (DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
+                        Cinema c = mapDocToCinema(doc);
+                        if (!c.deleted) {
+                            result.add(c);
+                        }
+                    }
+                    Log.d(TAG, "Cinemas fetched from Firestore: " + result.size());
+                    if (callback != null) callback.onSuccess(result);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Firestore cinema load failed: " + e.getMessage());
+                    if (callback != null) callback.onError("Không thể tải danh sách rạp phiêm.");
+                });
     }
 
     // =========================
