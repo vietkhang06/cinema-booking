@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="8dp"
+    app:cardBackgroundColor="@color/white"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="2dp"
+    app:strokeColor="#ECE8F0"
+    app:strokeWidth="1.5dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <!-- Movie Poster Container with rounded corners -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="80dp"
+            android:layout_height="110dp"
+            android:layout_margin="10dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:id="@+id/img_poster"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/login_icon" />
+
+                <!-- Time Overlay Badge -->
+                <TextView
+                    android:id="@+id/tv_start_time"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:background="#CC1E1A23"
+                    android:gravity="center"
+                    android:paddingVertical="4dp"
+                    android:text="14:30"
+                    android:textColor="@color/white"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+            </FrameLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Movie Details -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginLeft="12dp"
+            android:orientation="vertical"
+            android:paddingRight="12dp">
+
+            <TextView
+                android:id="@+id/tv_movie_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tên phim"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:textColor="#1E1A23"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <TextView
+                android:id="@+id/tv_cinema_room"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Cinema - Room 1"
+                android:textSize="13sp"
+                android:textColor="#1E1A23"
+                android:layout_marginTop="2dp" />
+
+            <TextView
+                android:id="@+id/tv_format_lang"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2D | Phụ đề"
+                android:textSize="12sp"
+                android:textColor="#7A757F"
+                android:layout_marginTop="2dp" />
+
+            <!-- Seats Progress -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="8dp">
+
+                <ProgressBar
+                    android:id="@+id/pb_seats"
+                    style="@android:style/Widget.ProgressBar.Horizontal"
+                    android:layout_width="80dp"
+                    android:layout_height="6dp"
+                    android:progress="50"
+                    android:progressTint="#A13345"
+                    android:progressBackgroundTint="#ECE8F0" />
+
+                <TextView
+                    android:id="@+id/tv_seats_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:text="Ghế: 45/90"
+                    android:textSize="12sp"
+                    android:textColor="#7A757F" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Forward Arrow / Indicator -->
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@drawable/ic_arrow_next"
+            app:tint="#A13345"
+            android:layout_marginRight="16dp"
+            android:contentDescription="Next" />
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>
