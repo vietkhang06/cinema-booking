@@ -14,5 +14,6 @@ public class Seat {
     public long bookedAt;
     public double priceOverride;
 
-    public Seat() {}
+    public Seat() {
+    }
 }

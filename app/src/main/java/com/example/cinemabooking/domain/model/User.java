@@ -17,5 +17,6 @@ public class User {
     public String birthDate;
     public String gender;
 
-    public User() {}
+    public User() {
+    }
 }

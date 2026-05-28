@@ -17,5 +17,6 @@ public class Showtime {
     public long updatedAt;
     public boolean deleted;
 
-    public Showtime() {}
+    public Showtime() {
+    }
 }

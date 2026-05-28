@@ -30,6 +30,8 @@ public final class BookingMapper {
         model.paymentMethod = dto.paymentMethod;
         model.paymentStatus = dto.paymentStatus;
         model.bookingStatus = dto.bookingStatus;
+        model.paymentCode = dto.paymentCode;
+        model.paymentAt = dto.paymentAt;
         model.qrCodeValue = dto.qrCodeValue;
         model.checkInAt = dto.checkInAt;
         model.createdAt = dto.createdAt;
@@ -61,6 +63,8 @@ public final class BookingMapper {
         dto.paymentMethod = model.paymentMethod;
         dto.paymentStatus = model.paymentStatus;
         dto.bookingStatus = model.bookingStatus;
+        dto.paymentCode = model.paymentCode;
+        dto.paymentAt = model.paymentAt;
         dto.qrCodeValue = model.qrCodeValue;
         dto.checkInAt = model.checkInAt;
         dto.createdAt = model.createdAt;
