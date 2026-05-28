@@ -6,25 +6,22 @@ import android.text.TextUtils;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.cinemabooking.R;
 import com.example.cinemabooking.core.base.BaseActivity;
 import com.example.cinemabooking.data.repository.CinemaRepositoryImpl;
+import com.example.cinemabooking.data.repository.RoomRepositoryImpl;
 import com.example.cinemabooking.domain.common.ResultCallback;
 import com.example.cinemabooking.domain.model.Cinema;
-import com.example.cinemabooking.domain.repository.CinemaRepository;
-import com.google.android.material.button.MaterialButton;
-
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import com.example.cinemabooking.data.repository.RoomRepositoryImpl;
 import com.example.cinemabooking.domain.model.Room;
+import com.example.cinemabooking.domain.repository.CinemaRepository;
 import com.example.cinemabooking.domain.repository.RoomRepository;
 import com.example.cinemabooking.ui.admin.room.AdminRoomAdapter;
 import com.example.cinemabooking.ui.admin.room.AdminSeatTemplateActivity;
+import com.google.android.material.button.MaterialButton;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class AdminCinemaDetailActivity extends BaseActivity {
@@ -33,11 +30,11 @@ public class AdminCinemaDetailActivity extends BaseActivity {
 
     private TextView tvName, tvAddress, tvCity, tvDistrict, tvPhone, tvLat, tvLng, tvStatus;
     private android.view.View btnEdit;
-    private com.google.android.material.button.MaterialButton btnDelete;
+    private MaterialButton btnDelete;
 
     private RecyclerView rvRooms;
     private TextView tvEmptyRooms;
-    private com.google.android.material.button.MaterialButton btnAddRoom;
+    private MaterialButton btnAddRoom;
     private AdminRoomAdapter roomAdapter;
 
     private CinemaRepository cinemaRepository;
@@ -111,7 +108,7 @@ public class AdminCinemaDetailActivity extends BaseActivity {
 
         if (btnDelete != null) {
             btnDelete.setOnClickListener(v -> {
-                new androidx.appcompat.app.AlertDialog.Builder(this)
+                new AlertDialog.Builder(this)
                         .setTitle("⚠️ Xác nhận xóa rạp")
                         .setMessage("Bạn có chắc chắn muốn xóa rạp này không?")
                         .setPositiveButton("Xóa", (dialog, which) -> {

@@ -36,7 +36,7 @@ public class AdminRoomListActivity extends BaseActivity {
     private CinemaRepository cinemaRepository;
     private RoomRepository roomRepository;
 
-    private com.example.cinemabooking.ui.admin.room.AdminRoomAdapter roomAdapter;
+    private AdminRoomAdapter roomAdapter;
     private List<Cinema> cinemaList = new ArrayList<>();
     private Cinema selectedCinema;
 
@@ -63,7 +63,7 @@ public class AdminRoomListActivity extends BaseActivity {
         rvRooms = findViewById(R.id.rvRooms);
         tvEmptyRooms = findViewById(R.id.tvEmptyRooms);
 
-        roomAdapter = new com.example.cinemabooking.ui.admin.room.AdminRoomAdapter();
+        roomAdapter = new AdminRoomAdapter();
         rvRooms.setLayoutManager(new LinearLayoutManager(this));
         rvRooms.setAdapter(roomAdapter);
     }
@@ -80,7 +80,7 @@ public class AdminRoomListActivity extends BaseActivity {
             }
         });
 
-        roomAdapter.setListener(new com.example.cinemabooking.ui.admin.room.AdminRoomAdapter.OnRoomActionListener() {
+        roomAdapter.setListener(new AdminRoomAdapter.OnRoomActionListener() {
             @Override
             public void onEditClick(Room room) {
                 showRoomFormDialog(room);
@@ -174,10 +174,10 @@ public class AdminRoomListActivity extends BaseActivity {
 
         TextView tvTitle = dialogView.findViewById(R.id.tvDialogTitle);
         com.google.android.material.textfield.TextInputEditText edtName = dialogView.findViewById(R.id.edtRoomName);
-        com.google.android.material.textfield.MaterialAutoCompleteTextView actvLayout = dialogView.findViewById(R.id.actvRoomLayout);
+        MaterialAutoCompleteTextView actvLayout = dialogView.findViewById(R.id.actvRoomLayout);
         com.google.android.material.textfield.TextInputEditText edtRows = dialogView.findViewById(R.id.edtRoomRows);
         com.google.android.material.textfield.TextInputEditText edtCols = dialogView.findViewById(R.id.edtRoomCols);
-        com.google.android.material.textfield.MaterialAutoCompleteTextView actvStatus = dialogView.findViewById(R.id.actvRoomStatus);
+        MaterialAutoCompleteTextView actvStatus = dialogView.findViewById(R.id.actvRoomStatus);
 
         View btnCancel = dialogView.findViewById(R.id.btnCancel);
         View btnSave = dialogView.findViewById(R.id.btnSave);

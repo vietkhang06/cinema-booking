@@ -50,8 +50,8 @@ public class AdminCinemaListActivity extends BaseActivity {
         adapter.setListener(new AdminCinemaAdapter.OnCinemaActionListener() {
             @Override
             public void onEditClick(Cinema cinema) {
-                Intent intent = new Intent(AdminCinemaListActivity.this, com.example.cinemabooking.ui.admin.cinema.AdminCinemaFormActivity.class);
-                intent.putExtra(com.example.cinemabooking.ui.admin.cinema.AdminCinemaFormActivity.EXTRA_CINEMA_ID, cinema.cinemaId);
+                Intent intent = new Intent(AdminCinemaListActivity.this, AdminCinemaFormActivity.class);
+                intent.putExtra(AdminCinemaFormActivity.EXTRA_CINEMA_ID, cinema.cinemaId);
                 startActivity(intent);
             }
 
@@ -80,8 +80,8 @@ public class AdminCinemaListActivity extends BaseActivity {
 
             @Override
             public void onViewDetailsClick(Cinema cinema) {
-                Intent intent = new Intent(AdminCinemaListActivity.this, com.example.cinemabooking.ui.admin.cinema.AdminCinemaDetailActivity.class);
-                intent.putExtra(com.example.cinemabooking.ui.admin.cinema.AdminCinemaDetailActivity.EXTRA_CINEMA_ID, cinema.cinemaId);
+                Intent intent = new Intent(AdminCinemaListActivity.this, AdminCinemaDetailActivity.class);
+                intent.putExtra(AdminCinemaDetailActivity.EXTRA_CINEMA_ID, cinema.cinemaId);
                 startActivity(intent);
             }
         });
@@ -89,7 +89,7 @@ public class AdminCinemaListActivity extends BaseActivity {
         rv.setAdapter(adapter);
 
         btnAdd.setOnClickListener(v ->
-                startActivity(new Intent(this, com.example.cinemabooking.ui.admin.cinema.AdminCinemaFormActivity.class))
+                startActivity(new Intent(this, AdminCinemaFormActivity.class))
         );
 
         android.widget.EditText etSearch = findViewById(R.id.etSearchCinema);
