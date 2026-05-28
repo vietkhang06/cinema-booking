@@ -11,9 +11,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.cinemabooking.R;
-//import com.example.cinemabooking.data.repository.SeatRepositoryImpl;
-//import com.example.cinemabooking.domain.model.SeatTemplate;
-//import com.example.cinemabooking.domain.repository.SeatRepository;
+import com.example.cinemabooking.data.repository.SeatRepositoryImpl;
+import com.example.cinemabooking.domain.model.SeatTemplate;
+import com.example.cinemabooking.domain.repository.SeatRepository;
 import com.example.cinemabooking.ui.admin.room.seatplan.SeatPlanCell;
 import com.example.cinemabooking.ui.admin.room.seatplan.SeatPlanRow;
 import com.example.cinemabooking.ui.admin.room.seatplan.SeatPlanRowAdapter;
@@ -28,7 +28,7 @@ public class AdminSeatTemplateActivity extends AppCompatActivity {
     private static final int DEFAULT_COLUMNS = 12;
 
     private String roomId;
-    //private SeatRepository seatRepository;
+    private SeatRepository seatRepository;
 
     private final List<SeatPlanRow> seatRows = new ArrayList<>();
 
@@ -76,7 +76,7 @@ public class AdminSeatTemplateActivity extends AppCompatActivity {
             SeatPlanCell cell = seatRows.get(rowPosition).cells.get(seatPosition);
             cell.type = selectedPaintType;
             rowAdapter.notifyItemChanged(rowPosition);
-            //updateSummary();
+            updateSummary();
         });
 
         rvSeatRows.setAdapter(rowAdapter);
@@ -86,14 +86,14 @@ public class AdminSeatTemplateActivity extends AppCompatActivity {
         btnModeCouple.setOnClickListener(v -> setPaintMode(SeatPlanCell.TYPE_COUPLE));
         btnModeLocked.setOnClickListener(v -> setPaintMode(SeatPlanCell.TYPE_LOCKED));
 
-        //btnGenerate.setOnClickListener(v -> generateFromInputs());
+        btnGenerate.setOnClickListener(v -> generateFromInputs());
         btnReset.setOnClickListener(v -> resetTemplate());
-        //btnSave.setOnClickListener(v -> saveSeatTemplates());
+        btnSave.setOnClickListener(v -> saveSeatTemplates());
 
         setPaintMode(SeatPlanCell.TYPE_NORMAL);
 
         roomId = getIntent().getStringExtra("extra_room_id");
-        //seatRepository = new SeatRepositoryImpl();
+        seatRepository = new SeatRepositoryImpl();
 
         int rows = getIntent().getIntExtra("extra_rows", DEFAULT_ROWS);
         int cols = getIntent().getIntExtra("extra_cols", DEFAULT_COLUMNS);
@@ -101,7 +101,7 @@ public class AdminSeatTemplateActivity extends AppCompatActivity {
         if (etColumns != null) etColumns.setText(String.valueOf(cols));
 
         if (roomId != null) {
-            //loadSeatTemplates();
+            loadSeatTemplates();
         } else {
             generateTemplate(rows, cols);
         }
@@ -109,22 +109,22 @@ public class AdminSeatTemplateActivity extends AppCompatActivity {
 
     private void setPaintMode(int type) {
         selectedPaintType = type;
-        //tvCurrentMode.setText("Chế độ hiện tại: " + modeName(type));
+        tvCurrentMode.setText("Chế độ hiện tại: " + modeName(type));
     }
 
-//    private void generateFromInputs() {
-//        int rows = parsePositiveInt(etRows.getText().toString(), DEFAULT_ROWS);
-//        int cols = parsePositiveInt(etColumns.getText().toString(), DEFAULT_COLUMNS);
-//
-//        if (rows < 1) rows = DEFAULT_ROWS;
-//        if (cols < 1) cols = DEFAULT_COLUMNS;
-//
-//        if (rows > 26) rows = 26;
-//        if (cols > 20) cols = 20;
-//
-//        generateTemplate(rows, cols);
-//        Toast.makeText(this, "Đã tạo sơ đồ ghế " + rows + " x " + cols, Toast.LENGTH_SHORT).show();
-//    }
+    private void generateFromInputs() {
+        int rows = parsePositiveInt(etRows.getText().toString(), DEFAULT_ROWS);
+        int cols = parsePositiveInt(etColumns.getText().toString(), DEFAULT_COLUMNS);
+
+        if (rows < 1) rows = DEFAULT_ROWS;
+        if (cols < 1) cols = DEFAULT_COLUMNS;
+
+        if (rows > 26) rows = 26;
+        if (cols > 20) cols = 20;
+
+        generateTemplate(rows, cols);
+        Toast.makeText(this, "Đã tạo sơ đồ ghế " + rows + " x " + cols, Toast.LENGTH_SHORT).show();
+    }
 
     private void resetTemplate() {
         etRows.setText(String.valueOf(DEFAULT_ROWS));
@@ -158,188 +158,188 @@ public class AdminSeatTemplateActivity extends AppCompatActivity {
         }
 
         rowAdapter.notifyDataSetChanged();
-        //updateSummary();
+        updateSummary();
     }
 
-//    private void loadSeatTemplates() {
-//        if (roomId == null) return;
-//
-//        seatRepository.getSeatTemplatesByRoomId(roomId, new com.example.cinemabooking.domain.common.ResultCallback<List<SeatTemplate>>() {
-//            @Override
-//            public void onSuccess(List<SeatTemplate> templates) {
-//                if (isFinishing() || isDestroyed()) return;
-//
-//                if (templates != null && !templates.isEmpty()) {
-//                    populateFromTemplates(templates);
-//                } else {
-//                    int rows = getIntent().getIntExtra("extra_rows", DEFAULT_ROWS);
-//                    int cols = getIntent().getIntExtra("extra_cols", DEFAULT_COLUMNS);
-//                    generateTemplate(rows, cols);
-//                }
-//            }
-//
-//            @Override
-//            public void onError(String message) {
-//                if (isFinishing() || isDestroyed()) return;
-//                Toast.makeText(AdminSeatTemplateActivity.this, "Lỗi tải sơ đồ ghế: " + message, Toast.LENGTH_SHORT).show();
-//
-//                int rows = getIntent().getIntExtra("extra_rows", DEFAULT_ROWS);
-//                int cols = getIntent().getIntExtra("extra_cols", DEFAULT_COLUMNS);
-//                generateTemplate(rows, cols);
-//            }
-//        });
-//    }
-//
-//    private void populateFromTemplates(List<SeatTemplate> templates) {
-//        seatRows.clear();
-//
-//        int maxRow = 0;
-//        int maxCol = 0;
-//
-//        java.util.Map<String, List<SeatTemplate>> groups = new java.util.TreeMap<>();
-//        for (SeatTemplate t : templates) {
-//            if (t.rowName == null) continue;
-//            if (!groups.containsKey(t.rowName)) {
-//                groups.put(t.rowName, new ArrayList<>());
-//            }
-//            groups.get(t.rowName).add(t);
-//
-//            int rIdx = t.rowName.charAt(0) - 'A';
-//            if (rIdx > maxRow) maxRow = rIdx;
-//            if (t.columnNo > maxCol) maxCol = t.columnNo;
-//        }
-//
-//        maxRow += 1;
-//
-//        if (etRows != null) etRows.setText(String.valueOf(maxRow));
-//        if (etColumns != null) etColumns.setText(String.valueOf(maxCol));
-//
-//        for (java.util.Map.Entry<String, List<SeatTemplate>> entry : groups.entrySet()) {
-//            String rowName = entry.getKey();
-//            List<SeatTemplate> rowTemplates = entry.getValue();
-//
-//            rowTemplates.sort((a, b) -> Integer.compare(a.columnNo, b.columnNo));
-//
-//            List<SeatPlanCell> cells = new ArrayList<>();
-//            for (SeatTemplate t : rowTemplates) {
-//                int cellType = SeatPlanCell.TYPE_NORMAL;
-//                if (!t.isEnabled) {
-//                    cellType = SeatPlanCell.TYPE_LOCKED;
-//                } else if ("VIP".equalsIgnoreCase(t.seatType)) {
-//                    cellType = SeatPlanCell.TYPE_VIP;
-//                } else if ("COUPLE".equalsIgnoreCase(t.seatType)) {
-//                    cellType = SeatPlanCell.TYPE_COUPLE;
-//                }
-//
-//                cells.add(new SeatPlanCell(t.seatCode, cellType));
-//            }
-//
-//            seatRows.add(new SeatPlanRow(rowName, cells));
-//        }
-//
-//        rowAdapter.notifyDataSetChanged();
-//        updateSummary();
-//    }
-//
-//    private void saveSeatTemplates() {
-//        if (roomId == null) {
-//            Toast.makeText(this, "Không tìm thấy Room ID để lưu", Toast.LENGTH_SHORT).show();
-//            return;
-//        }
-//
-//        List<SeatTemplate> templates = new ArrayList<>();
-//        for (SeatPlanRow row : seatRows) {
-//            for (int i = 0; i < row.cells.size(); i++) {
-//                SeatPlanCell cell = row.cells.get(i);
-//                SeatTemplate t = new SeatTemplate();
-//                t.roomId = roomId;
-//                t.seatCode = cell.seatCode;
-//                t.rowName = row.rowName;
-//                t.columnNo = i + 1;
-//
-//                if (cell.type == SeatPlanCell.TYPE_LOCKED) {
-//                    t.seatType = "STANDARD";
-//                    t.isEnabled = false;
-//                } else {
-//                    t.isEnabled = true;
-//                    if (cell.type == SeatPlanCell.TYPE_VIP) {
-//                        t.seatType = "VIP";
-//                    } else if (cell.type == SeatPlanCell.TYPE_COUPLE) {
-//                        t.seatType = "COUPLE";
-//                    } else {
-//                        t.seatType = "STANDARD";
-//                    }
-//                }
-//
-//                t.seatId = roomId + "_" + t.seatCode;
-//                templates.add(t);
-//            }
-//        }
-//
-//        seatRepository.createSeatTemplates(roomId, templates, new com.example.cinemabooking.domain.common.ResultCallback<Void>() {
-//            @Override
-//            public void onSuccess(Void data) {
-//                Toast.makeText(AdminSeatTemplateActivity.this, "Đã lưu sơ đồ ghế thành công", Toast.LENGTH_SHORT).show();
-//                finish();
-//            }
-//
-//            @Override
-//            public void onError(String message) {
-//                Toast.makeText(AdminSeatTemplateActivity.this, "Lỗi khi lưu sơ đồ ghế: " + message, Toast.LENGTH_SHORT).show();
-//            }
-//        });
-//    }
-//
-//    private void updateSummary() {
-//        int normal = 0;
-//        int vip = 0;
-//        int couple = 0;
-//        int locked = 0;
-//
-//        for (SeatPlanRow row : seatRows) {
-//            for (SeatPlanCell cell : row.cells) {
-//                switch (cell.type) {
-//                    case SeatPlanCell.TYPE_VIP:
-//                        vip++;
-//                        break;
-//                    case SeatPlanCell.TYPE_COUPLE:
-//                        couple++;
-//                        break;
-//                    case SeatPlanCell.TYPE_LOCKED:
-//                        locked++;
-//                        break;
-//                    default:
-//                        normal++;
-//                        break;
-//                }
-//            }
-//        }
-//
-//        tvSummary.setText("Normal: " + normal +
-//                " | VIP: " + vip +
-//                " | Couple: " + couple +
-//                " | Locked: " + locked);
-//    }
-//
-//    private int parsePositiveInt(String value, int fallback) {
-//        try {
-//            int result = Integer.parseInt(value.trim());
-//            return result > 0 ? result : fallback;
-//        } catch (Exception e) {
-//            return fallback;
-//        }
-//    }
-//
-//    private String modeName(int type) {
-//        switch (type) {
-//            case SeatPlanCell.TYPE_VIP:
-//                return "VIP";
-//            case SeatPlanCell.TYPE_COUPLE:
-//                return "COUPLE";
-//            case SeatPlanCell.TYPE_LOCKED:
-//                return "LOCKED";
-//            default:
-//                return "NORMAL";
-//        }
-//    }
+    private void loadSeatTemplates() {
+        if (roomId == null) return;
+
+        seatRepository.getSeatTemplatesByRoomId(roomId, new com.example.cinemabooking.domain.common.ResultCallback<List<SeatTemplate>>() {
+            @Override
+            public void onSuccess(List<SeatTemplate> templates) {
+                if (isFinishing() || isDestroyed()) return;
+
+                if (templates != null && !templates.isEmpty()) {
+                    populateFromTemplates(templates);
+                } else {
+                    int rows = getIntent().getIntExtra("extra_rows", DEFAULT_ROWS);
+                    int cols = getIntent().getIntExtra("extra_cols", DEFAULT_COLUMNS);
+                    generateTemplate(rows, cols);
+                }
+            }
+
+            @Override
+            public void onError(String message) {
+                if (isFinishing() || isDestroyed()) return;
+                Toast.makeText(AdminSeatTemplateActivity.this, "Lỗi tải sơ đồ ghế: " + message, Toast.LENGTH_SHORT).show();
+
+                int rows = getIntent().getIntExtra("extra_rows", DEFAULT_ROWS);
+                int cols = getIntent().getIntExtra("extra_cols", DEFAULT_COLUMNS);
+                generateTemplate(rows, cols);
+            }
+        });
+    }
+
+    private void populateFromTemplates(List<SeatTemplate> templates) {
+        seatRows.clear();
+
+        int maxRow = 0;
+        int maxCol = 0;
+
+        java.util.Map<String, List<SeatTemplate>> groups = new java.util.TreeMap<>();
+        for (SeatTemplate t : templates) {
+            if (t.rowName == null) continue;
+            if (!groups.containsKey(t.rowName)) {
+                groups.put(t.rowName, new ArrayList<>());
+            }
+            groups.get(t.rowName).add(t);
+
+            int rIdx = t.rowName.charAt(0) - 'A';
+            if (rIdx > maxRow) maxRow = rIdx;
+            if (t.columnNo > maxCol) maxCol = t.columnNo;
+        }
+
+        maxRow += 1;
+
+        if (etRows != null) etRows.setText(String.valueOf(maxRow));
+        if (etColumns != null) etColumns.setText(String.valueOf(maxCol));
+
+        for (java.util.Map.Entry<String, List<SeatTemplate>> entry : groups.entrySet()) {
+            String rowName = entry.getKey();
+            List<SeatTemplate> rowTemplates = entry.getValue();
+
+            rowTemplates.sort((a, b) -> Integer.compare(a.columnNo, b.columnNo));
+
+            List<SeatPlanCell> cells = new ArrayList<>();
+            for (SeatTemplate t : rowTemplates) {
+                int cellType = SeatPlanCell.TYPE_NORMAL;
+                if (!t.isEnabled) {
+                    cellType = SeatPlanCell.TYPE_LOCKED;
+                } else if ("VIP".equalsIgnoreCase(t.seatType)) {
+                    cellType = SeatPlanCell.TYPE_VIP;
+                } else if ("COUPLE".equalsIgnoreCase(t.seatType)) {
+                    cellType = SeatPlanCell.TYPE_COUPLE;
+                }
+
+                cells.add(new SeatPlanCell(t.seatCode, cellType));
+            }
+
+            seatRows.add(new SeatPlanRow(rowName, cells));
+        }
+
+        rowAdapter.notifyDataSetChanged();
+        updateSummary();
+    }
+
+    private void saveSeatTemplates() {
+        if (roomId == null) {
+            Toast.makeText(this, "Không tìm thấy Room ID để lưu", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        List<SeatTemplate> templates = new ArrayList<>();
+        for (SeatPlanRow row : seatRows) {
+            for (int i = 0; i < row.cells.size(); i++) {
+                SeatPlanCell cell = row.cells.get(i);
+                SeatTemplate t = new SeatTemplate();
+                t.roomId = roomId;
+                t.seatCode = cell.seatCode;
+                t.rowName = row.rowName;
+                t.columnNo = i + 1;
+
+                if (cell.type == SeatPlanCell.TYPE_LOCKED) {
+                    t.seatType = "STANDARD";
+                    t.isEnabled = false;
+                } else {
+                    t.isEnabled = true;
+                    if (cell.type == SeatPlanCell.TYPE_VIP) {
+                        t.seatType = "VIP";
+                    } else if (cell.type == SeatPlanCell.TYPE_COUPLE) {
+                        t.seatType = "COUPLE";
+                    } else {
+                        t.seatType = "STANDARD";
+                    }
+                }
+
+                t.seatId = roomId + "_" + t.seatCode;
+                templates.add(t);
+            }
+        }
+
+        seatRepository.createSeatTemplates(roomId, templates, new com.example.cinemabooking.domain.common.ResultCallback<Void>() {
+            @Override
+            public void onSuccess(Void data) {
+                Toast.makeText(AdminSeatTemplateActivity.this, "Đã lưu sơ đồ ghế thành công", Toast.LENGTH_SHORT).show();
+                finish();
+            }
+
+            @Override
+            public void onError(String message) {
+                Toast.makeText(AdminSeatTemplateActivity.this, "Lỗi khi lưu sơ đồ ghế: " + message, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void updateSummary() {
+        int normal = 0;
+        int vip = 0;
+        int couple = 0;
+        int locked = 0;
+
+        for (SeatPlanRow row : seatRows) {
+            for (SeatPlanCell cell : row.cells) {
+                switch (cell.type) {
+                    case SeatPlanCell.TYPE_VIP:
+                        vip++;
+                        break;
+                    case SeatPlanCell.TYPE_COUPLE:
+                        couple++;
+                        break;
+                    case SeatPlanCell.TYPE_LOCKED:
+                        locked++;
+                        break;
+                    default:
+                        normal++;
+                        break;
+                }
+            }
+        }
+
+        tvSummary.setText("Normal: " + normal +
+                " | VIP: " + vip +
+                " | Couple: " + couple +
+                " | Locked: " + locked);
+    }
+
+    private int parsePositiveInt(String value, int fallback) {
+        try {
+            int result = Integer.parseInt(value.trim());
+            return result > 0 ? result : fallback;
+        } catch (Exception e) {
+            return fallback;
+        }
+    }
+
+    private String modeName(int type) {
+        switch (type) {
+            case SeatPlanCell.TYPE_VIP:
+                return "VIP";
+            case SeatPlanCell.TYPE_COUPLE:
+                return "COUPLE";
+            case SeatPlanCell.TYPE_LOCKED:
+                return "LOCKED";
+            default:
+                return "NORMAL";
+        }
+    }
 }

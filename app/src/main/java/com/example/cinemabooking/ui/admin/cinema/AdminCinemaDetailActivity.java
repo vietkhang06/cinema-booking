@@ -181,21 +181,21 @@ public class AdminCinemaDetailActivity extends BaseActivity {
     private void showRoomFormDialog(final Room roomToEdit) {
         boolean isEdit = roomToEdit != null;
         android.view.View dialogView = getLayoutInflater().inflate(R.layout.dialog_admin_room_form, null);
-
+        
         TextView tvTitle = dialogView.findViewById(R.id.tvDialogTitle);
         com.google.android.material.textfield.TextInputEditText edtName = dialogView.findViewById(R.id.edtRoomName);
         com.google.android.material.textfield.MaterialAutoCompleteTextView actvLayout = dialogView.findViewById(R.id.actvRoomLayout);
         com.google.android.material.textfield.TextInputEditText edtRows = dialogView.findViewById(R.id.edtRoomRows);
         com.google.android.material.textfield.TextInputEditText edtCols = dialogView.findViewById(R.id.edtRoomCols);
         com.google.android.material.textfield.MaterialAutoCompleteTextView actvStatus = dialogView.findViewById(R.id.actvRoomStatus);
-
+        
         android.view.View btnCancel = dialogView.findViewById(R.id.btnCancel);
         android.view.View btnSave = dialogView.findViewById(R.id.btnSave);
 
         // Setup dropdowns
         String[] layouts = {"2D", "3D", "IMAX"};
         actvLayout.setAdapter(new android.widget.ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, layouts));
-
+        
         String[] statuses = {"active", "inactive"};
         actvStatus.setAdapter(new android.widget.ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, statuses));
 
@@ -217,7 +217,7 @@ public class AdminCinemaDetailActivity extends BaseActivity {
         AlertDialog dialog = new AlertDialog.Builder(this)
                 .setView(dialogView)
                 .create();
-
+        
         if (dialog.getWindow() != null) {
             dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
         }
