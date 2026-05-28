@@ -27,7 +27,7 @@ import com.example.cinemabooking.domain.model.Banner;
 import com.example.cinemabooking.domain.model.Booking;
 import com.example.cinemabooking.domain.model.Movie;
 import com.example.cinemabooking.domain.repository.MovieRepository;
-import com.example.cinemabooking.domain.usecase.banner.GetBannersUseCase;
+import com.example.cinemabooking.domain.usecase.movie.banner.GetBannersUseCase;
 import com.example.cinemabooking.domain.usecase.movie.GetMoviesUseCase;
 import com.example.cinemabooking.service.BookingService;
 import com.example.cinemabooking.ui.customer.adapter.HomeBannerAdapter;

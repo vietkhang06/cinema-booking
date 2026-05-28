@@ -1,7 +1,7 @@
 package com.example.cinemabooking.data.local.Cinema_DienAnh;
 
-import com.example.cinemabookingapp.domain.model.Cinema_DienAnh.CinemaContent;
-import com.example.cinemabookingapp.domain.model.Cinema_DienAnh.CinemaContentType;
+import com.example.cinemabooking.domain.model.Cinema_DienAnh.CinemaContent;
+import com.example.cinemabooking.domain.model.Cinema_DienAnh.CinemaContentType;
 
 import java.util.ArrayList;
 import java.util.List;
