@@ -91,7 +91,7 @@ public class AdminCinemaListActivity extends BaseActivity {
         btnAdd.setOnClickListener(v ->
                 startActivity(new Intent(this, AdminCinemaFormActivity.class))
         );
-        
+
         android.widget.EditText etSearch = findViewById(R.id.etSearchCinema);
         if (etSearch != null) {
             etSearch.addTextChangedListener(new android.text.TextWatcher() {
@@ -109,7 +109,7 @@ public class AdminCinemaListActivity extends BaseActivity {
         super.onResume();
         loadData();
     }
-    
+
     private void filter(String text) {
         if (text.isEmpty()) {
             adapter.submitList(new ArrayList<>(list));
@@ -118,8 +118,8 @@ public class AdminCinemaListActivity extends BaseActivity {
         String lowerText = text.toLowerCase();
         List<Cinema> filtered = new ArrayList<>();
         for (Cinema c : list) {
-            if ((c.name != null && c.name.toLowerCase().contains(lowerText)) || 
-                (c.city != null && c.city.toLowerCase().contains(lowerText))) {
+            if ((c.name != null && c.name.toLowerCase().contains(lowerText)) ||
+                    (c.city != null && c.city.toLowerCase().contains(lowerText))) {
                 filtered.add(c);
             }
         }

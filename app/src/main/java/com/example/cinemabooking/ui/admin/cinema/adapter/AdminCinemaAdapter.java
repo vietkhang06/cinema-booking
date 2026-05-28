@@ -46,13 +46,13 @@ public class AdminCinemaAdapter extends RecyclerView.Adapter<AdminCinemaAdapter.
         Cinema c = list.get(i);
 
         h.name.setText(c.name != null ? c.name : "N/A");
-        
+
         String dist = c.district != null ? c.district : "N/A";
         String cityVal = c.city != null ? c.city : "N/A";
         h.location.setText(dist + ", " + cityVal);
 
         h.address.setText(c.address != null ? c.address : "N/A");
-        
+
         if ("active".equalsIgnoreCase(c.status)) {
             h.status.setText("HOẠT ĐỘNG");
             h.status.setTextColor(android.graphics.Color.parseColor("#10B981"));
@@ -60,22 +60,22 @@ public class AdminCinemaAdapter extends RecyclerView.Adapter<AdminCinemaAdapter.
             h.status.setText("NGỪNG HĐ");
             h.status.setTextColor(android.graphics.Color.parseColor("#C62828"));
         }
-        
+
         int roomCount = c.roomIds != null ? c.roomIds.size() : 0;
         h.roomCount.setText("Phòng chiếu: " + roomCount);
 
         h.btnEdit.setOnClickListener(v -> {
             if (listener != null) listener.onEditClick(c);
         });
-        
+
         h.btnDelete.setOnClickListener(v -> {
             if (listener != null) listener.onDeleteClick(c);
         });
-        
+
         h.btnViewDetails.setOnClickListener(v -> {
             if (listener != null) listener.onViewDetailsClick(c);
         });
-        
+
         h.itemView.setOnClickListener(v -> {
             if (listener != null) listener.onViewDetailsClick(c);
         });
@@ -97,7 +97,7 @@ public class AdminCinemaAdapter extends RecyclerView.Adapter<AdminCinemaAdapter.
             address = v.findViewById(R.id.tvAddress);
             status = v.findViewById(R.id.tvStatus);
             roomCount = v.findViewById(R.id.tvRoomCount);
-            
+
             btnEdit = v.findViewById(R.id.btnEdit);
             btnDelete = v.findViewById(R.id.btnDelete);
             btnViewDetails = v.findViewById(R.id.btnViewDetails);
