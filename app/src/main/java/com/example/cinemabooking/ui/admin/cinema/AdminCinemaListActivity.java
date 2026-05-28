@@ -1,4 +1,4 @@
-package com.example.cinemabookingapp.ui.admin.cinema;
+package com.example.cinemabooking.ui.admin.cinema;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -8,12 +8,12 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.cinemabookingapp.R;
-import com.example.cinemabookingapp.core.base.BaseActivity;
-import com.example.cinemabookingapp.data.repository.CinemaRepositoryImpl;
-import com.example.cinemabookingapp.domain.common.ResultCallback;
-import com.example.cinemabookingapp.domain.model.Cinema;
-import com.example.cinemabookingapp.ui.admin.cinema.adapter.AdminCinemaAdapter;
+import com.example.cinemabooking.R;
+import com.example.cinemabooking.core.base.BaseActivity;
+import com.example.cinemabooking.data.repository.CinemaRepositoryImpl;
+import com.example.cinemabooking.domain.common.ResultCallback;
+import com.example.cinemabooking.domain.model.Cinema;
+import com.example.cinemabooking.ui.admin.cinema.adapter.AdminCinemaAdapter;
 import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
@@ -50,8 +50,8 @@ public class AdminCinemaListActivity extends BaseActivity {
         adapter.setListener(new AdminCinemaAdapter.OnCinemaActionListener() {
             @Override
             public void onEditClick(Cinema cinema) {
-                Intent intent = new Intent(AdminCinemaListActivity.this, com.example.cinemabookingapp.ui.admin.cinema.AdminCinemaFormActivity.class);
-                intent.putExtra(com.example.cinemabookingapp.ui.admin.cinema.AdminCinemaFormActivity.EXTRA_CINEMA_ID, cinema.cinemaId);
+                Intent intent = new Intent(AdminCinemaListActivity.this, com.example.cinemabooking.ui.admin.cinema.AdminCinemaFormActivity.class);
+                intent.putExtra(com.example.cinemabooking.ui.admin.cinema.AdminCinemaFormActivity.EXTRA_CINEMA_ID, cinema.cinemaId);
                 startActivity(intent);
             }
 
@@ -80,8 +80,8 @@ public class AdminCinemaListActivity extends BaseActivity {
 
             @Override
             public void onViewDetailsClick(Cinema cinema) {
-                Intent intent = new Intent(AdminCinemaListActivity.this, com.example.cinemabookingapp.ui.admin.cinema.AdminCinemaDetailActivity.class);
-                intent.putExtra(com.example.cinemabookingapp.ui.admin.cinema.AdminCinemaDetailActivity.EXTRA_CINEMA_ID, cinema.cinemaId);
+                Intent intent = new Intent(AdminCinemaListActivity.this, com.example.cinemabooking.ui.admin.cinema.AdminCinemaDetailActivity.class);
+                intent.putExtra(com.example.cinemabooking.ui.admin.cinema.AdminCinemaDetailActivity.EXTRA_CINEMA_ID, cinema.cinemaId);
                 startActivity(intent);
             }
         });
@@ -89,7 +89,7 @@ public class AdminCinemaListActivity extends BaseActivity {
         rv.setAdapter(adapter);
 
         btnAdd.setOnClickListener(v ->
-                startActivity(new Intent(this, com.example.cinemabookingapp.ui.admin.cinema.AdminCinemaFormActivity.class))
+                startActivity(new Intent(this, com.example.cinemabooking.ui.admin.cinema.AdminCinemaFormActivity.class))
         );
 
         android.widget.EditText etSearch = findViewById(R.id.etSearchCinema);

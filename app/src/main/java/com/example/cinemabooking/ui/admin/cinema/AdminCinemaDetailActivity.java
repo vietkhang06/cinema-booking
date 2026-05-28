@@ -1,4 +1,4 @@
-package com.example.cinemabookingapp.ui.admin.cinema;
+package com.example.cinemabooking.ui.admin.cinema;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -7,22 +7,22 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
 
-import com.example.cinemabookingapp.R;
-import com.example.cinemabookingapp.core.base.BaseActivity;
-import com.example.cinemabookingapp.data.repository.CinemaRepositoryImpl;
-import com.example.cinemabookingapp.domain.common.ResultCallback;
-import com.example.cinemabookingapp.domain.model.Cinema;
-import com.example.cinemabookingapp.domain.repository.CinemaRepository;
+import com.example.cinemabooking.R;
+import com.example.cinemabooking.core.base.BaseActivity;
+import com.example.cinemabooking.data.repository.CinemaRepositoryImpl;
+import com.example.cinemabooking.domain.common.ResultCallback;
+import com.example.cinemabooking.domain.model.Cinema;
+import com.example.cinemabooking.domain.repository.CinemaRepository;
 import com.google.android.material.button.MaterialButton;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.cinemabookingapp.data.repository.RoomRepositoryImpl;
-import com.example.cinemabookingapp.domain.model.Room;
-import com.example.cinemabookingapp.domain.repository.RoomRepository;
-import com.example.cinemabookingapp.ui.admin.room.AdminRoomAdapter;
-import com.example.cinemabookingapp.ui.admin.room.AdminSeatTemplateActivity;
+import com.example.cinemabooking.data.repository.RoomRepositoryImpl;
+import com.example.cinemabooking.domain.model.Room;
+import com.example.cinemabooking.domain.repository.RoomRepository;
+import com.example.cinemabooking.ui.admin.room.AdminRoomAdapter;
+import com.example.cinemabooking.ui.admin.room.AdminSeatTemplateActivity;
 
 import java.util.ArrayList;
 import java.util.List;
