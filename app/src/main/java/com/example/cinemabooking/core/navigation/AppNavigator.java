@@ -9,13 +9,10 @@ import com.example.cinemabooking.ui.admin.AdminDashboardActivity;
 import com.example.cinemabooking.ui.auth.ForgotPasswordActivity;
 import com.example.cinemabooking.ui.auth.LoginActivity;
 import com.example.cinemabooking.ui.auth.RegisterActivity;
-//import com.example.cinemabooking.ui.auth.ForgotPasswordActivity;
-//import com.example.cinemabooking.ui.auth.LoginActivity;
-//import com.example.cinemabooking.ui.auth.RegisterActivity;
-//import com.example.cinemabooking.ui.customer.home.HomeActivity;
-//import com.example.cinemabooking.ui.customer.transaction.TicketDetailActivity;
-//import com.example.cinemabooking.ui.customer.transaction.TransactionHistoryActivity;
-//import com.example.cinemabooking.ui.staff.StaffDashboardActivity;
+import com.example.cinemabooking.ui.customer.HomeActivity;
+import com.example.cinemabooking.ui.customer.transaction.TicketDetailActivity;
+import com.example.cinemabooking.ui.customer.transaction.TransactionHistoryActivity;
+import com.example.cinemabooking.ui.staff.StaffDashboardActivity;
 
 import java.util.Map;
 
@@ -60,23 +57,23 @@ public final class AppNavigator {
         open(activity, ForgotPasswordActivity.class);
     }
 
-//    public static void goToCustomerHome(Activity activity) {
-//        openAndClear(activity, HomeActivity.class);
-//    }
-//
-//    public static void goToTransactionHistory(Activity activity) {
-//        open(activity, TransactionHistoryActivity.class);
-//    }
-//
-//    public static void goToTicketDetail(Activity activity, String bookingId) {
-//        Intent intent = new Intent(activity, TicketDetailActivity.class);
-//        intent.putExtra(TicketDetailActivity.EXTRA_BOOKING_ID, bookingId);
-//        activity.startActivity(intent);
-//    }
-//
-//    public static void goToStaffDashboard(Activity activity) {
-//        openAndClear(activity, StaffDashboardActivity.class);
-//    }
+    public static void goToCustomerHome(Activity activity) {
+        openAndClear(activity, HomeActivity.class);
+    }
+
+    public static void goToTransactionHistory(Activity activity) {
+        open(activity, TransactionHistoryActivity.class);
+    }
+
+    public static void goToTicketDetail(Activity activity, String bookingId) {
+        Intent intent = new Intent(activity, TicketDetailActivity.class);
+        intent.putExtra(TicketDetailActivity.EXTRA_BOOKING_ID, bookingId);
+        activity.startActivity(intent);
+    }
+
+    public static void goToStaffDashboard(Activity activity) {
+        openAndClear(activity, StaffDashboardActivity.class);
+    }
 
     public static void goToAdminDashboard(Activity activity) {
         openAndClear(activity, AdminDashboardActivity.class);
@@ -88,9 +85,9 @@ public final class AppNavigator {
         if ("admin".equals(safeRole)) {
             goToAdminDashboard(activity);
         } else if ("staff".equals(safeRole)) {
-            //goToStaffDashboard(activity);
+            goToStaffDashboard(activity);
         } else {
-            //goToCustomerHome(activity);
+            goToCustomerHome(activity);
         }
     }
 }

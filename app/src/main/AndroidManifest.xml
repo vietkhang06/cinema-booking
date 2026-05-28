@@ -36,6 +36,106 @@
         <activity
             android:name=".ui.auth.RegisterActivity"
             android:exported="false" />
+        <activity
+            android:name=".ui.customer.HomeActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.customer.MovieDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.customer.cinema.CinemaDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.customer.SeatSelectionActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.customer.BookingConfirmActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.customer.PaymentInstructionActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.customer.transaction.TransactionHistoryActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.customer.transaction.TicketDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.customer.profile.SettingsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.admin.AdminDashboardActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.staff.StaffDashboardActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.staff.StaffProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.staff.StaffScanQRActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.staff.StaffSearchBookingActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.staff.StaffShowtimesActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.staff.StaffPaymentSupportActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.staff.StaffAuditLogActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.staff.StaffInvoiceActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.admin.cinema.AdminCinemaListActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.admin.cinema.AdminCinemaDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.admin.cinema.AdminCinemaFormActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.admin.room.AdminRoomListActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.admin.room.AdminSeatTemplateActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.admin.showtime.AdminShowtimeListActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.admin.showtime.AdminShowtimeAddEditActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.admin.movie.AdminMovieListActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.admin.movie.AdminMovieDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.admin.movie.AdminMovieFormActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.admin.AdminPaymentListActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.admin.user.AdminUserManagementActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.admin.promotion.AdminPromotionListActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.admin.report.AdminReportActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.admin.log.AdminAuditLogActivity"
+            android:exported="false" />
     </application>
 
 </manifest>
