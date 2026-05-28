@@ -1,4 +1,4 @@
-package com.example.cinemabooking.ui.customer.home;
+package com.example.cinemabooking.ui.customer;
 
 import android.content.Intent;
 import android.content.res.ColorStateList;
@@ -27,11 +27,9 @@ import com.example.cinemabooking.domain.model.Banner;
 import com.example.cinemabooking.domain.model.Booking;
 import com.example.cinemabooking.domain.model.Movie;
 import com.example.cinemabooking.domain.repository.MovieRepository;
-import com.example.cinemabooking.domain.usecase.movie.banner.GetBannersUseCase;
+import com.example.cinemabooking.domain.usecase.banner.GetBannersUseCase;
 import com.example.cinemabooking.domain.usecase.movie.GetMoviesUseCase;
 import com.example.cinemabooking.service.BookingService;
-import com.example.cinemabooking.ui.customer.CineShopFragment;
-import com.example.cinemabooking.ui.customer.MovieDetailActivity;
 import com.example.cinemabooking.ui.customer.adapter.HomeBannerAdapter;
 import com.example.cinemabooking.ui.customer.adapter.HomeMovieAdapter;
 import com.example.cinemabooking.ui.customer.cinema.LocationBottomSheetFragment;

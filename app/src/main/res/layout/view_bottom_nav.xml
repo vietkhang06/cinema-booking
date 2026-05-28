@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="88dp"
+    android:background="@android:color/transparent"
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:paddingStart="6dp"
+    android:paddingEnd="6dp"
+    android:paddingBottom="12dp">
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/bottomNavRoot"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:layout_gravity="bottom"
+        app:cardBackgroundColor="#FFFFFF"
+        app:cardCornerRadius="28dp"
+        app:cardElevation="10dp"
+        app:strokeColor="#12000000"
+        app:strokeWidth="1dp">
+
+    <LinearLayout
+        android:id="@+id/bottomNavContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="7dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="7dp"
+        android:paddingBottom="8dp">
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/navHomeCard"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            app:cardCornerRadius="24dp"
+            app:cardBackgroundColor="#1E1A23"
+            app:strokeWidth="0dp"
+            app:rippleColor="#22000000">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:paddingHorizontal="14dp">
+
+                <ImageView
+                    android:id="@+id/navHomeIcon"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/house_user_solid_full"
+                    app:tint="#FFFFFF" />
+
+                <TextView
+                    android:id="@+id/navHomeLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:paddingStart="0dp"
+                    android:paddingEnd="8dp"
+                    android:text="Trang Chủ"
+                    android:textColor="#FFFFFF"
+                    android:textSize="14sp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/navShowtimeCard"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_marginHorizontal="4dp"
+            android:layout_weight="0.8"
+            app:cardBackgroundColor="#FFFFFF"
+            app:cardCornerRadius="24dp"
+            app:strokeColor="#D3CAD7"
+            app:strokeWidth="1dp"
+            app:rippleColor="#22000000">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:paddingHorizontal="14dp">
+
+                <ImageView
+                    android:id="@+id/navShowtimeIcon"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:src="@drawable/glasses_solid_full"
+                    app:tint="#4A4650" />
+
+                <TextView
+                    android:id="@+id/navShowtimeLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:paddingStart="0dp"
+                    android:paddingEnd="8dp"
+                    android:text="Rạp Phim"
+                    android:textColor="#1E1A23"
+                    android:textSize="14sp"
+                    android:visibility="gone" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/navCartCard"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_marginHorizontal="4dp"
+            android:layout_weight="0.8"
+            app:cardBackgroundColor="#FFFFFF"
+            app:cardCornerRadius="24dp"
+            app:strokeColor="#D3CAD7"
+            app:strokeWidth="1dp"
+            app:rippleColor="#22000000">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:paddingHorizontal="14dp">
+
+                <ImageView
+                    android:id="@+id/navCartIcon"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:src="@drawable/cart_shopping_solid_full"
+                    app:tint="#4A4650" />
+
+                <TextView
+                    android:id="@+id/navCartLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:paddingStart="0dp"
+                    android:paddingEnd="8dp"
+                    android:text="Cine Shop"
+                    android:textColor="#1E1A23"
+                    android:textSize="14sp"
+                    android:visibility="gone" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/navMovieCard"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_marginHorizontal="4dp"
+            android:layout_weight="0.8"
+            app:cardBackgroundColor="#FFFFFF"
+            app:cardCornerRadius="24dp"
+            app:strokeColor="#D3CAD7"
+            app:strokeWidth="1dp"
+            app:rippleColor="#22000000">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:paddingHorizontal="14dp">
+
+                <ImageView
+                    android:id="@+id/navMovieIcon"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:src="@drawable/clapperboard_solid_full"
+                    app:tint="#4A4650" />
+
+                <TextView
+                    android:id="@+id/navMovieLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:paddingStart="0dp"
+                    android:paddingEnd="8dp"
+                    android:text="Điện Ảnh"
+                    android:textColor="#1E1A23"
+                    android:textSize="14sp"
+                    android:visibility="gone" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/navProfileCard"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_marginHorizontal="4dp"
+            android:layout_weight="0.8"
+            app:cardBackgroundColor="#FFFFFF"
+            app:cardCornerRadius="24dp"
+            app:strokeColor="#D3CAD7"
+            app:strokeWidth="1dp"
+            app:rippleColor="#22000000">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:paddingHorizontal="14dp">
+
+                <ImageView
+                    android:id="@+id/navProfileIcon"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:src="@drawable/user_solid_full"
+                    app:tint="#4A4650" />
+
+                <TextView
+                    android:id="@+id/navProfileLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:paddingStart="0dp"
+                    android:paddingEnd="8dp"
+                    android:text="Tài Khoản"
+                    android:textColor="#1E1A23"
+                    android:textSize="14sp"
+                    android:visibility="gone" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+    </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+</FrameLayout>

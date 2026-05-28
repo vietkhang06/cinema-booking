@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="#1E1B2E"
+    android:padding="24dp"
+    android:gravity="center_horizontal">
+
+    <!-- Warning Icon -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="⚠️"
+        android:textSize="48sp"
+        android:layout_marginBottom="16dp"/>
+
+    <TextView
+        android:id="@+id/tvWarningTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="XÁC NHẬN ĐỘ TUỔI TỐI THIỂU"
+        android:textColor="#E53935"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="12dp"
+        android:gravity="center"/>
+
+    <TextView
+        android:id="@+id/tvWarningMsg"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Phim này có phân loại độ tuổi hạn chế. Vui lòng xác nhận bạn đủ độ tuổi quy định trước khi thực hiện đặt vé."
+        android:textColor="#CCCCCC"
+        android:textSize="13sp"
+        android:lineSpacingExtra="4dp"
+        android:layout_marginBottom="24dp"
+        android:gravity="center"/>
+
+    <!-- Buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnCancelWarn"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:text="Quay lại"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#2A2A4A"
+            android:layout_marginEnd="8dp"/>
+
+        <Button
+            android:id="@+id/btnAgreeWarn"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1.2"
+            android:text="Đồng ý &amp; Tiếp tục"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#E53935"
+            android:layout_marginStart="8dp"/>
+    </LinearLayout>
+</LinearLayout>
