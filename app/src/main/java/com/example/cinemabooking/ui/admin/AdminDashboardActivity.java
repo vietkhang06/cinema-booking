@@ -10,13 +10,13 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.cinemabooking.R;
-// import com.example.cinemabooking.core.navigation.AppNavigator;
+import com.example.cinemabooking.core.navigation.AppNavigator;
 import com.example.cinemabooking.data.remote.datasource.MovieRemoteDataSource;
 import com.example.cinemabooking.data.repository.BookingRepositoryImpl;
 import com.example.cinemabooking.data.repository.MovieRepositoryImpl;
 import com.example.cinemabooking.data.repository.ShowtimeRepositoryImpl;
 import com.example.cinemabooking.data.repository.UserRepositoryImpl;
-// import com.example.cinemabooking.di.ServiceProvider;
+import com.example.cinemabooking.di.ServiceProvider;
 import com.example.cinemabooking.domain.common.ResultCallback;
 import com.example.cinemabooking.domain.model.Booking;
 import com.example.cinemabooking.domain.model.Movie;
@@ -98,10 +98,10 @@ public class AdminDashboardActivity extends AppCompatActivity {
 
         loadRealStats();
 
-//        btnLogout.setOnClickListener(v -> {
-//            ServiceProvider.getInstance(getApplicationContext()).getAuthenticationService().logOut();
-//            AppNavigator.goToLogin(this);
-//        });
+        btnLogout.setOnClickListener(v -> {
+            ServiceProvider.getInstance(getApplicationContext()).getAuthenticationService().logOut();
+            AppNavigator.goToLogin(this);
+        });
     }
 
     private void loadRealStats() {
