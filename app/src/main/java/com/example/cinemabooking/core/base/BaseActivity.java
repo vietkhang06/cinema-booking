@@ -24,7 +24,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         appContainer = ((MyApp) getApplication()).getAppContainer();
-        sessionManager = appContainer.getSessionManager();
+        sessionManager = new SessionManager(this);
     }
 
     protected void showToast(String message) {

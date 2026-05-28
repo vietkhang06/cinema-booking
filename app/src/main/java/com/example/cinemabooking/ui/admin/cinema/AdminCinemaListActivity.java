@@ -50,8 +50,8 @@ public class AdminCinemaListActivity extends BaseActivity {
         adapter.setListener(new AdminCinemaAdapter.OnCinemaActionListener() {
             @Override
             public void onEditClick(Cinema cinema) {
-                Intent intent = new Intent(AdminCinemaListActivity.this, com.example.cinemabooking.ui.admin.cinema.AdminCinemaFormActivity.class);
-                intent.putExtra(com.example.cinemabooking.ui.admin.cinema.AdminCinemaFormActivity.EXTRA_CINEMA_ID, cinema.cinemaId);
+                Intent intent = new Intent(AdminCinemaListActivity.this, AdminCinemaFormActivity.class);
+                intent.putExtra(AdminCinemaFormActivity.EXTRA_CINEMA_ID, cinema.cinemaId);
                 startActivity(intent);
             }
 

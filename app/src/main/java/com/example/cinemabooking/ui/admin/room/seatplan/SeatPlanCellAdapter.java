@@ -10,7 +10,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.cinemabooking.R;
-import com.google.android.material.card.MaterialCardView;
 
 import java.util.List;
 
@@ -20,10 +19,10 @@ public class SeatPlanCellAdapter extends RecyclerView.Adapter<SeatPlanCellAdapte
         void onSeatCellClicked(int seatPosition);
     }
 
-    private final List<com.example.cinemabooking.ui.admin.room.seatplan.SeatPlanCell> cells;
+    private final List<SeatPlanCell> cells;
     private final OnSeatCellClickListener listener;
 
-    public SeatPlanCellAdapter(List<com.example.cinemabooking.ui.admin.room.seatplan.SeatPlanCell> cells, OnSeatCellClickListener listener) {
+    public SeatPlanCellAdapter(List<SeatPlanCell> cells, OnSeatCellClickListener listener) {
         this.cells = cells;
         this.listener = listener;
     }
@@ -38,23 +37,23 @@ public class SeatPlanCellAdapter extends RecyclerView.Adapter<SeatPlanCellAdapte
 
     @Override
     public void onBindViewHolder(@NonNull CellVH holder, int position) {
-        com.example.cinemabooking.ui.admin.room.seatplan.SeatPlanCell cell = cells.get(position);
+        SeatPlanCell cell = cells.get(position);
 
         holder.tvSeatCode.setText(cell.seatCode);
 
         switch (cell.type) {
-            case com.example.cinemabooking.ui.admin.room.seatplan.SeatPlanCell.TYPE_VIP:
+            case SeatPlanCell.TYPE_VIP:
                 holder.tvSeatCode.setBackgroundResource(R.drawable.couch_solid_vip);
                 holder.tvSeatCode.setTextColor(Color.WHITE);
                 holder.tvSeatCode.setAlpha(1f);
                 break;
-            case com.example.cinemabooking.ui.admin.room.seatplan.SeatPlanCell.TYPE_COUPLE:
+            case SeatPlanCell.TYPE_COUPLE:
                 holder.tvSeatCode.setBackgroundResource(R.drawable.couch_solid_normal);
                 holder.tvSeatCode.getBackground().setTint(Color.parseColor("#C026D3"));
                 holder.tvSeatCode.setTextColor(Color.WHITE);
                 holder.tvSeatCode.setAlpha(1f);
                 break;
-            case com.example.cinemabooking.ui.admin.room.seatplan.SeatPlanCell.TYPE_LOCKED:
+            case SeatPlanCell.TYPE_LOCKED:
                 holder.tvSeatCode.setBackgroundResource(R.drawable.couch_solid_full);
                 holder.tvSeatCode.getBackground().setTint(Color.parseColor("#475569"));
                 holder.tvSeatCode.setTextColor(Color.parseColor("#A0AEC0"));
