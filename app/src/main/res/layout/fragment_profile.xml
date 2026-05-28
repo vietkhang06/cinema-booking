@@ -342,7 +342,7 @@
                 </LinearLayout>
 
                 <!-- Achievement progress bar -->
-                <com.example.cinemabookingapp.ui.component.AchievementProgressBar
+                <com.example.cinemabooking.ui.component.AchievementProgressBar
                     android:id="@+id/achievement_bar"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

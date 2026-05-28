@@ -9,7 +9,7 @@
     android:background="#FAFAFC"
     android:orientation="vertical"
     android:padding="16dp"
-    tools:context="com.example.cinemabooking.ui.staff.StaffProfileActivity">
+    tools:context=".ui.staff.StaffProfileActivity">
 
     <!-- Elegant Toolbar with Back Card & Title -->
     <LinearLayout
