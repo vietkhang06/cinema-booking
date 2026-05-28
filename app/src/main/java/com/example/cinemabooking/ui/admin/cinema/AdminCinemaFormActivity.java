@@ -87,7 +87,7 @@ public class AdminCinemaFormActivity extends BaseActivity {
 
     private void bindActions() {
         btnSave.setOnClickListener(v -> saveCinema());
-        
+
         android.view.View btnBack = findViewById(R.id.btnAdminBack);
         if (btnBack != null) {
             btnBack.setOnClickListener(v -> finish());
