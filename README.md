@@ -15,13 +15,13 @@ Mục tiêu của đồ án là áp dụng kiến thức Java vào một hệ th
 
 # Giới thiệu thành viên nhóm
 
-| STT | Họ và tên            | Vai trò            | Nhiệm vụ chính                                          |
-| --- | ------------         | ------------------ | ------------------------------------------------------- |
-| 1   | Đoàn Việt Khang      | Nhóm trưởng / Lead | Phân tích hệ thống, kiến trúc, backend, đồng bộ dữ liệu |
-| 2   | Phạm Ngọc Gia Khang  | Developer          | Giao diện Customer / Auth                               |
-| 3   | Huỳnh Long Bảo Khanh | Developer          | Giao diện Admin / CRUD                                  |
-| 4   | Lương Phúc Khang     | Developer          | Giao diện Staff / QR / hỗ trợ vận hành                  |
-| 5   | Huỳnh Gia Khang      | Developer          | CineShop / payment / history / UI                       |
+| STT | Họ và tên            | Vai trò                                                   
+| --- | ------------         | ------------------
+| 1   | Đoàn Việt Khang      | Nhóm trưởng 
+| 2   | Phạm Ngọc Gia Khang  | Developer          
+| 3   | Huỳnh Long Bảo Khanh | Developer          
+| 4   | Lương Phúc Khang     | Developer          
+| 5   | Huỳnh Gia Khang      | Developer          
 
 # Tổng quan chức năng chính
 
