@@ -31,10 +31,6 @@ public interface BookingApiService {
     Call<ApiResponse<BookingDTO>> createBooking(@retrofit2.http.Body SeatBookingRequestDTO request);
 
     @retrofit2.http.PUT("bookings/payment/{id}/confirmed")
-    Call<ApiResponse<Void>> confirmPayment(@Path("id") String bookingId);
-
-    @retrofit2.http.PUT("bookings/payment/{id}/failed")
-    Call<ApiResponse<Void>> cancelBooking(@Path("id") String bookingId);
     Call<ApiResponse<Void>> confirmPayment(@retrofit2.http.Path("id") String bookingId);
 
     @retrofit2.http.PUT("bookings/payment/{id}/failed")
