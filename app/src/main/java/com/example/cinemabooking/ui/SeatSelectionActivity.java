@@ -1,4 +1,4 @@
-package com.example.cinemabookingapp.ui.customer;
+package com.example.cinemabooking.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,9 +10,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.cinemabookingapp.R;
-import com.example.cinemabookingapp.data.dto.SeatDTO;
-import com.example.cinemabookingapp.ui.customer.adapter.SeatAdapter;
+import com.example.cinemabooking.R;
+import com.example.cinemabooking.data.dto.SeatDTO;
+import com.example.cinemabooking.ui.customer.adapter.SeatAdapter;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -23,6 +23,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import android.widget.LinearLayout;
+import com.example.cinemabooking.ui.customer.BookingConfirmActivity;
 
 public class SeatSelectionActivity extends AppCompatActivity {
 
@@ -144,16 +145,16 @@ public class SeatSelectionActivity extends AppCompatActivity {
                 if (s.seatId != null) selectedSeatIds.add(s.seatId);
             }
 
-            com.example.cinemabookingapp.data.dto.SeatLockRequestDTO lockRequest = 
-                    new com.example.cinemabookingapp.data.dto.SeatLockRequestDTO(showtimeId, selectedSeatIds);
+            com.example.cinemabooking.data.dto.SeatLockRequestDTO lockRequest =
+                    new com.example.cinemabooking.data.dto.SeatLockRequestDTO(showtimeId, selectedSeatIds);
 
-            com.example.cinemabookingapp.data.remote.api.SeatApiService seatApi = 
-                    com.example.cinemabookingapp.data.remote.api.RetrofitClient.getInstance()
-                    .create(com.example.cinemabookingapp.data.remote.api.SeatApiService.class);
+            com.example.cinemabooking.data.remote.api.SeatApiService seatApi =
+                    com.example.cinemabooking.data.remote.api.RetrofitClient.getInstance()
+                    .create(com.example.cinemabooking.data.remote.api.SeatApiService.class);
 
-            seatApi.lockSeats(lockRequest).enqueue(new retrofit2.Callback<com.example.cinemabookingapp.data.dto.ApiResponse<Void>>() {
+            seatApi.lockSeats(lockRequest).enqueue(new retrofit2.Callback<com.example.cinemabooking.data.dto.ApiResponse<Void>>() {
                 @Override
-                public void onResponse(retrofit2.Call<com.example.cinemabookingapp.data.dto.ApiResponse<Void>> call, retrofit2.Response<com.example.cinemabookingapp.data.dto.ApiResponse<Void>> response) {
+                public void onResponse(retrofit2.Call<com.example.cinemabooking.data.dto.ApiResponse<Void>> call, retrofit2.Response<com.example.cinemabooking.data.dto.ApiResponse<Void>> response) {
                     btnContinue.setEnabled(true);
                     if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                         goToBookingConfirm(selected);
@@ -172,7 +173,7 @@ public class SeatSelectionActivity extends AppCompatActivity {
                 }
 
                 @Override
-                public void onFailure(retrofit2.Call<com.example.cinemabookingapp.data.dto.ApiResponse<Void>> call, Throwable t) {
+                public void onFailure(retrofit2.Call<com.example.cinemabooking.data.dto.ApiResponse<Void>> call, Throwable t) {
                     btnContinue.setEnabled(true);
                     Toast.makeText(SeatSelectionActivity.this, "Lỗi kết nối mạng: " + t.getMessage(), Toast.LENGTH_LONG).show();
                 }
@@ -185,13 +186,13 @@ public class SeatSelectionActivity extends AppCompatActivity {
     private void loadSeats() {
         if (showtimeId == null) { loadDummySeats(); return; }
 
-        com.example.cinemabookingapp.data.remote.api.SeatApiService seatApi = 
-                com.example.cinemabookingapp.data.remote.api.RetrofitClient.getInstance()
-                .create(com.example.cinemabookingapp.data.remote.api.SeatApiService.class);
+        com.example.cinemabooking.data.remote.api.SeatApiService seatApi =
+                com.example.cinemabooking.data.remote.api.RetrofitClient.getInstance()
+                .create(com.example.cinemabooking.data.remote.api.SeatApiService.class);
 
-        seatApi.getSeatsByShowtimeId(showtimeId).enqueue(new retrofit2.Callback<com.example.cinemabookingapp.data.dto.ApiResponse<List<SeatDTO>>>() {
+        seatApi.getSeatsByShowtimeId(showtimeId).enqueue(new retrofit2.Callback<com.example.cinemabooking.data.dto.ApiResponse<List<SeatDTO>>>() {
             @Override
-            public void onResponse(retrofit2.Call<com.example.cinemabookingapp.data.dto.ApiResponse<List<SeatDTO>>> call, retrofit2.Response<com.example.cinemabookingapp.data.dto.ApiResponse<List<SeatDTO>>> response) {
+            public void onResponse(retrofit2.Call<com.example.cinemabooking.data.dto.ApiResponse<List<SeatDTO>>> call, retrofit2.Response<com.example.cinemabooking.data.dto.ApiResponse<List<SeatDTO>>> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                     // Initial load successful. Now start realtime Firestore sync!
                     startRealtimeSeatSync();
@@ -203,7 +204,7 @@ public class SeatSelectionActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(retrofit2.Call<com.example.cinemabookingapp.data.dto.ApiResponse<List<SeatDTO>>> call, Throwable t) {
+            public void onFailure(retrofit2.Call<com.example.cinemabooking.data.dto.ApiResponse<List<SeatDTO>>> call, Throwable t) {
                 Toast.makeText(SeatSelectionActivity.this, "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 finish();
             }
