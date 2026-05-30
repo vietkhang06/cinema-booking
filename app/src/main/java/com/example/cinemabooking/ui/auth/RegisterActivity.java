@@ -56,6 +56,7 @@ public class RegisterActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        com.facebook.FacebookSdk.sdkInitialize(getApplicationContext());
         setContentView(R.layout.activity_register);
 
         authService = ServiceProvider.getInstance().getAuthenticationService();
