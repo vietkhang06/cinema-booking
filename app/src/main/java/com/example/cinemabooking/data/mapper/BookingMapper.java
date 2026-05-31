@@ -12,7 +12,7 @@ public final class BookingMapper {
         Booking model = new Booking();
         model.bookingId = dto.bookingId;
         model.userId = dto.userId;
-//        model.movieId = dto.movieId;
+        model.movieId = dto.movieId;
 //        model.cinemaId = dto.cinemaId;
 //        model.roomId = dto.roomId;
         model.showtimeId = dto.showtimeId;
@@ -45,7 +45,7 @@ public final class BookingMapper {
         BookingDTO dto = new BookingDTO();
         dto.bookingId = model.bookingId;
         dto.userId = model.userId;
-//        dto.movieId = model.movieId;
+        dto.movieId = model.movieId;
 //        dto.cinemaId = model.cinemaId;
 //        dto.roomId = model.roomId;
         dto.showtimeId = model.showtimeId;

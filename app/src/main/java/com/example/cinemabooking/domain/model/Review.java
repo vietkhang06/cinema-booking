@@ -8,6 +8,9 @@ public class Review {
     public String movieTitleSnapshot;
     public int rating;
     public String content;
+    public String parentId;
+    public String userName;
+    public String userAvatar;
     public String status;
     public long createdAt;
     public long updatedAt;

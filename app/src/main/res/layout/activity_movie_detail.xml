@@ -287,11 +287,11 @@
                             app:strokeWidth="1dp" />
 
                         <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btnTabNews"
+                            android:id="@+id/btnTabReviews"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
-                            android:text="Tin tức"
+                            android:text="Đánh giá"
                             android:textAllCaps="false"
                             android:textColor="#1E1A23"
                             android:textSize="13sp"
@@ -436,18 +436,19 @@
                     </LinearLayout>
 
                     <LinearLayout
-                        android:id="@+id/layoutNewsSection"
+                        android:id="@+id/layoutReviewsSection"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="18dp"
                         android:orientation="vertical"
                         android:visibility="gone">
 
+                        <!-- Khung Tóm tắt Điểm số -->
                         <com.google.android.material.card.MaterialCardView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="12dp"
-                            app:cardBackgroundColor="#FFFFFF"
+                            app:cardBackgroundColor="#FAF9FB"
                             app:cardCornerRadius="16dp"
                             app:cardElevation="0dp"
                             app:strokeColor="#E6E6E6"
@@ -457,60 +458,97 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:orientation="vertical"
-                                android:padding="16dp">
+                                android:padding="16dp"
+                                android:gravity="center">
 
                                 <TextView
+                                    android:id="@+id/tvAvgRatingScore"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="Tin nổi bật"
+                                    android:text="0.0"
                                     android:textColor="#111111"
-                                    android:textSize="16sp"
+                                    android:textSize="36sp"
                                     android:textStyle="bold" />
 
-                                <TextView
-                                    android:layout_width="match_parent"
+                                <RatingBar
+                                    android:id="@+id/rbAvgStars"
+                                    style="?android:attr/ratingBarStyleIndicator"
+                                    android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:layout_marginTop="8dp"
-                                    android:lineSpacingExtra="4dp"
-                                    android:text="Sẽ hiển thị tin tức, hậu trường hoặc bài viết liên quan đến phim."
-                                    android:textColor="#555555"
-                                    android:textSize="14sp" />
+                                    android:layout_marginTop="4dp"
+                                    android:numStars="5"
+                                    android:rating="0.0"
+                                    android:stepSize="0.1"
+                                    android:progressTint="#FFB300"
+                                    android:progressBackgroundTint="#CCCCCC"
+                                    android:isIndicator="true" />
+
+                                <TextView
+                                    android:id="@+id/tvTotalRatingsCount"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="6dp"
+                                    android:text="(0 lượt đánh giá)"
+                                    android:textColor="#888888"
+                                    android:textSize="12sp" />
                             </LinearLayout>
                         </com.google.android.material.card.MaterialCardView>
 
+                        <!-- Khung Viết Đánh giá (Nút) -->
                         <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/cardWriteReview"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:layout_marginBottom="16dp"
                             app:cardBackgroundColor="#FFFFFF"
-                            app:cardCornerRadius="16dp"
-                            app:cardElevation="0dp"
-                            app:strokeColor="#E6E6E6"
-                            app:strokeWidth="1dp">
+                            app:cardCornerRadius="12dp"
+                            app:cardElevation="2dp"
+                            app:strokeColor="#E0E0E0"
+                            app:strokeWidth="1dp"
+                            android:clickable="true"
+                            android:focusable="true">
 
                             <LinearLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:orientation="vertical"
-                                android:padding="16dp">
+                                android:orientation="horizontal"
+                                android:padding="14dp"
+                                android:gravity="center_vertical">
+
+                                <ImageView
+                                    android:layout_width="20dp"
+                                    android:layout_height="20dp"
+                                    android:src="@android:drawable/ic_menu_edit"
+                                    app:tint="#1E4F8F" />
 
                                 <TextView
+                                    android:id="@+id/tvWriteReviewHint"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="Bài viết khác"
-                                    android:textColor="#111111"
-                                    android:textSize="16sp"
+                                    android:layout_marginStart="10dp"
+                                    android:text="Viết đánh giá &amp; bình luận phim"
+                                    android:textColor="#1E4F8F"
+                                    android:textSize="13sp"
                                     android:textStyle="bold" />
-
-                                <TextView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="8dp"
-                                    android:lineSpacingExtra="4dp"
-                                    android:text="Khu vực này sẽ dùng cho các nội dung quảng bá, review hoặc thông báo mới."
-                                    android:textColor="#555555"
-                                    android:textSize="14sp" />
                             </LinearLayout>
                         </com.google.android.material.card.MaterialCardView>
+
+                        <!-- Tiêu đề phần bình luận -->
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Bình luận người dùng"
+                            android:textColor="#111111"
+                            android:textSize="15sp"
+                            android:textStyle="bold"
+                            android:layout_marginBottom="8dp" />
+
+                        <!-- RecyclerView Danh sách Đánh giá & Bình luận -->
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/rvReviews"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:nestedScrollingEnabled="false" />
                     </LinearLayout>
 
                     <com.google.android.material.button.MaterialButton

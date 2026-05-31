@@ -6,6 +6,7 @@ public class Booking {
     public String bookingId;
     public String userId;
     public String showtimeId;
+    public String movieId;
     public String movieTitleSnapshot;
     public String movieImageUrlSnapshot;
     public String cinemaNameSnapshot;

@@ -177,7 +177,7 @@ public class RegisterActivity extends BaseActivity {
             @Override
             public void onSuccess(User data) {
                 showToast("Đăng ký thành công");
-                //AppNavigator.goToCustomerHome(RegisterActivity.this);
+                AppNavigator.goToLogin(RegisterActivity.this);
             }
 
             @Override
