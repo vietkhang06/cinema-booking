@@ -10,7 +10,7 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import com.example.cinemabooking.R;
 import com.example.cinemabooking.core.base.BaseActivity;
 import com.example.cinemabooking.core.navigation.AppNavigator;
-import com.example.cinemabooking.di.ServiceProvider;
+
 
 public class SplashActivity extends BaseActivity {
 
@@ -27,11 +27,12 @@ public class SplashActivity extends BaseActivity {
         startDotAnimation();
 
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            if (sessionManager.isLoggedIn() && sessionManager.isRememberMe()) {
+            if (sessionManager.isLoggedIn()) {
+                // Đã đăng nhập → vào đúng màn hình theo vai trò
                 AppNavigator.goToHomeByRole(this, sessionManager.getRole());
             } else {
-                ServiceProvider.getInstance(getApplicationContext()).getAuthenticationService().logOut();
-                AppNavigator.goToLogin(this);
+                // Chưa đăng nhập → vào HomeActivity ở chế độ guest (không ép đăng nhập)
+                AppNavigator.goToCustomerHome(this);
             }
         }, SPLASH_DELAY);
     }

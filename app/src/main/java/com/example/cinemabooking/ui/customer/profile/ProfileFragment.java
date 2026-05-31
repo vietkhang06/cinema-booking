@@ -40,6 +40,7 @@ public class ProfileFragment extends Fragment {
     ImageView profileAvatar, badgeImage;
     MaterialCardView editProfileBtn, viewTransactionBtn, viewNotificationBtn;
     MaterialCardView logOutBtn;
+    TextView tvLogoutBtnLabel;
     LinearLayout btnMemberCard;
     ImageView btnSettings;
     AchievementProgressBar achievementBar;
@@ -80,6 +81,7 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+        updateAuthButton();
         loadUserProfile();
         loadUserSpendingMilestone();
     }
@@ -193,6 +195,7 @@ public class ProfileFragment extends Fragment {
         viewTransactionBtn  = view.findViewById(R.id.profile_transaction_btn);
         viewNotificationBtn = view.findViewById(R.id.profile_notification_btn);
         logOutBtn           = view.findViewById(R.id.profile_logout_btn);
+        tvLogoutBtnLabel    = view.findViewById(R.id.tvLogoutBtnLabel);
         btnMemberCard       = view.findViewById(R.id.btnMemberCard);
         btnSettings         = view.findViewById(R.id.btnProfileSettings);
 
@@ -296,18 +299,42 @@ public class ProfileFragment extends Fragment {
             menuFaq.setOnClickListener(v ->
                     Toast.makeText(getContext(), "Câu hỏi thường gặp", Toast.LENGTH_SHORT).show());
 
-        // ── ĐĂNG XUẤT — fix crash: navigate về LoginActivity sau khi logout ──
+        // ── ĐĂNG NHẬP / ĐĂNG XUẤT — đổi hành vi theo trạng thái đăng nhập ──
         logOutBtn.setOnClickListener(v -> {
-            new AlertDialog.Builder(requireContext())
-                    .setTitle("Đăng xuất")
-                    .setMessage("Bạn có chắc muốn đăng xuất không?")
-                    .setPositiveButton("Đăng xuất", (dialog, which) -> {
-                        authService.logOut();
-                        // Navigate về LoginActivity và xoá back stack
-                        AppNavigator.goToLogin(requireActivity());
-                    })
-                    .setNegativeButton("Huỷ", null)
-                    .show();
+            boolean isLoggedIn = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() != null;
+            if (isLoggedIn) {
+                // Đã đăng nhập → hiện dialog xác nhận đăng xuất
+                new AlertDialog.Builder(requireContext())
+                        .setTitle("Đăng xuất")
+                        .setMessage("Bạn có chắc muốn đăng xuất không?")
+                        .setPositiveButton("Đăng xuất", (dialog, which) -> {
+                            authService.logOut();
+                            // Sau khi logout → về HomeActivity (guest mode), không clear về Login
+                            AppNavigator.goToCustomerHome(requireActivity());
+                        })
+                        .setNegativeButton("Huỷ", null)
+                        .show();
+            } else {
+                // Chưa đăng nhập → mở LoginActivity mà không xóa back stack
+                // → back hoặc login xong sẽ quay về tab Profile
+                AppNavigator.goToLoginForBooking(requireActivity());
+            }
         });
+    }
+
+    // ── Cập nhật nút Login/Logout theo trạng thái đăng nhập ─────────────────
+
+    private void updateAuthButton() {
+        if (!isAdded() || tvLogoutBtnLabel == null) return;
+
+        boolean isLoggedIn = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() != null;
+
+        if (isLoggedIn) {
+            tvLogoutBtnLabel.setText("Đăng xuất");
+            tvLogoutBtnLabel.setTextColor(android.graphics.Color.parseColor("#E8640C")); // cam
+        } else {
+            tvLogoutBtnLabel.setText("Đăng nhập");
+            tvLogoutBtnLabel.setTextColor(android.graphics.Color.parseColor("#1E4F8F")); // xanh
+        }
     }
 }

@@ -119,6 +119,8 @@ public class MovieDetailActivity extends BaseActivity {
     private String selectedDateLabel = "";
     private String selectedDateText = "";
     private String selectedShowtime = "";
+    /** Lưu đối tượng suất chiếu đang chọn — dùng khi nhấn nút "Đặt vé ngay" */
+    private MovieDetailScheduleCatalog.ShowtimeItem selectedShowtimeItem = null;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -409,6 +411,7 @@ public class MovieDetailActivity extends BaseActivity {
 
     private void onCitySelected(String city) {
         selectedCity = city;
+        selectedShowtimeItem = null; // reset khi đổi thành phố
         actvCity.setText(city, false);
 
         selectedCinema = getFirstCinemaName(city);
@@ -507,6 +510,7 @@ public class MovieDetailActivity extends BaseActivity {
         }
 
         selectedDateIndex = index;
+        selectedShowtimeItem = null; // reset khi đổi ngày
         DateOption option = dateOptions.get(index);
         selectedDateLabel = option.label;
         selectedDateText = option.dateText;
@@ -686,21 +690,13 @@ public class MovieDetailActivity extends BaseActivity {
         styleTimeButton(button, selected);
 
         button.setOnClickListener(v -> {
-            selectedCinema = cinemaName;
-            selectedRoomType = roomType;
-            selectedShowtime = item.timeText;
+            // Chỉ lưu lựa chọn, KHÔNG check đăng nhập — việc đó sẽ thực hiện khi nhấn "Đặt vé ngay"
+            selectedCinema      = cinemaName;
+            selectedRoomType    = roomType;
+            selectedShowtime    = item.timeText;
+            selectedShowtimeItem = item;   // lưu để dùng sau
 
-            Intent intent = new Intent(MovieDetailActivity.this, SeatSelectionActivity.class);
-
-            intent.putExtra(SeatSelectionActivity.EXTRA_SHOWTIME_ID, item.showtimeId);
-            intent.putExtra(SeatSelectionActivity.EXTRA_MOVIE_TITLE, tvMovieTitle.getText().toString());
-            intent.putExtra(SeatSelectionActivity.EXTRA_POSTER_URL, selectedMoviePosterUrl);
-            intent.putExtra(SeatSelectionActivity.EXTRA_CINEMA_NAME, cinemaName);
-            intent.putExtra(SeatSelectionActivity.EXTRA_SHOWTIME_START, item.startAt);
-            intent.putExtra(SeatSelectionActivity.EXTRA_BASE_PRICE, item.basePrice);
-            intent.putExtra(SeatSelectionActivity.EXTRA_MOVIE_ID, selectedMovieId);
-
-            startActivity(intent);
+            renderCinemaGroups(); // làm mới UI nút thời gian để highlight suất đang chọn
         });
 
         return button;
@@ -863,7 +859,9 @@ public class MovieDetailActivity extends BaseActivity {
     }
 
     private void prepareBookingPayload() {
-        if (TextUtils.isEmpty(selectedCity)
+        // 1. Kiểm tra đã chọn đủ thông tin chưa
+        if (selectedShowtimeItem == null
+                || TextUtils.isEmpty(selectedCity)
                 || TextUtils.isEmpty(selectedCinema)
                 || TextUtils.isEmpty(selectedDateText)
                 || TextUtils.isEmpty(selectedShowtime)) {
@@ -871,9 +869,22 @@ public class MovieDetailActivity extends BaseActivity {
             return;
         }
 
-        Intent bookingResult = buildBookingPayloadIntent();
-        setResult(RESULT_OK, bookingResult);
-        showToast("Dữ liệu đặt vé đã sẵn sàng cho màn tiếp theo");
+        // 2. Kiểm tra đăng nhập
+        if (com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() == null) {
+            showLoginRequiredDialog();
+            return;
+        }
+
+        // 3. Chuyển sang màn hình chọn ghế
+        Intent intent = new Intent(this, SeatSelectionActivity.class);
+        intent.putExtra(SeatSelectionActivity.EXTRA_SHOWTIME_ID, selectedShowtimeItem.showtimeId);
+        intent.putExtra(SeatSelectionActivity.EXTRA_MOVIE_TITLE, tvMovieTitle.getText().toString());
+        intent.putExtra(SeatSelectionActivity.EXTRA_POSTER_URL, selectedMoviePosterUrl);
+        intent.putExtra(SeatSelectionActivity.EXTRA_CINEMA_NAME, selectedCinema);
+        intent.putExtra(SeatSelectionActivity.EXTRA_SHOWTIME_START, selectedShowtimeItem.startAt);
+        intent.putExtra(SeatSelectionActivity.EXTRA_BASE_PRICE, selectedShowtimeItem.basePrice);
+        intent.putExtra(SeatSelectionActivity.EXTRA_MOVIE_ID, selectedMovieId);
+        startActivity(intent);
     }
 
     public Intent buildBookingPayloadIntent() {
@@ -948,5 +959,100 @@ public class MovieDetailActivity extends BaseActivity {
 
     private int dp(int value) {
         return Math.round(value * getResources().getDisplayMetrics().density);
+    }
+
+    /**
+     * Hiển thị dialog yêu cầu đăng nhập khi người dùng chưa đăng nhập mà muốn đặt vé.
+     * Nút "Đăng nhập" → mở LoginActivity (sau khi login xong sẽ quay về màn hình này).
+     * Nút "Để sau" → đóng dialog, người dùng có thể tiếp tục xem phim.
+     */
+    private void showLoginRequiredDialog() {
+        com.google.android.material.bottomsheet.BottomSheetDialog dialog =
+                new com.google.android.material.bottomsheet.BottomSheetDialog(this);
+
+        android.widget.LinearLayout layout = new android.widget.LinearLayout(this);
+        layout.setOrientation(android.widget.LinearLayout.VERTICAL);
+        layout.setPadding(dp(24), dp(32), dp(24), dp(32));
+        layout.setBackgroundColor(android.graphics.Color.WHITE);
+
+        // Icon
+        android.widget.ImageView icon = new android.widget.ImageView(this);
+        icon.setImageResource(android.R.drawable.ic_lock_idle_lock);
+        android.widget.LinearLayout.LayoutParams iconParams =
+                new android.widget.LinearLayout.LayoutParams(dp(48), dp(48));
+        iconParams.gravity = android.view.Gravity.CENTER_HORIZONTAL;
+        iconParams.bottomMargin = dp(16);
+        icon.setLayoutParams(iconParams);
+        layout.addView(icon);
+
+        // Tiêu đề
+        android.widget.TextView tvTitle = new android.widget.TextView(this);
+        tvTitle.setText("Đăng nhập để đặt vé");
+        tvTitle.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 20f);
+        tvTitle.setTypeface(tvTitle.getTypeface(), android.graphics.Typeface.BOLD);
+        tvTitle.setTextColor(android.graphics.Color.parseColor("#1A1A2E"));
+        tvTitle.setGravity(android.view.Gravity.CENTER);
+        android.widget.LinearLayout.LayoutParams titleParams =
+                new android.widget.LinearLayout.LayoutParams(
+                        android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                        android.widget.LinearLayout.LayoutParams.WRAP_CONTENT);
+        titleParams.bottomMargin = dp(8);
+        tvTitle.setLayoutParams(titleParams);
+        layout.addView(tvTitle);
+
+        // Mô tả
+        android.widget.TextView tvDesc = new android.widget.TextView(this);
+        tvDesc.setText("Bạn cần đăng nhập để tiếp tục đặt vé. Sau khi đăng nhập, bạn sẽ được quay lại trang này.");
+        tvDesc.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 14f);
+        tvDesc.setTextColor(android.graphics.Color.parseColor("#666666"));
+        tvDesc.setGravity(android.view.Gravity.CENTER);
+        android.widget.LinearLayout.LayoutParams descParams =
+                new android.widget.LinearLayout.LayoutParams(
+                        android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                        android.widget.LinearLayout.LayoutParams.WRAP_CONTENT);
+        descParams.bottomMargin = dp(28);
+        tvDesc.setLayoutParams(descParams);
+        layout.addView(tvDesc);
+
+        // Nút Đăng nhập
+        com.google.android.material.button.MaterialButton btnLogin =
+                new com.google.android.material.button.MaterialButton(this);
+        btnLogin.setText("Đăng nhập");
+        btnLogin.setAllCaps(false);
+        btnLogin.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 15f);
+        btnLogin.setCornerRadius(dp(12));
+        btnLogin.setBackgroundTintList(
+                android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#1E4F8F")));
+        btnLogin.setTextColor(android.graphics.Color.WHITE);
+        android.widget.LinearLayout.LayoutParams loginParams =
+                new android.widget.LinearLayout.LayoutParams(
+                        android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                        dp(50));
+        loginParams.bottomMargin = dp(12);
+        btnLogin.setLayoutParams(loginParams);
+        btnLogin.setOnClickListener(v -> {
+            dialog.dismiss();
+            com.example.cinemabooking.core.navigation.AppNavigator.goToLoginForBooking(this);
+        });
+        layout.addView(btnLogin);
+
+        // Nút Để sau
+        com.google.android.material.button.MaterialButton btnLater =
+                new com.google.android.material.button.MaterialButton(this,
+                        null, android.R.attr.borderlessButtonStyle);
+        btnLater.setText("Để sau");
+        btnLater.setAllCaps(false);
+        btnLater.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 15f);
+        btnLater.setTextColor(android.graphics.Color.parseColor("#888888"));
+        android.widget.LinearLayout.LayoutParams laterParams =
+                new android.widget.LinearLayout.LayoutParams(
+                        android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                        dp(48));
+        btnLater.setLayoutParams(laterParams);
+        btnLater.setOnClickListener(v -> dialog.dismiss());
+        layout.addView(btnLater);
+
+        dialog.setContentView(layout);
+        dialog.show();
     }
 }
