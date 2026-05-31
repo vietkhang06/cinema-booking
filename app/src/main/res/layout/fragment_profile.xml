@@ -518,9 +518,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:textColor="#111111"
-                        android:textSize="14sp">
-                        <![CDATA[Email:  <font color="#E8640C">hotro@galaxystudio.vn</font>]]>
-                    </TextView>
+                        android:textSize="14sp" />
 
                     <ImageView
                         android:layout_width="16dp"
@@ -686,6 +684,7 @@
                     app:cardBackgroundColor="@android:color/transparent">
 
                     <TextView
+                        android:id="@+id/tvLogoutBtnLabel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:paddingHorizontal="32dp"

@@ -64,7 +64,7 @@ public class SessionManager {
     }
 
     public boolean isRememberMe() {
-        return sharedPreferences.getBoolean(KEY_REMEMBER_ME, false);
+        return sharedPreferences.getBoolean(KEY_REMEMBER_ME, true);
     }
 
     public void logout() {

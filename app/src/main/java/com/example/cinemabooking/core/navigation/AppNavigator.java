@@ -49,6 +49,16 @@ public final class AppNavigator {
         openAndClear(activity, LoginActivity.class);
     }
 
+    /**
+     * Mở LoginActivity từ màn hình booking (không clear stack).
+     * Sau khi login thành công, LoginActivity sẽ finish() và quay lại màn hình trước.
+     */
+    public static void goToLoginForBooking(Activity activity) {
+        Intent intent = new Intent(activity, LoginActivity.class);
+        intent.putExtra(LoginActivity.EXTRA_FROM_BOOKING, true);
+        activity.startActivity(intent);
+    }
+
     public static void goToRegister(Activity activity) {
         open(activity, RegisterActivity.class);
     }

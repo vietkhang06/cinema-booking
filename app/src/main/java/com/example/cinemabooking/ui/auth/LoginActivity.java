@@ -35,7 +35,12 @@ import java.util.Arrays;
 
 public class LoginActivity extends BaseActivity {
 
+    /** Khi true: login xong thì finish() về màn hình trước thay vì go to Home */
+    public static final String EXTRA_FROM_BOOKING = "from_booking";
+
     private static final int RC_SIGN_IN = 1001;
+
+    private boolean fromBooking = false;
 
     private TextInputLayout tilEmail, tilPassword;
     private TextInputEditText edtEmail, edtPassword;
@@ -50,6 +55,8 @@ public class LoginActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        fromBooking = getIntent().getBooleanExtra(EXTRA_FROM_BOOKING, false);
 
         authService = ServiceProvider
                 .getInstance(getApplicationContext())
@@ -142,7 +149,12 @@ public class LoginActivity extends BaseActivity {
                     @Override
                     public void onSuccess(User user) {
                         btnLogin.setEnabled(true);
-                        AppNavigator.goToHomeByRole(LoginActivity.this, user.role);
+                        if (fromBooking) {
+                            // Từ màn hình đặt vé → quay lại màn hình trước
+                            finish();
+                        } else {
+                            AppNavigator.goToHomeByRole(LoginActivity.this, user.role);
+                        }
                     }
 
                     @Override
@@ -175,7 +187,11 @@ public class LoginActivity extends BaseActivity {
                                 new AuthCallback() {
                                     @Override
                                     public void onSuccess(User user) {
-                                        AppNavigator.goToHomeByRole(LoginActivity.this, user.role);
+                                        if (fromBooking) {
+                                            finish();
+                                        } else {
+                                            AppNavigator.goToHomeByRole(LoginActivity.this, user.role);
+                                        }
                                     }
 
                                     @Override
@@ -228,7 +244,11 @@ public class LoginActivity extends BaseActivity {
                 authService.signInWithGoogle(account.getIdToken(), new AuthCallback() {
                     @Override
                     public void onSuccess(User user) {
-                        AppNavigator.goToHomeByRole(LoginActivity.this, user.role);
+                        if (fromBooking) {
+                            finish();
+                        } else {
+                            AppNavigator.goToHomeByRole(LoginActivity.this, user.role);
+                        }
                     }
 
                     @Override
