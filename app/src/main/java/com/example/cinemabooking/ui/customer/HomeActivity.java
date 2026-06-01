@@ -36,6 +36,7 @@ import com.example.cinemabooking.ui.customer.cinema.LocationBottomSheetFragment;
 import com.example.cinemabooking.ui.customer.cinema_contents.CinemaContentFragment;
 import com.example.cinemabooking.ui.customer.model.HomeBannerItem;
 import com.example.cinemabooking.ui.customer.model.HomeMovieItem;
+import com.example.cinemabooking.ui.customer.movie.MovieDetailActivity;
 import com.example.cinemabooking.ui.customer.profile.ProfileFragment;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;

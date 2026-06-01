@@ -42,7 +42,7 @@
             android:name=".ui.customer.HomeActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.customer.MovieDetailActivity"
+            android:name=".ui.customer.movie.MovieDetailActivity"
             android:exported="false" />
         <activity
             android:name=".ui.customer.cinema.CinemaDetailActivity"
