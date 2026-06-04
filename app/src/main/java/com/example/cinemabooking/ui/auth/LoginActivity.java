@@ -172,7 +172,6 @@ public class LoginActivity extends BaseActivity {
                     public void onSuccess(User user) {
                         btnLogin.setEnabled(true);
 
-                        // Lưu hoặc xóa credentials theo trạng thái checkbox
                         if (cbRemember.isChecked()) {
                             sessionManager.saveRememberedEmail(email);
                             sessionManager.saveRememberedPassword(password);
