@@ -421,18 +421,18 @@ public class HomeActivity extends BaseActivity {
     private void applyBottomState(MaterialCardView card, TextView label, ImageView icon, boolean selected, String text) {
         LinearLayout.LayoutParams params;
         if (selected) {
-            params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, dp(48));
+            params = new LinearLayout.LayoutParams(0, dp(48), 1.2f);
             params.setMarginStart(dp(4));
             params.setMarginEnd(dp(4));
-            card.setCardBackgroundColor(activeColor);
+            card.setCardBackgroundColor(Color.parseColor("#121212")); // Tô đen như ảnh
             card.setStrokeWidth(0);
             label.setText(text);
             label.setVisibility(View.VISIBLE);
-            ImageViewCompat.setImageTintList(icon, ColorStateList.valueOf(activeTint));
-            label.setTextColor(activeTint);
+            ImageViewCompat.setImageTintList(icon, ColorStateList.valueOf(Color.WHITE));
+            label.setTextColor(Color.WHITE);
             card.animate().scaleX(1.03f).scaleY(1.03f).setDuration(150).start();
         } else {
-            params = new LinearLayout.LayoutParams(0, dp(48), 0.8f);
+            params = new LinearLayout.LayoutParams(dp(48), dp(48));
             params.setMarginStart(dp(4));
             params.setMarginEnd(dp(4));
             card.setCardBackgroundColor(Color.WHITE);
