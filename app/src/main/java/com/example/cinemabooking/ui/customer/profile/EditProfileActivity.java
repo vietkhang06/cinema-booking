@@ -17,6 +17,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.cinemabooking.R;
 import com.example.cinemabooking.core.base.AuthActivity;
 import com.example.cinemabooking.di.ServiceProvider;
@@ -120,12 +121,27 @@ public class EditProfileActivity extends AuthActivity {
         } else if ("Nữ".equalsIgnoreCase(user.gender)) {
             rbFemale.setChecked(true);
         }
+        //Kiểm tra có sẵn avatar chưa
+        if (user.avatarUrl != null && user.avatarUrl.startsWith("data:image")) {
+            String base64Content = user.avatarUrl.substring(user.avatarUrl.indexOf(",") + 1);
+            byte[] imageBytes = android.util.Base64.decode(base64Content, android.util.Base64.DEFAULT);
+            Glide.with(this)
+                    .load(imageBytes)
+                    .skipMemoryCache(true)
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                    .circleCrop()
+                    .placeholder(R.drawable.user_solid_full)
+                    .into(profileAvatar);
+        } else {
+            Glide.with(this)
+                    .load(TextUtils.isEmpty(user.avatarUrl) ? R.drawable.user_solid_full : user.avatarUrl)
+                    .skipMemoryCache(true)
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                    .circleCrop()
+                    .placeholder(R.drawable.user_solid_full)
+                    .into(profileAvatar);
+        }
 
-        Glide.with(this)
-                .load(TextUtils.isEmpty(user.avatarUrl) ? R.drawable.user_solid_full : user.avatarUrl)
-                .circleCrop()
-                .placeholder(R.drawable.user_solid_full)
-                .into(profileAvatar);
     }
 
     private void saveChanges() {
@@ -142,17 +158,23 @@ public class EditProfileActivity extends AuthActivity {
         loadingOverlay.setVisibility(View.VISIBLE);
 
         executorService.execute(() -> {
-            // Use a copy to avoid immediate local state change before server confirms
-            User user = profileService.getCachedProfile();
-            user.name = name;
-            user.phone = phone;
-            user.birthDate = birthDate;
-            user.gender = gender;
+            User cachedUser = profileService.getCachedProfile();
+            if (cachedUser == null) return;
+
+            User updatedUser = new User();
+            updatedUser.uid = cachedUser.uid;
+            updatedUser.email = cachedUser.email;
+            updatedUser.role = cachedUser.role;
+
+            updatedUser.name = name;
+            updatedUser.phone = phone;
+            updatedUser.birthDate = birthDate;
+            updatedUser.gender = gender;
 
             if (s_profileUri != null) {
                 String uploadedUrl = ServiceProvider.getInstance().getUploadService().uploadImage(s_profileUri);
                 if (uploadedUrl != null) {
-                    user.avatarUrl = uploadedUrl;
+                    updatedUser.avatarUrl = uploadedUrl;
                 } else {
                     android.util.Log.e("EditProfile", "Image upload returned null URL");
                     runOnUiThread(() -> {
@@ -161,10 +183,12 @@ public class EditProfileActivity extends AuthActivity {
                     });
                     return;
                 }
+            } else {
+                updatedUser.avatarUrl = cachedUser.avatarUrl;
             }
 
             runOnUiThread(() -> {
-                profileService.updateUserProfile(user, new ResultCallback<User>() {
+                profileService.updateUserProfile(updatedUser, new ResultCallback<User>() {
                     @Override
                     public void onSuccess(User data) {
                         loadingOverlay.setVisibility(View.GONE);

@@ -351,7 +351,7 @@
                 android:textSize="14sp"
                 android:textStyle="bold"
                 app:backgroundTint="#A13345"
-                app:cornerRadius="16dp"/>
+                app:cornerRadius="16dp" />
 
         </LinearLayout>
     </ScrollView>

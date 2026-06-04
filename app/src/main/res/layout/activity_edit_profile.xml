@@ -74,7 +74,7 @@
                         android:layout_height="match_parent"
                         android:scaleType="centerCrop"
                         android:src="@drawable/user_solid_full"
-                        app:tint="#CCCCCC" />
+                        />
                 </com.google.android.material.card.MaterialCardView>
 
                 <com.google.android.material.card.MaterialCardView
@@ -85,7 +85,7 @@
                     android:layout_alignParentBottom="true"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="4dp"
-                    app:cardBackgroundColor="#FF7A1A"
+                    app:cardBackgroundColor="#A13345"
                     app:strokeWidth="2dp"
                     app:strokeColor="#FFFFFF">
 
@@ -103,7 +103,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Họ và tên"
-                android:textColor="#666666"
+                android:textColor="#757575"
                 android:textSize="13sp"
                 android:layout_marginBottom="8dp" />
 
@@ -112,7 +112,12 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="20dp"
                 app:hintEnabled="false"
-                app:boxBackgroundMode="none">
+                app:boxBackgroundMode="outline"
+                app:boxCornerRadiusTopStart="5dp"
+                app:boxCornerRadiusTopEnd="5dp"
+                app:boxCornerRadiusBottomStart="5dp"
+                app:boxCornerRadiusBottomEnd="5dp"
+                app:boxStrokeColor="#757575">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/edit_profile_username"
@@ -123,7 +128,6 @@
                     android:textColor="#111111"
                     android:textSize="16sp"
                     android:textStyle="bold"
-                    android:background="@drawable/bg_bottom_line"
                     android:inputType="textPersonName" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -140,7 +144,12 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="20dp"
                 app:hintEnabled="false"
-                app:boxBackgroundMode="none">
+                app:boxBackgroundMode="outline"
+                app:boxCornerRadiusTopStart="5dp"
+                app:boxCornerRadiusTopEnd="5dp"
+                app:boxCornerRadiusBottomStart="5dp"
+                app:boxCornerRadiusBottomEnd="5dp"
+                app:boxStrokeColor="#757575">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/edit_profile_phone"
@@ -150,7 +159,6 @@
                     android:paddingVertical="12dp"
                     android:textColor="#111111"
                     android:textSize="16sp"
-                    android:background="@drawable/bg_bottom_line"
                     android:inputType="phone" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -167,7 +175,12 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="20dp"
                 app:hintEnabled="false"
-                app:boxBackgroundMode="none">
+                app:boxBackgroundMode="outline"
+                app:boxCornerRadiusTopStart="5dp"
+                app:boxCornerRadiusTopEnd="5dp"
+                app:boxCornerRadiusBottomStart="5dp"
+                app:boxCornerRadiusBottomEnd="5dp"
+                app:boxStrokeColor="#757575">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/edit_profile_birthdate"
@@ -177,7 +190,6 @@
                     android:paddingVertical="12dp"
                     android:textColor="#111111"
                     android:textSize="16sp"
-                    android:background="@drawable/bg_bottom_line"
                     android:focusable="false"
                     android:clickable="true"
                     android:inputType="none" />
@@ -196,7 +208,12 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="20dp"
                 app:hintEnabled="false"
-                app:boxBackgroundMode="none">
+                app:boxBackgroundMode="outline"
+                app:boxCornerRadiusTopStart="5dp"
+                app:boxCornerRadiusTopEnd="5dp"
+                app:boxCornerRadiusBottomStart="5dp"
+                app:boxCornerRadiusBottomEnd="5dp"
+                app:boxStrokeColor="#757575">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/edit_profile_email"
@@ -206,7 +223,6 @@
                     android:paddingVertical="12dp"
                     android:textColor="#999999"
                     android:textSize="16sp"
-                    android:background="@drawable/bg_bottom_line"
                     android:enabled="false"
                     android:inputType="textEmailAddress" />
             </com.google.android.material.textfield.TextInputLayout>
@@ -215,8 +231,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Giới tính"
-                android:textColor="#666666"
-                android:textSize="13sp"
+                android:textColor="#757575"
+                android:textSize="14dp"
                 android:layout_marginBottom="8dp" />
 
             <RadioGroup
@@ -224,22 +240,25 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
+
                 android:layout_marginBottom="32dp">
 
                 <RadioButton
                     android:id="@+id/rbMale"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textColor="#757575"
                     android:text="Nam"
                     android:layout_marginEnd="32dp"
-                    android:buttonTint="#FF7A1A" />
+                    app:buttonTint="@color/selector_radio" />
 
                 <RadioButton
                     android:id="@+id/rbFemale"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textColor="#757575"
                     android:text="Nữ"
-                    android:buttonTint="#FF7A1A" />
+                    app:buttonTint="@color/selector_radio" />
             </RadioGroup>
 
             <!-- Buttons -->
@@ -252,23 +271,23 @@
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:textColor="#FFFFFF"
-                app:backgroundTint="#FF7A1A"
+                app:backgroundTint="#A13345"
                 app:cornerRadius="12dp"
                 android:layout_marginBottom="16dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnChangePassword"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Chỉnh sửa lại mật khẩu"
+                android:layout_height="54dp"
+                android:text="Đổi mật khẩu"
                 android:textAllCaps="false"
-                android:textColor="#0B5ED7"
-                android:textSize="15sp"
-                android:backgroundTint="@android:color/transparent"
-                app:rippleColor="#100B5ED7"
-                app:elevation="0dp"
-                android:insetTop="0dp"
-                android:insetBottom="0dp" />
+                android:textColor="#A13345"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:backgroundTint="#FFFFFF"
+                app:strokeColor="#A13345"
+                app:strokeWidth="1dp"
+                app:cornerRadius="8dp"  />
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
