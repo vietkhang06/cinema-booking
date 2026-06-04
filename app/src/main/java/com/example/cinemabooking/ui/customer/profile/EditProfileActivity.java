@@ -1,6 +1,8 @@
 package com.example.cinemabooking.ui.customer.profile;
+import com.google.android.material.datepicker.CalendarConstraints;
+import com.google.android.material.datepicker.DateValidatorPointBackward;
+import com.google.android.material.datepicker.MaterialDatePicker;
 
-import android.app.DatePickerDialog;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -10,6 +12,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.util.Base64;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.PickVisualMediaRequest;
@@ -31,6 +34,11 @@ import com.google.android.material.textfield.TextInputEditText;
 import java.util.Calendar;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 
 public class EditProfileActivity extends AuthActivity {
 
@@ -95,17 +103,35 @@ public class EditProfileActivity extends AuthActivity {
     }
 
     private void showDatePicker() {
-        Calendar calendar = Calendar.getInstance();
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH);
-        int day = calendar.get(Calendar.DAY_OF_MONTH);
+        // 1. Tạo ràng buộc: Chỉ cho chọn ngày cách đây tối đa 15 năm về trước
+        Calendar constraintsCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        constraintsCalendar.add(Calendar.YEAR, -15);
+        long maxDateInMillis = constraintsCalendar.getTimeInMillis();
 
-        DatePickerDialog datePickerDialog = new DatePickerDialog(this, (view, year1, month1, dayOfMonth) -> {
-            String date = dayOfMonth + "/" + (month1 + 1) + "/" + year1;
-            birthdateTV.setText(date);
-        }, year, month, day);
-        datePickerDialog.show();
+        CalendarConstraints constraints = new CalendarConstraints.Builder()
+                .setValidator(DateValidatorPointBackward.before(maxDateInMillis))
+                .build();
+
+        // 2. Khởi tạo MaterialDatePicker và cấu hình chế độ nhập phím trực tiếp
+        MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder.datePicker()
+                .setTitleText("Chọn ngày sinh")
+                .setCalendarConstraints(constraints)
+                .setSelection(maxDateInMillis)
+                .setInputMode(MaterialDatePicker.INPUT_MODE_TEXT)
+                .build();
+
+        // 3. Lắng nghe sự kiện click nút OK
+        datePicker.addOnPositiveButtonClickListener(selection -> {
+            SimpleDateFormat sdf = new SimpleDateFormat("d/M/yyyy", Locale.US);
+            sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+            String formattedDate = sdf.format(new Date(selection));
+            birthdateTV.setText(formattedDate);
+        });
+
+        // 4. Hiển thị Dialog
+        datePicker.show(getSupportFragmentManager(), "MATERIAL_DATE_PICKER");
     }
+
 
     private void loadUserData() {
         User user = profileService.getCachedProfile();
@@ -124,7 +150,7 @@ public class EditProfileActivity extends AuthActivity {
         //Kiểm tra có sẵn avatar chưa
         if (user.avatarUrl != null && user.avatarUrl.startsWith("data:image")) {
             String base64Content = user.avatarUrl.substring(user.avatarUrl.indexOf(",") + 1);
-            byte[] imageBytes = android.util.Base64.decode(base64Content, android.util.Base64.DEFAULT);
+            byte[] imageBytes = Base64.decode(base64Content, Base64.DEFAULT);
             Glide.with(this)
                     .load(imageBytes)
                     .skipMemoryCache(true)
@@ -154,6 +180,33 @@ public class EditProfileActivity extends AuthActivity {
             showToast("Vui lòng nhập họ tên");
             return;
         }
+
+        if (!TextUtils.isEmpty(birthDate)) {
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat("d/M/yyyy", Locale.US);
+                sdf.setLenient(false);
+                Date dateOfBirth = sdf.parse(birthDate);
+                if (dateOfBirth != null) {
+                    Calendar dob = Calendar.getInstance();
+                    dob.setTime(dateOfBirth);
+                    Calendar today = Calendar.getInstance();
+
+                    int age = today.get(Calendar.YEAR) - dob.get(Calendar.YEAR);
+                    if (today.get(Calendar.DAY_OF_YEAR) < dob.get(Calendar.DAY_OF_YEAR)) {
+                        age--;
+                    }
+
+                    if (age < 16) {
+                        showToast("Bạn phải từ 16 tuổi trở lên");
+                        return;
+                    }
+                }
+            } catch (ParseException e) {
+                showToast("Ngày sinh không đúng định dạng");
+                return;
+            }
+        }
+
 
         loadingOverlay.setVisibility(View.VISIBLE);
 
