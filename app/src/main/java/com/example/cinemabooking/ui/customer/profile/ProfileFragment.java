@@ -102,11 +102,22 @@ public class ProfileFragment extends Fragment {
                     tvMemberLevel.setText(profileData.memberLevel != null ? profileData.memberLevel : "Basic");
                 }
 
-                Glide.with(ProfileFragment.this)
-                        .load(profileData.avatarUrl != null ? profileData.avatarUrl : R.drawable.user_solid_full)
-                        .circleCrop()
-                        .placeholder(R.drawable.user_solid_full)
-                        .into(profileAvatar);
+                if (profileData.avatarUrl != null && profileData.avatarUrl.startsWith("data:image")) {
+                    String base64Content = profileData.avatarUrl.substring(profileData.avatarUrl.indexOf(",") + 1);
+                    byte[] imageBytes = android.util.Base64.decode(base64Content, android.util.Base64.DEFAULT);
+                    Glide.with(ProfileFragment.this)
+                            .load(imageBytes)
+                            .circleCrop()
+                            .placeholder(R.drawable.user_solid_full)
+                            .into(profileAvatar);
+                } else {
+                    Glide.with(ProfileFragment.this)
+                            .load(profileData.avatarUrl != null ? profileData.avatarUrl : R.drawable.user_solid_full)
+                            .circleCrop()
+                            .placeholder(R.drawable.user_solid_full)
+                            .into(profileAvatar);
+                }
+
 
                 loadUserSpendingMilestone();
             }

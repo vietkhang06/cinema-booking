@@ -40,7 +40,7 @@ public class UploadService {
             byte[] byteArray = byteArrayOutputStream.toByteArray();
 
             // 4. Chuyển sang chuỗi Base64 với tiền tố data:image/jpeg;base64,
-            String base64Image = Base64.encodeToString(byteArray, Base64.DEFAULT);
+            String base64Image = Base64.encodeToString(byteArray, Base64.NO_WRAP);
             
             // Giải phóng bộ nhớ
             originalBitmap.recycle();
