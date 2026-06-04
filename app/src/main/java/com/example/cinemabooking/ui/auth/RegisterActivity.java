@@ -1,6 +1,5 @@
 package com.example.cinemabooking.ui.auth;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -8,10 +7,15 @@ import android.util.Patterns;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+import androidx.credentials.Credential;
+import androidx.credentials.CredentialManager;
+import androidx.credentials.CredentialManagerCallback;
+import androidx.credentials.GetCredentialRequest;
+import androidx.credentials.GetCredentialResponse;
+import androidx.credentials.exceptions.GetCredentialException;
 
 import com.example.cinemabooking.R;
-import com.example.cinemabooking.config.auth.FacebookAuthProviderConfig;
 import com.example.cinemabooking.core.base.BaseActivity;
 import com.example.cinemabooking.core.navigation.AppNavigator;
 import com.example.cinemabooking.di.ServiceProvider;
@@ -23,16 +27,14 @@ import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.tasks.Task;
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption;
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+
+import java.util.Arrays;
 
 public class RegisterActivity extends BaseActivity {
 
@@ -49,20 +51,18 @@ public class RegisterActivity extends BaseActivity {
     // Facebook
     private CallbackManager callbackManager;
 
-    // Google
-    private GoogleSignInClient googleSignInClient;
-    private static final int RC_SIGN_IN = 1001;
+    // Google (Credential Manager)
+    private CredentialManager credentialManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        com.facebook.FacebookSdk.sdkInitialize(getApplicationContext());
         setContentView(R.layout.activity_register);
 
         authService = ServiceProvider.getInstance().getAuthenticationService();
 
+        credentialManager = CredentialManager.create(this);
         initViews();
-        initGoogle();
         initFacebook();
         bindActions();
     }
@@ -85,25 +85,15 @@ public class RegisterActivity extends BaseActivity {
         btnFacebook = findViewById(R.id.btnFacebook);
     }
 
-    private void initGoogle() {
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
-                .requestEmail()
-                .build();
-
-        googleSignInClient = GoogleSignIn.getClient(this, gso);
-    }
-
     private void initFacebook() {
         callbackManager = CallbackManager.Factory.create();
-
-        LoginManager.getInstance().registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
+        LoginManager.getInstance().registerCallback(callbackManager, new FacebookCallback<>() {
             @Override
             public void onSuccess(LoginResult result) {
                 authService.handleFacebookAccessToken(result.getAccessToken(), new AuthCallback() {
                     @Override
                     public void onSuccess(User data) {
-                        //AppNavigator.goToCustomerHome(RegisterActivity.this);
+                        AppNavigator.goToHomeByRole(RegisterActivity.this, data.role);
                     }
 
                     @Override
@@ -117,8 +107,8 @@ public class RegisterActivity extends BaseActivity {
             public void onCancel() {}
 
             @Override
-            public void onError(FacebookException error) {
-                Log.e("FacebookAuth", error.getMessage());
+            public void onError(@NonNull FacebookException error) {
+                Log.e("FacebookAuth", String.valueOf(error.getMessage()));
             }
         });
     }
@@ -176,8 +166,9 @@ public class RegisterActivity extends BaseActivity {
         authService.signUpWithEmailAndPassword(email, password, phone, new AuthCallback() {
             @Override
             public void onSuccess(User data) {
-                showToast("Đăng ký thành công");
-                //AppNavigator.goToCustomerHome(RegisterActivity.this);
+                showToast("Đăng ký thành công! Vui lòng đăng nhập.");
+                // Chuyển về LoginActivity, xóa RegisterActivity khỏi back stack
+                AppNavigator.goToLogin(RegisterActivity.this);
             }
 
             @Override
@@ -189,47 +180,54 @@ public class RegisterActivity extends BaseActivity {
     }
 
     private void signInWithFacebook() {
-        FacebookAuthProviderConfig config = new FacebookAuthProviderConfig();
-
-        LoginManager.getInstance().logInWithReadPermissions(
-                this,
-                config.getFacebookReadPermissions()
-        );
+        LoginManager.getInstance().logIn(this, callbackManager,
+                Arrays.asList("email", "public_profile"));
     }
 
     private void signInWithGoogle() {
-        Intent intent = googleSignInClient.getSignInIntent();
-        startActivityForResult(intent, RC_SIGN_IN);
+        GetGoogleIdOption googleIdOption = new GetGoogleIdOption.Builder()
+                .setFilterByAuthorizedAccounts(false)
+                .setServerClientId(getString(R.string.default_web_client_id))
+                .build();
+
+        GetCredentialRequest request = new GetCredentialRequest.Builder()
+                .addCredentialOption(googleIdOption)
+                .build();
+
+        credentialManager.getCredentialAsync(
+                this, request, null,
+                ContextCompat.getMainExecutor(this),
+                new CredentialManagerCallback<GetCredentialResponse, GetCredentialException>() {
+                    @Override
+                    public void onResult(GetCredentialResponse result) {
+                        handleGoogleCredential(result.getCredential());
+                    }
+
+                    @Override
+                    public void onError(@NonNull GetCredentialException e) {
+                        showToast("Đăng nhập Google thất bại. Vui lòng thử lại.");
+                    }
+                }
+        );
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        callbackManager.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == RC_SIGN_IN) {
-            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-
-            try {
-                GoogleSignInAccount account = task.getResult(ApiException.class);
-
-                authService.signInWithGoogle(account.getIdToken(), new AuthCallback() {
-                    @Override
-                    public void onSuccess(User user) {
-                        //AppNavigator.goToCustomerHome(RegisterActivity.this);
-                    }
-
-                    @Override
-                    public void onError(String message) {
-                        showToast(message);
-                    }
-                });
-
-            } catch (ApiException e) {
-                Log.e("GoogleAuth", "Login failed", e);
-            }
+    private void handleGoogleCredential(Credential credential) {
+        if (!(credential instanceof GoogleIdTokenCredential)) {
+            showToast("Không thể đăng nhập Google");
+            return;
         }
+        String idToken = ((GoogleIdTokenCredential) credential).getIdToken();
+        authService.signInWithGoogle(idToken, new AuthCallback() {
+            @Override
+            public void onSuccess(User user) {
+                AppNavigator.goToHomeByRole(RegisterActivity.this, user.role);
+            }
+
+            @Override
+            public void onError(String message) {
+                showToast(message);
+            }
+        });
     }
 
     private void clearErrors() {
