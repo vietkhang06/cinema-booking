@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="88dp"
+    android:background="@android:color/transparent"
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:paddingStart="6dp"
+    android:paddingEnd="6dp"
+    android:paddingBottom="12dp">
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/bottomNavRoot"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:layout_gravity="bottom"
+        app:cardBackgroundColor="#FFFFFF"
+        app:cardCornerRadius="28dp"
+        app:cardElevation="10dp"
+        app:strokeColor="#12000000"
+        app:strokeWidth="1dp">
+
+        <LinearLayout
+            android:id="@+id/bottomNavContainer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="7dp"
+            android:paddingTop="8dp"
+            android:paddingEnd="7dp"
+            android:paddingBottom="8dp">
+
+            <!-- 1. Tổng quan -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/navStaffHomeCard"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                app:cardCornerRadius="24dp"
+                app:cardBackgroundColor="#1E1A23"
+                app:strokeWidth="0dp"
+                app:rippleColor="#22000000">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="14dp">
+
+                    <ImageView
+                        android:id="@+id/navStaffHomeIcon"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/house_user_solid_full"
+                        app:tint="#FFFFFF" />
+
+                    <TextView
+                        android:id="@+id/navStaffHomeLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:paddingStart="0dp"
+                        android:paddingEnd="8dp"
+                        android:text="Tổng quan"
+                        android:textColor="#FFFFFF"
+                        android:textSize="14sp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- 2. Quét QR -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/navStaffScanCard"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_marginHorizontal="4dp"
+                android:layout_weight="0.8"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="24dp"
+                app:strokeColor="#D3CAD7"
+                app:strokeWidth="1dp"
+                app:rippleColor="#22000000">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="14dp">
+
+                    <ImageView
+                        android:id="@+id/navStaffScanIcon"
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:src="@drawable/ic_scan_qr"
+                        app:tint="#4A4650" />
+
+                    <TextView
+                        android:id="@+id/navStaffScanLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:paddingStart="0dp"
+                        android:paddingEnd="8dp"
+                        android:text="Quét QR"
+                        android:textColor="#1E1A23"
+                        android:textSize="14sp"
+                        android:visibility="gone" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- 3. Thông báo -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/navStaffNotifCard"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_marginHorizontal="4dp"
+                android:layout_weight="0.8"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="24dp"
+                app:strokeColor="#D3CAD7"
+                app:strokeWidth="1dp"
+                app:rippleColor="#22000000">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="14dp">
+
+                    <ImageView
+                        android:id="@+id/navStaffNotifIcon"
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:src="@drawable/ic_notification"
+                        app:tint="#4A4650" />
+
+                    <TextView
+                        android:id="@+id/navStaffNotifLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:paddingStart="0dp"
+                        android:paddingEnd="8dp"
+                        android:text="Thông báo"
+                        android:textColor="#1E1A23"
+                        android:textSize="14sp"
+                        android:visibility="gone" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- 4. Tài khoản/Cài đặt -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/navStaffProfileCard"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_marginHorizontal="4dp"
+                android:layout_weight="0.8"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="24dp"
+                app:strokeColor="#D3CAD7"
+                app:strokeWidth="1dp"
+                app:rippleColor="#22000000">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="14dp">
+
+                    <ImageView
+                        android:id="@+id/navStaffProfileIcon"
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:src="@drawable/gear_solid_full"
+                        app:tint="#4A4650" />
+
+                    <TextView
+                        android:id="@+id/navStaffProfileLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:paddingStart="0dp"
+                        android:paddingEnd="8dp"
+                        android:text="Cài đặt"
+                        android:textColor="#1E1A23"
+                        android:textSize="14sp"
+                        android:visibility="gone" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+</FrameLayout>

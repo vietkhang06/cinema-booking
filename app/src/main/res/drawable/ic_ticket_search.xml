@@ -1,0 +1,28 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="576"
+    android:viewportHeight="576">
+
+    <!-- Ticket Path (scaled and offset to top-left) -->
+    <group
+        android:scaleX="0.75"
+        android:scaleY="0.75"
+        android:translateX="30"
+        android:translateY="40">
+        <path
+            android:fillColor="#FF000000"
+            android:pathData="M128 160h320v192H128V160zm400 96c0 26.51 21.49 48 48 48v96c0 26.51-21.49 48-48 48H48c-26.51 0-48-21.49-48-48v-96c26.51 0 48-21.49 48-48s-21.49-48-48-48v-96c0-26.51 21.49-48 48-48h480c26.51 0 48 21.49 48 48v96c0 26.51-21.49 48-48 48z"/>
+    </group>
+
+    <!-- Magnifying Glass Path (scaled and offset to bottom-right) -->
+    <group
+        android:scaleX="0.5"
+        android:scaleY="0.5"
+        android:translateX="260"
+        android:translateY="240">
+        <path
+            android:fillColor="#FF000000"
+            android:pathData="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"/>
+    </group>
+</vector>
