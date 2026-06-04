@@ -1,12 +1,17 @@
 package com.example.cinemabooking.ui.auth;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Patterns;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+import androidx.credentials.Credential;
+import androidx.credentials.CredentialManager;
+import androidx.credentials.CredentialManagerCallback;
+import androidx.credentials.GetCredentialRequest;
+import androidx.credentials.GetCredentialResponse;
+import androidx.credentials.exceptions.GetCredentialException;
 
 import com.example.cinemabooking.R;
 import com.example.cinemabooking.core.base.BaseActivity;
@@ -20,12 +25,8 @@ import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.tasks.Task;
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption;
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.textfield.TextInputEditText;
@@ -38,8 +39,6 @@ public class LoginActivity extends BaseActivity {
     /** Khi true: login xong thì finish() về màn hình trước thay vì go to Home */
     public static final String EXTRA_FROM_BOOKING = "from_booking";
 
-    private static final int RC_SIGN_IN = 1001;
-
     private boolean fromBooking = false;
 
     private TextInputLayout tilEmail, tilPassword;
@@ -48,7 +47,7 @@ public class LoginActivity extends BaseActivity {
     private MaterialCheckBox cbRemember;
 
     private AuthenticationService authService;
-    private GoogleSignInClient googleSignInClient;
+    private CredentialManager credentialManager;
     private CallbackManager callbackManager;
 
     @Override
@@ -62,11 +61,11 @@ public class LoginActivity extends BaseActivity {
                 .getInstance(getApplicationContext())
                 .getAuthenticationService();
 
+        credentialManager = CredentialManager.create(this);
         initViews();
-        initGoogle();
         initFacebook();
         bindActions();
-        loadRememberedEmail();
+        loadRememberedCredentials();
     }
 
     private void initViews() {
@@ -78,17 +77,35 @@ public class LoginActivity extends BaseActivity {
         cbRemember = findViewById(R.id.cbRemember);
     }
 
-    private void initGoogle() {
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
-                .requestEmail()
-                .build();
-
-        googleSignInClient = GoogleSignIn.getClient(this, gso);
-    }
-
     private void initFacebook() {
         callbackManager = CallbackManager.Factory.create();
+        LoginManager.getInstance().registerCallback(callbackManager, new FacebookCallback<>() {
+            @Override
+            public void onSuccess(LoginResult result) {
+                authService.handleFacebookAccessToken(result.getAccessToken(), new AuthCallback() {
+                    @Override
+                    public void onSuccess(User user) {
+                        if (fromBooking) finish();
+                        else AppNavigator.goToHomeByRole(LoginActivity.this, user.role);
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        showToast(message);
+                    }
+                });
+            }
+
+            @Override
+            public void onCancel() {
+                showToast("Huỷ đăng nhập Facebook");
+            }
+
+            @Override
+            public void onError(@NonNull FacebookException error) {
+                showToast(String.valueOf(error.getMessage()));
+            }
+        });
     }
 
     private void bindActions() {
@@ -110,11 +127,16 @@ public class LoginActivity extends BaseActivity {
                 .setOnClickListener(v -> showToast("Apple chưa hỗ trợ"));
     }
 
-    private void loadRememberedEmail() {
-        String saved = sessionManager.getRememberedEmail();
-        if (!saved.isEmpty()) {
-            edtEmail.setText(saved);
+    /** Điền sẵn email + password nếu người dùng đã tick "Nhớ mật khẩu" lần trước */
+    private void loadRememberedCredentials() {
+        String savedEmail    = sessionManager.getRememberedEmail();
+        String savedPassword = sessionManager.getRememberedPassword();
+        if (!savedEmail.isEmpty()) {
+            edtEmail.setText(savedEmail);
             cbRemember.setChecked(true);
+        }
+        if (!savedPassword.isEmpty()) {
+            edtPassword.setText(savedPassword);
         }
     }
 
@@ -149,8 +171,17 @@ public class LoginActivity extends BaseActivity {
                     @Override
                     public void onSuccess(User user) {
                         btnLogin.setEnabled(true);
+
+                        // Lưu hoặc xóa credentials theo trạng thái checkbox
+                        if (cbRemember.isChecked()) {
+                            sessionManager.saveRememberedEmail(email);
+                            sessionManager.saveRememberedPassword(password);
+                        } else {
+                            sessionManager.clearRememberedEmail();
+                            sessionManager.clearRememberedPassword();
+                        }
+
                         if (fromBooking) {
-                            // Từ màn hình đặt vé → quay lại màn hình trước
                             finish();
                         } else {
                             AppNavigator.goToHomeByRole(LoginActivity.this, user.role);
@@ -167,52 +198,55 @@ public class LoginActivity extends BaseActivity {
     }
 
     private void startGoogleLogin() {
-        Intent intent = googleSignInClient.getSignInIntent();
-        startActivityForResult(intent, RC_SIGN_IN);
-    }
+        GetGoogleIdOption googleIdOption = new GetGoogleIdOption.Builder()
+                .setFilterByAuthorizedAccounts(false)
+                .setServerClientId(getString(R.string.default_web_client_id))
+                .build();
 
-    private void startFacebookLogin() {
-        LoginManager.getInstance().logInWithReadPermissions(
-                this,
-                Arrays.asList("email", "public_profile")
-        );
+        GetCredentialRequest request = new GetCredentialRequest.Builder()
+                .addCredentialOption(googleIdOption)
+                .build();
 
-        LoginManager.getInstance().registerCallback(
-                callbackManager,
-                new FacebookCallback<LoginResult>() {
+        credentialManager.getCredentialAsync(
+                this, request, null,
+                ContextCompat.getMainExecutor(this),
+                new CredentialManagerCallback<GetCredentialResponse, GetCredentialException>() {
                     @Override
-                    public void onSuccess(LoginResult result) {
-                        authService.handleFacebookAccessToken(
-                                result.getAccessToken(),
-                                new AuthCallback() {
-                                    @Override
-                                    public void onSuccess(User user) {
-                                        if (fromBooking) {
-                                            finish();
-                                        } else {
-                                            AppNavigator.goToHomeByRole(LoginActivity.this, user.role);
-                                        }
-                                    }
-
-                                    @Override
-                                    public void onError(String message) {
-                                        showToast(message);
-                                    }
-                                }
-                        );
+                    public void onResult(GetCredentialResponse result) {
+                        handleGoogleCredential(result.getCredential());
                     }
 
                     @Override
-                    public void onCancel() {
-                        showToast("Huỷ đăng nhập Facebook");
-                    }
-
-                    @Override
-                    public void onError(FacebookException error) {
-                        showToast(error.getMessage());
+                    public void onError(@NonNull GetCredentialException e) {
+                        showToast("Đăng nhập Google thất bại. Vui lòng thử lại.");
                     }
                 }
         );
+    }
+
+    private void handleGoogleCredential(Credential credential) {
+        if (!(credential instanceof GoogleIdTokenCredential)) {
+            showToast("Không thể đăng nhập Google");
+            return;
+        }
+        String idToken = ((GoogleIdTokenCredential) credential).getIdToken();
+        authService.signInWithGoogle(idToken, new AuthCallback() {
+            @Override
+            public void onSuccess(User user) {
+                if (fromBooking) finish();
+                else AppNavigator.goToHomeByRole(LoginActivity.this, user.role);
+            }
+
+            @Override
+            public void onError(String message) {
+                showToast(message);
+            }
+        });
+    }
+
+    private void startFacebookLogin() {
+        LoginManager.getInstance().logIn(this, callbackManager,
+                Arrays.asList("email", "public_profile"));
     }
 
     private void clearErrors() {
@@ -225,41 +259,4 @@ public class LoginActivity extends BaseActivity {
         return edt.getText() == null ? "" : edt.getText().toString().trim();
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        callbackManager.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == RC_SIGN_IN) {
-            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-            try {
-                GoogleSignInAccount account = task.getResult(ApiException.class);
-
-                if (account == null || account.getIdToken() == null) {
-                    showToast("Google login failed");
-                    return;
-                }
-
-                authService.signInWithGoogle(account.getIdToken(), new AuthCallback() {
-                    @Override
-                    public void onSuccess(User user) {
-                        if (fromBooking) {
-                            finish();
-                        } else {
-                            AppNavigator.goToHomeByRole(LoginActivity.this, user.role);
-                        }
-                    }
-
-                    @Override
-                    public void onError(String message) {
-                        showToast(message);
-                    }
-                });
-
-            } catch (ApiException e) {
-                showToast("Google login failed");
-            }
-        }
-    }
 }

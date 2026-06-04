@@ -17,6 +17,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.widget.NestedScrollView;
 
@@ -48,6 +49,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+@SuppressWarnings("SpellCheckingInspection")
 public class MovieDetailActivity extends BaseActivity {
 
     public static final String EXTRA_MOVIE_ID = "extra_movie_id";
@@ -70,7 +72,6 @@ public class MovieDetailActivity extends BaseActivity {
     public static final String EXTRA_BOOKING_ROOM_TYPE = "extra_booking_room_type";
     public static final String EXTRA_BOOKING_SHOWTIME = "extra_booking_showtime";
 
-    private NestedScrollView scrollMovieDetail;
 
     private ImageView imgHeroBackdrop;
     private ImageView imgPosterThumb;
@@ -140,8 +141,7 @@ public class MovieDetailActivity extends BaseActivity {
     }
 
     private void initViews() {
-        scrollMovieDetail = findViewById(R.id.scrollMovieDetail);
-
+        // scrollMovieDetail (đã xóa — không dùng)
         imgHeroBackdrop = findViewById(R.id.imgHeroBackdrop);
         imgPosterThumb = findViewById(R.id.imgPosterThumb);
 
@@ -203,10 +203,10 @@ public class MovieDetailActivity extends BaseActivity {
 
         tvMovieTitle.setText(title);
         tvMovieTagline.setText(tagline);
-        tvRating.setText("★ " + rating);
+        tvRating.setText(String.format("★ %s", rating));
         tvAgeRating.setText(ageRating);
-        tvDuration.setText("⏱ " + duration);
-        tvReleaseDate.setText("📅 " + releaseDate);
+        tvDuration.setText(String.format("⏱ %s", duration));
+        tvReleaseDate.setText(String.format("📅 %s", releaseDate));
         tvSynopsis.setText(description);
         selectedMoviePosterUrl = posterUrl;
         loadImage(posterUrl);
@@ -226,7 +226,7 @@ public class MovieDetailActivity extends BaseActivity {
             }
 
             @Override
-            public void onError(String errorMessage) {
+            public void onError(@NonNull String errorMessage) {
                 // giữ fallback từ intent
             }
         });
@@ -241,7 +241,7 @@ public class MovieDetailActivity extends BaseActivity {
 
         cinemaRepository.getAllCinemas(new ResultCallback<List<Cinema>>() {
             @Override
-            public void onSuccess(List<Cinema> cinemas) {
+            public void onSuccess(@NonNull List<Cinema> cinemas) {
                 cinemaMap.clear();
                 for (Cinema c : cinemas) {
                     if (c.cinemaId != null) cinemaMap.put(c.cinemaId, c);
@@ -251,7 +251,7 @@ public class MovieDetailActivity extends BaseActivity {
             }
 
             @Override
-            public void onError(String message) {
+            public void onError(@NonNull String message) {
                 // Ngay cả khi cinema load lỗi, vẫn tiếp tục load showtime với cinemaMap hiện tại
                 Log.w("MovieDetail", "Error loading cinemas (will proceed anyway): " + message);
                 loadShowtimesForMovie();
@@ -262,7 +262,7 @@ public class MovieDetailActivity extends BaseActivity {
     private void loadShowtimesForMovie() {
         showtimeRepository.getShowtimesByMovieId(selectedMovieId, new ResultCallback<List<Showtime>>() {
             @Override
-            public void onSuccess(List<Showtime> showtimes) {
+            public void onSuccess(@NonNull List<Showtime> showtimes) {
                 Log.d("MovieDetail", "Showtimes loaded: " + showtimes.size() + " for movieId=" + selectedMovieId);
 
                 // Nếu cinemaMap rỗng nhưng có showtimes, tạo placeholder Cinema từ cinemaId
@@ -317,7 +317,7 @@ public class MovieDetailActivity extends BaseActivity {
             }
 
             @Override
-            public void onError(String message) {
+            public void onError(@NonNull String message) {
                 Log.e("MovieDetail", "Error loading showtimes: " + message);
             }
         });
@@ -333,12 +333,12 @@ public class MovieDetailActivity extends BaseActivity {
 
         tvMovieTitle.setText(safe(movie.title, tvMovieTitle.getText().toString()));
         tvMovieTagline.setText(buildTagline(movie));
-        tvRating.setText("★ " + formatRating(movie.ratingAvg));
+        tvRating.setText(String.format("★ %s", formatRating(movie.ratingAvg)));
         tvAgeRating.setText(safe(movie.ageRating, "T13"));
-        tvDuration.setText("⏱ " + movie.durationMinutes + " phút");
+        tvDuration.setText(String.format("⏱ %d phút", movie.durationMinutes));
 
         if (movie.releaseDate > 0) {
-            tvReleaseDate.setText("📅 " + formatReleaseDate(movie.releaseDate));
+            tvReleaseDate.setText(String.format("📅 %s", formatReleaseDate(movie.releaseDate)));
         }
 
         tvSynopsis.setText(safe(movie.description, tvSynopsis.getText().toString()));
@@ -390,9 +390,9 @@ public class MovieDetailActivity extends BaseActivity {
     }
 
     private ArrayAdapter<String> createCenteredAdapter(List<String> values) {
-        return new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, values) {
+        return new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, values) {
             @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
+            public View getView(int position, View convertView, @NonNull ViewGroup parent) {
                 TextView tv = (TextView) super.getView(position, convertView, parent);
                 tv.setGravity(Gravity.CENTER);
                 tv.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
@@ -400,7 +400,7 @@ public class MovieDetailActivity extends BaseActivity {
             }
 
             @Override
-            public View getDropDownView(int position, View convertView, ViewGroup parent) {
+            public View getDropDownView(int position, View convertView, @NonNull ViewGroup parent) {
                 TextView tv = (TextView) super.getDropDownView(position, convertView, parent);
                 tv.setGravity(Gravity.CENTER);
                 tv.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
@@ -731,32 +731,6 @@ public class MovieDetailActivity extends BaseActivity {
         renderCinemaGroups();
     }
 
-    private void ensureSectionExpanded(String cinemaName) {
-        List<CinemaSection> sections = scheduleCatalog.getCinemas(selectedCity);
-        if (sections == null) {
-            return;
-        }
-
-        for (CinemaSection section : sections) {
-            section.expanded = section.name.equals(cinemaName);
-        }
-    }
-
-    private void ensureCitySelectionFor(String city) {
-        List<String> cinemaNames = scheduleCatalog.getCinemaNames(city);
-        if (cinemaNames.isEmpty()) {
-            selectedCinema = "";
-            selectedRoomType = "";
-            selectedShowtime = "";
-            return;
-        }
-
-        selectedCinema = cinemaNames.get(0);
-        selectedRoomType = getFirstRoomType(city, selectedCinema);
-        selectedShowtime = getFirstShowtime(city, selectedCinema, selectedRoomType);
-        scheduleCatalog.setExpandedCinema(city, selectedCinema);
-    }
-
     private void setupTabs() {
         toggleSections.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
             if (!isChecked) {
@@ -859,19 +833,19 @@ public class MovieDetailActivity extends BaseActivity {
     }
 
     private void prepareBookingPayload() {
-        // 1. Kiểm tra đã chọn đủ thông tin chưa
+        // 1. Kiểm tra đăng nhập trước
+        if (com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() == null) {
+            showLoginRequiredDialog();
+            return;
+        }
+
+        // 2. Kiểm tra đã chọn đủ thông tin chưa
         if (selectedShowtimeItem == null
                 || TextUtils.isEmpty(selectedCity)
                 || TextUtils.isEmpty(selectedCinema)
                 || TextUtils.isEmpty(selectedDateText)
                 || TextUtils.isEmpty(selectedShowtime)) {
             showToast("Hãy chọn đầy đủ rạp, ngày và suất chiếu");
-            return;
-        }
-
-        // 2. Kiểm tra đăng nhập
-        if (com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() == null) {
-            showLoginRequiredDialog();
             return;
         }
 
@@ -885,19 +859,6 @@ public class MovieDetailActivity extends BaseActivity {
         intent.putExtra(SeatSelectionActivity.EXTRA_BASE_PRICE, selectedShowtimeItem.basePrice);
         intent.putExtra(SeatSelectionActivity.EXTRA_MOVIE_ID, selectedMovieId);
         startActivity(intent);
-    }
-
-    public Intent buildBookingPayloadIntent() {
-        Intent bookingResult = new Intent();
-        bookingResult.putExtra(EXTRA_BOOKING_MOVIE_ID, selectedMovieId);
-        bookingResult.putExtra(EXTRA_BOOKING_MOVIE_TITLE, tvMovieTitle.getText().toString());
-        bookingResult.putExtra(EXTRA_BOOKING_CITY, selectedCity);
-        bookingResult.putExtra(EXTRA_BOOKING_CINEMA, selectedCinema);
-        bookingResult.putExtra(EXTRA_BOOKING_DATE_LABEL, selectedDateLabel);
-        bookingResult.putExtra(EXTRA_BOOKING_DATE_TEXT, selectedDateText);
-        bookingResult.putExtra(EXTRA_BOOKING_ROOM_TYPE, selectedRoomType);
-        bookingResult.putExtra(EXTRA_BOOKING_SHOWTIME, selectedShowtime);
-        return bookingResult;
     }
 
     private String buildTagline(Movie movie) {

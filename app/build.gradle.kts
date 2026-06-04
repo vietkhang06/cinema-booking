@@ -70,23 +70,37 @@ dependencies {
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 
-    implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
-    implementation("com.google.firebase:firebase-auth")
-    implementation("com.google.firebase:firebase-firestore")
-    implementation("com.google.firebase:firebase-storage")
+    // Firebase (BOM quản lý version cho tất cả firebase-* libs)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
+    implementation(libs.firebase.storage)
 
-    implementation("com.google.android.gms:play-services-auth:20.7.0")
+    // Google
+    implementation(libs.play.services.auth)
+    implementation(libs.play.services.code.scanner)
 
-    implementation("com.facebook.android:facebook-login:16.3.0")
+    // Facebook
+    implementation(libs.facebook.login)
 
-    implementation("com.github.bumptech.glide:glide:4.16.0")
-    annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
+    // Image loading
+    implementation(libs.glide)
+    annotationProcessor(libs.glide.compiler)
 
-    implementation("com.google.zxing:core:3.5.3")
-    implementation("com.google.zxing:javase:3.5.3")
-    implementation("com.google.android.gms:play-services-code-scanner:16.1.0")
+    // QR / Barcode
+    implementation(libs.zxing.core)
+    implementation(libs.zxing.javase)
 
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
+    // Networking
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.gson)
+    implementation(libs.okhttp.logging)
+
+    // Lưu password an toàn bằng EncryptedSharedPreferences
+    implementation(libs.security.crypto)
+
+    // Credential Manager — thay thế GoogleSignIn deprecated
+    implementation(libs.credentials)
+    implementation(libs.credentials.play.services.auth)
+    implementation(libs.google.identity)
 }
