@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingVertical="8dp"
+    android:paddingHorizontal="4dp"
+    android:background="?android:attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true">
+
+    <!-- Circle Icon Card -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cv_log_icon_bg"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        app:cardCornerRadius="18dp"
+        app:cardElevation="0dp"
+        app:strokeWidth="0dp"
+        app:cardBackgroundColor="#E8F5E9">
+
+        <ImageView
+            android:id="@+id/iv_log_icon"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_check"
+            app:tint="#4CAF50" />
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Details -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginStart="12dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tv_log_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="VE #123456 (P03 - Avengers)"
+            android:textColor="#1E1A23"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+        <TextView
+            android:id="@+id/tv_log_subtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Quét bởi: Staff 01"
+            android:textColor="#7A757F"
+            android:textSize="11sp"
+            android:layout_marginTop="2dp"
+            android:maxLines="1"
+            android:ellipsize="end" />
+    </LinearLayout>
+
+    <!-- Timestamp -->
+    <TextView
+        android:id="@+id/tv_log_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="09:20:15"
+        android:textColor="#7A757F"
+        android:textSize="11sp"
+        android:layout_marginEnd="8dp" />
+
+    <!-- Chevron -->
+    <ImageView
+        android:layout_width="14dp"
+        android:layout_height="14dp"
+        android:src="@drawable/ic_arrow_next"
+        app:tint="#D3CAD7"
+        android:contentDescription="Detail arrow" />
+</LinearLayout>
