@@ -300,6 +300,8 @@ public class MovieDetailActivity extends BaseActivity {
                         if (!cinemasInCity.isEmpty()) {
                             selectedCinema = cinemasInCity.get(0);
                             scheduleCatalog.setExpandedCinema(selectedCity, selectedCinema);
+                            selectedRoomType = getFirstRoomType(selectedCity, selectedCinema);
+                            selectedShowtime = getFirstShowtime(selectedCity, selectedCinema, selectedRoomType);
                         }
                     }
                 } else {
@@ -377,13 +379,16 @@ public class MovieDetailActivity extends BaseActivity {
         actvCinema.setOnClickListener(v -> actvCinema.showDropDown());
 
         actvCity.setOnItemClickListener((parent, view, position, id) -> {
-            String city = scheduleCatalog.getCityNames().get(position);
-            onCitySelected(city);
+            List<String> cities = scheduleCatalog.getCityNames();
+            if (cities != null && position >= 0 && position < cities.size()) {
+                String city = cities.get(position);
+                onCitySelected(city);
+            }
         });
 
         actvCinema.setOnItemClickListener((parent, view, position, id) -> {
             List<String> cinemas = scheduleCatalog.getCinemaNames(selectedCity);
-            if (position >= 0 && position < cinemas.size()) {
+            if (cinemas != null && position >= 0 && position < cinemas.size()) {
                 onCinemaSelected(cinemas.get(position));
             }
         });
@@ -602,64 +607,68 @@ public class MovieDetailActivity extends BaseActivity {
             content.setOrientation(LinearLayout.VERTICAL);
             content.setVisibility(expanded ? View.VISIBLE : View.GONE);
 
-            for (ShowtimeGroup group : section.groups) {
-                TextView groupTitle = new TextView(this);
-                LinearLayout.LayoutParams groupParams = new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.WRAP_CONTENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                );
-                groupParams.setMargins(0, dp(14), 0, 0);
-                groupTitle.setLayoutParams(groupParams);
-                groupTitle.setText(group.title);
-                groupTitle.setTextColor(Color.parseColor("#111111"));
-                groupTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f);
-                groupTitle.setTypeface(groupTitle.getTypeface(), Typeface.BOLD);
+            if (section.groups != null) {
+                for (ShowtimeGroup group : section.groups) {
+                    if (group == null) continue;
+                    TextView groupTitle = new TextView(this);
+                    LinearLayout.LayoutParams groupParams = new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT
+                    );
+                    groupParams.setMargins(0, dp(14), 0, 0);
+                    groupTitle.setLayoutParams(groupParams);
+                    groupTitle.setText(group.title);
+                    groupTitle.setTextColor(Color.parseColor("#111111"));
+                    groupTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f);
+                    groupTitle.setTypeface(groupTitle.getTypeface(), Typeface.BOLD);
 
-                content.addView(groupTitle);
+                    content.addView(groupTitle);
 
-                LinearLayout rows = new LinearLayout(this);
-                rows.setOrientation(LinearLayout.VERTICAL);
-                rows.setLayoutParams(new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                ));
-
-                List<MovieDetailScheduleCatalog.ShowtimeItem> times = group.showtimes;
-                for (int start = 0; start < times.size(); start += 4) {
-                    LinearLayout row = new LinearLayout(this);
-                    row.setOrientation(LinearLayout.HORIZONTAL);
-                    row.setLayoutParams(new LinearLayout.LayoutParams(
+                    LinearLayout rows = new LinearLayout(this);
+                    rows.setOrientation(LinearLayout.VERTICAL);
+                    rows.setLayoutParams(new LinearLayout.LayoutParams(
                             LinearLayout.LayoutParams.MATCH_PARENT,
                             LinearLayout.LayoutParams.WRAP_CONTENT
                     ));
 
-                    int end = Math.min(start + 4, times.size());
-                    for (int t = start; t < end; t++) {
-                        MovieDetailScheduleCatalog.ShowtimeItem item = times.get(t);
-                        MaterialButton timeButton = buildTimeButton(item, section.name, group.title);
-                        LinearLayout.LayoutParams timeParams = new LinearLayout.LayoutParams(
-                                LinearLayout.LayoutParams.WRAP_CONTENT,
-                                dp(36)
-                        );
-                        timeParams.setMargins(0, 0, dp(8), dp(8));
-                        timeButton.setLayoutParams(timeParams);
-                        row.addView(timeButton);
+                    List<MovieDetailScheduleCatalog.ShowtimeItem> times = group.showtimes;
+                    if (times == null || times.isEmpty()) continue;
+                    for (int start = 0; start < times.size(); start += 4) {
+                        LinearLayout row = new LinearLayout(this);
+                        row.setOrientation(LinearLayout.HORIZONTAL);
+                        row.setLayoutParams(new LinearLayout.LayoutParams(
+                                LinearLayout.LayoutParams.MATCH_PARENT,
+                                LinearLayout.LayoutParams.WRAP_CONTENT
+                        ));
+
+                        int end = Math.min(start + 4, times.size());
+                        for (int t = start; t < end; t++) {
+                            MovieDetailScheduleCatalog.ShowtimeItem item = times.get(t);
+                            MaterialButton timeButton = buildTimeButton(item, section.name, group.title);
+                            LinearLayout.LayoutParams timeParams = new LinearLayout.LayoutParams(
+                                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                                    dp(36)
+                            );
+                            timeParams.setMargins(0, 0, dp(8), dp(8));
+                            timeButton.setLayoutParams(timeParams);
+                            row.addView(timeButton);
+                        }
+
+                        rows.addView(row);
                     }
 
-                    rows.addView(row);
+                    content.addView(rows);
+
+                    View divider = new View(this);
+                    LinearLayout.LayoutParams dividerParams = new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            dp(1)
+                        );
+                    dividerParams.setMargins(0, dp(10), 0, dp(4));
+                    divider.setLayoutParams(dividerParams);
+                    divider.setBackgroundColor(Color.parseColor("#EEEEEE"));
+                    content.addView(divider);
                 }
-
-                content.addView(rows);
-
-                View divider = new View(this);
-                LinearLayout.LayoutParams dividerParams = new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        dp(1)
-                    );
-                dividerParams.setMargins(0, dp(10), 0, dp(4));
-                divider.setLayoutParams(dividerParams);
-                divider.setBackgroundColor(Color.parseColor("#EEEEEE"));
-                content.addView(divider);
             }
 
             header.setOnClickListener(v -> toggleCinemaSection(section.name));
@@ -683,9 +692,9 @@ public class MovieDetailActivity extends BaseActivity {
         button.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#FFFFFF")));
         button.setTextColor(Color.parseColor("#111111"));
 
-        boolean selected = cinemaName.equals(selectedCinema)
-                && roomType.equals(selectedRoomType)
-                && item.timeText.equals(selectedShowtime);
+        boolean selected = (cinemaName != null && cinemaName.equals(selectedCinema))
+                && (roomType != null && roomType.equals(selectedRoomType))
+                && (item != null && item.timeText != null && item.timeText.equals(selectedShowtime));
 
         styleTimeButton(button, selected);
 
@@ -815,17 +824,18 @@ public class MovieDetailActivity extends BaseActivity {
     }
 
     private void openTrailer() {
-        if (TextUtils.isEmpty(selectedTrailerUrl)) {
+        if (TextUtils.isEmpty(selectedTrailerUrl) || "null".equalsIgnoreCase(selectedTrailerUrl.trim())) {
             showToast("Phim này chưa có trailer");
             return;
         }
 
-        if (!selectedTrailerUrl.startsWith("http")) {
-            selectedTrailerUrl = "https://" + selectedTrailerUrl;
+        String trailerUrl = selectedTrailerUrl.trim();
+        if (!trailerUrl.startsWith("http")) {
+            trailerUrl = "https://" + trailerUrl;
         }
 
         try {
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(selectedTrailerUrl));
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(trailerUrl));
             startActivity(intent);
         } catch (Exception e) {
             showToast("Không thể mở trailer");
@@ -888,9 +898,15 @@ public class MovieDetailActivity extends BaseActivity {
     }
 
     private String getFirstRoomType(String city, String cinemaName) {
+        if (TextUtils.isEmpty(city) || TextUtils.isEmpty(cinemaName)) {
+            return "";
+        }
         List<CinemaSection> sections = scheduleCatalog.getCinemas(city);
+        if (sections == null) {
+            return "";
+        }
         for (CinemaSection section : sections) {
-            if (section.name.equals(cinemaName) && section.groups != null && !section.groups.isEmpty()) {
+            if (section != null && cinemaName.equals(section.name) && section.groups != null && !section.groups.isEmpty()) {
                 return section.groups.get(0).title;
             }
         }
@@ -898,11 +914,17 @@ public class MovieDetailActivity extends BaseActivity {
     }
 
     private String getFirstShowtime(String city, String cinemaName, String roomType) {
+        if (TextUtils.isEmpty(city) || TextUtils.isEmpty(cinemaName) || TextUtils.isEmpty(roomType)) {
+            return "";
+        }
         List<CinemaSection> sections = scheduleCatalog.getCinemas(city);
+        if (sections == null) {
+            return "";
+        }
         for (CinemaSection section : sections) {
-            if (section.name.equals(cinemaName)) {
+            if (section != null && cinemaName.equals(section.name) && section.groups != null) {
                 for (ShowtimeGroup group : section.groups) {
-                    if (group.title.equals(roomType) && group.showtimes != null && !group.showtimes.isEmpty()) {
+                    if (group != null && roomType.equals(group.title) && group.showtimes != null && !group.showtimes.isEmpty()) {
                         return group.showtimes.get(0).timeText;
                     }
                 }

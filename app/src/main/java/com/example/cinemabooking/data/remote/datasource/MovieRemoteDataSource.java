@@ -8,6 +8,7 @@ import com.example.cinemabooking.domain.model.Movie;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
+import com.google.firebase.Timestamp;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -86,7 +87,28 @@ public class MovieRemoteDataSource {
             return;
         }
 
-        Log.d(TAG, "Requesting movie by ID: " + movieId);
+        Log.d(TAG, "Requesting movie from Firestore by ID: " + movieId);
+        firestore.collection(COLLECTION_MOVIES)
+                .document(movieId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        Movie movie = mapSnapshotToMovie(documentSnapshot);
+                        Log.d(TAG, "Movie loaded from Firestore: " + (movie != null ? movie.title : "null"));
+                        if (callback != null) callback.onSuccess(movie);
+                    } else {
+                        Log.d(TAG, "Movie not found in Firestore, falling back to API: " + movieId);
+                        getMovieByIdFromApi(movieId, callback);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.w(TAG, "Firestore failed to get movie, falling back to API: " + e.getMessage());
+                    getMovieByIdFromApi(movieId, callback);
+                });
+    }
+
+    private void getMovieByIdFromApi(String movieId, ResultCallback<Movie> callback) {
+        Log.d(TAG, "Requesting movie by ID via API: " + movieId);
         movieApi.getMovieById(movieId).enqueue(new Callback<ApiResponse<Movie>>() {
             @Override
             public void onResponse(Call<ApiResponse<Movie>> call, Response<ApiResponse<Movie>> response) {
@@ -110,6 +132,31 @@ public class MovieRemoteDataSource {
     }
 
     public void getAllMovies(ResultCallback<List<Movie>> callback) {
+        Log.d(TAG, "Requesting all movies from Firestore");
+        firestore.collection(COLLECTION_MOVIES)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<Movie> movies = new ArrayList<>();
+                    for (DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
+                        if (isVisible(doc)) {
+                            movies.add(mapSnapshotToMovie(doc));
+                        }
+                    }
+                    Log.d(TAG, "getAllMovies from Firestore success, count: " + movies.size());
+                    if (!movies.isEmpty()) {
+                        if (callback != null) callback.onSuccess(movies);
+                    } else {
+                        Log.d(TAG, "Firestore movies empty, falling back to API");
+                        getAllMoviesFromApi(callback);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.w(TAG, "Firestore getAllMovies failed, falling back to API: " + e.getMessage());
+                    getAllMoviesFromApi(callback);
+                });
+    }
+
+    private void getAllMoviesFromApi(ResultCallback<List<Movie>> callback) {
         Log.d(TAG, "Requesting all movies via API");
         movieApi.getAllMovies(0, 20).enqueue(new Callback<ApiResponse<List<Movie>>>() {
             @Override
@@ -123,7 +170,6 @@ public class MovieRemoteDataSource {
                     String msg = (response.body() != null) ? response.body().getMessage() : "Lỗi tải phim (Code: " + response.code() + ")";
                     Log.e(TAG, "getAllMovies - API Error: " + msg);
                     if (callback != null) {
-                        // FIX: Only trigger onError. ViewModel should handle empty state if needed.
                         callback.onError(msg);
                     }
                 }
@@ -141,9 +187,35 @@ public class MovieRemoteDataSource {
 
     public void getMoviesByStatus(String status, ResultCallback<List<Movie>> callback) {
         final String normalizedStatus = normalizeStatus(status);
-        Log.d(TAG, "Requesting movies by status: " + normalizedStatus);
+        Log.d(TAG, "Requesting movies by status from Firestore: " + normalizedStatus);
 
-        movieApi.getMoviesByStatus(normalizedStatus, 0, 20).enqueue(new Callback<ApiResponse<List<Movie>>>() {
+        firestore.collection(COLLECTION_MOVIES)
+                .whereEqualTo("status", normalizedStatus)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<Movie> movies = new ArrayList<>();
+                    for (DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
+                        if (isVisible(doc)) {
+                            movies.add(mapSnapshotToMovie(doc));
+                        }
+                    }
+                    Log.d(TAG, "getMoviesByStatus from Firestore success, count: " + movies.size());
+                    if (!movies.isEmpty()) {
+                        if (callback != null) callback.onSuccess(movies);
+                    } else {
+                        Log.d(TAG, "Firestore status empty, falling back to API");
+                        getMoviesByStatusFromApi(normalizedStatus, callback);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.w(TAG, "Firestore getMoviesByStatus failed, falling back to API: " + e.getMessage());
+                    getMoviesByStatusFromApi(normalizedStatus, callback);
+                });
+    }
+
+    private void getMoviesByStatusFromApi(String status, ResultCallback<List<Movie>> callback) {
+        Log.d(TAG, "getMoviesByStatus - API: " + status);
+        movieApi.getMoviesByStatus(status, 0, 20).enqueue(new Callback<ApiResponse<List<Movie>>>() {
             @Override
             public void onResponse(Call<ApiResponse<List<Movie>>> call, Response<ApiResponse<List<Movie>>> response) {
                 Log.d(TAG, "getMoviesByStatus - Response Code: " + response.code());
@@ -155,7 +227,6 @@ public class MovieRemoteDataSource {
                     String msg = (response.body() != null) ? response.body().getMessage() : "Lỗi tải phim (Code: " + response.code() + ")";
                     Log.e(TAG, "getMoviesByStatus - API Error: " + msg);
                     if (callback != null) {
-                        // FIX: Only trigger onError.
                         callback.onError(msg);
                     }
                 }
@@ -307,6 +378,7 @@ public class MovieRemoteDataSource {
         setValue(movie, "genre", firstNonNull(data.get("genre"), joinGenres(readGenres(data.get("genres")))));
         setValue(movie, "durationMinutes", firstNonNull(data.get("durationMinutes"), data.get("duration")));
         setValue(movie, "duration", firstNonNull(data.get("duration"), data.get("durationMinutes")));
+        setValue(movie, "releaseDate", data.get("releaseDate"));
         setValue(movie, "createdAt", data.get("createdAt"));
         setValue(movie, "updatedAt", data.get("updatedAt"));
         setValue(movie, "isActive", data.get("isActive"));
@@ -365,6 +437,7 @@ public class MovieRemoteDataSource {
         putIfNotNull(data, "isActive", readValue(movie, "isActive"));
         putIfNotNull(data, "deleted", readValue(movie, "deleted"));
         putIfPositiveLong(data, "createdAt", readValue(movie, "createdAt"));
+        putIfPositiveLong(data, "releaseDate", readValue(movie, "releaseDate"));
 
         return data;
     }
@@ -580,6 +653,9 @@ public class MovieRemoteDataSource {
         }
 
         if (targetType == long.class || targetType == Long.class) {
+            if (value instanceof Timestamp) {
+                return ((Timestamp) value).toDate().getTime();
+            }
             if (value instanceof Number) {
                 return ((Number) value).longValue();
             }
