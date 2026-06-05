@@ -39,10 +39,10 @@
             android:name=".ui.auth.RegisterActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.customer.HomeActivity"
+            android:name=".ui.customer.home.HomeActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.customer.MovieDetailActivity"
+            android:name=".ui.customer.movie.MovieDetailActivity"
             android:exported="false" />
         <activity
             android:name=".ui.customer.cinema.CinemaDetailActivity"
