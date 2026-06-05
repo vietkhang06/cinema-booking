@@ -9,7 +9,7 @@ import com.example.cinemabooking.ui.admin.AdminDashboardActivity;
 import com.example.cinemabooking.ui.auth.ForgotPasswordActivity;
 import com.example.cinemabooking.ui.auth.LoginActivity;
 import com.example.cinemabooking.ui.auth.RegisterActivity;
-import com.example.cinemabooking.ui.customer.HomeActivity;
+import com.example.cinemabooking.ui.customer.home.HomeActivity;
 import com.example.cinemabooking.ui.customer.transaction.TicketDetailActivity;
 import com.example.cinemabooking.ui.customer.transaction.TransactionHistoryActivity;
 import com.example.cinemabooking.ui.staff.StaffDashboardActivity;
