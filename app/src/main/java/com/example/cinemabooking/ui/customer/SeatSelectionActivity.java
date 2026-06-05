@@ -3,7 +3,6 @@ package com.example.cinemabooking.ui.customer;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -16,12 +15,14 @@ import com.example.cinemabooking.data.dto.SeatDTO;
 import com.example.cinemabooking.ui.customer.adapter.SeatAdapter;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import android.widget.LinearLayout;
 
 public class SeatSelectionActivity extends AppCompatActivity {
 
@@ -36,7 +37,7 @@ public class SeatSelectionActivity extends AppCompatActivity {
     public static final String EXTRA_CINEMA_NAME  = "cinemaName";
 
     private SeatAdapter adapter;
-    private LinearLayout llSelectedSeatChips;
+    private android.widget.LinearLayout llSelectedSeatChips;
     private android.widget.HorizontalScrollView scrollSelectedSeats;
     private android.view.View dividerBottom;
     private final List<SeatDTO> seatList = new ArrayList<>();
@@ -100,12 +101,18 @@ public class SeatSelectionActivity extends AppCompatActivity {
             String currentUserId = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() != null
                     ? com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid()
                     : "";
-            
+
             boolean isBooked = "booked".equalsIgnoreCase(seat.status);
-            boolean isHeldByOther = "held".equalsIgnoreCase(seat.status) 
-                    && (seat.heldUntil > now) 
+            boolean isHeldByOther = "held".equalsIgnoreCase(seat.status)
+                    && (seat.heldUntil > now)
                     && !currentUserId.equals(seat.heldBy);
-            
+            boolean isLocked = "LOCKED".equalsIgnoreCase(seat.status)
+                    || "LOCKED".equalsIgnoreCase(seat.seatType);
+
+            if (isLocked) {
+                Toast.makeText(this, "Ghế đã bị khóa!", Toast.LENGTH_SHORT).show();
+                return;
+            }
             if (isBooked) {
                 Toast.makeText(this, "Ghế đã được đặt trước!", Toast.LENGTH_SHORT).show();
                 return;
@@ -134,7 +141,7 @@ public class SeatSelectionActivity extends AppCompatActivity {
                 Toast.makeText(this, "Vui lòng chọn ít nhất 1 ghế!", Toast.LENGTH_SHORT).show();
                 return;
             }
-            
+
             btnContinue.setEnabled(false);
             Toast.makeText(this, "Đang kiểm tra trạng thái ghế...", Toast.LENGTH_SHORT).show();
 
@@ -143,12 +150,12 @@ public class SeatSelectionActivity extends AppCompatActivity {
                 if (s.seatId != null) selectedSeatIds.add(s.seatId);
             }
 
-            com.example.cinemabooking.data.dto.SeatLockRequestDTO lockRequest = 
+            com.example.cinemabooking.data.dto.SeatLockRequestDTO lockRequest =
                     new com.example.cinemabooking.data.dto.SeatLockRequestDTO(showtimeId, selectedSeatIds);
 
-            com.example.cinemabooking.data.remote.api.SeatApiService seatApi = 
+            com.example.cinemabooking.data.remote.api.SeatApiService seatApi =
                     com.example.cinemabooking.data.remote.api.RetrofitClient.getInstance()
-                    .create(com.example.cinemabooking.data.remote.api.SeatApiService.class);
+                            .create(com.example.cinemabooking.data.remote.api.SeatApiService.class);
 
             seatApi.lockSeats(lockRequest).enqueue(new retrofit2.Callback<com.example.cinemabooking.data.dto.ApiResponse<Void>>() {
                 @Override
@@ -158,12 +165,28 @@ public class SeatSelectionActivity extends AppCompatActivity {
                         goToBookingConfirm(selected);
                     } else {
                         String errMsg = "Ghế đã có người khác chọn hoặc hết hạn khóa ghế. Vui lòng chọn ghế khác!";
-                        if (response.body() != null && response.body().getMessage() != null) {
-                            errMsg = response.body().getMessage();
+                        try {
+                            if (response.errorBody() != null) {
+                                String errorJson = response.errorBody().string();
+                                com.example.cinemabooking.data.dto.ApiResponse<?> apiError = 
+                                        new com.google.gson.Gson().fromJson(errorJson, com.example.cinemabooking.data.dto.ApiResponse.class);
+                                if (apiError != null && apiError.getMessage() != null) {
+                                    errMsg = apiError.getMessage();
+                                }
+                            }
+                        } catch (Exception ignored) {
+                        }
+
+                        if (response.code() == 404) {
+                            errMsg = "Lỗi kết nối (404 Not Found): Endpoint không tồn tại trên server.";
                         } else if (response.code() == 409) {
-                            errMsg = "Xung đột: Ghế đã có người giữ hoặc đã được đặt!";
+                            if (errMsg.equals("Ghế đã có người khác chọn hoặc hết hạn khóa ghế. Vui lòng chọn ghế khác!")) {
+                                errMsg = "Xung đột (409 Conflict): Ghế đã có người giữ hoặc đã được đặt!";
+                            }
                         } else if (response.code() == 401 || response.code() == 403) {
-                            errMsg = "Lỗi xác thực: Vui lòng đăng nhập lại!";
+                            errMsg = "Lỗi xác thực (401/403): Vui lòng đăng nhập lại!";
+                        } else if (response.code() >= 500) {
+                            errMsg = "Lỗi máy chủ (500 Internal Server Error): Vui lòng thử lại sau.";
                         }
                         Toast.makeText(SeatSelectionActivity.this, errMsg, Toast.LENGTH_LONG).show();
                         loadSeats(); // Refresh seat map
@@ -184,9 +207,9 @@ public class SeatSelectionActivity extends AppCompatActivity {
     private void loadSeats() {
         if (showtimeId == null) { loadDummySeats(); return; }
 
-        com.example.cinemabooking.data.remote.api.SeatApiService seatApi = 
+        com.example.cinemabooking.data.remote.api.SeatApiService seatApi =
                 com.example.cinemabooking.data.remote.api.RetrofitClient.getInstance()
-                .create(com.example.cinemabooking.data.remote.api.SeatApiService.class);
+                        .create(com.example.cinemabooking.data.remote.api.SeatApiService.class);
 
         seatApi.getSeatsByShowtimeId(showtimeId).enqueue(new retrofit2.Callback<com.example.cinemabooking.data.dto.ApiResponse<List<SeatDTO>>>() {
             @Override
@@ -211,7 +234,7 @@ public class SeatSelectionActivity extends AppCompatActivity {
 
     private void startRealtimeSeatSync() {
         if (showtimeId == null) return;
-        
+
         if (seatListenerRegistration != null) {
             seatListenerRegistration.remove();
         }
@@ -239,7 +262,7 @@ public class SeatSelectionActivity extends AppCompatActivity {
                         int maxCol = 1;
                         boolean seatStolen = false;
                         String stolenSeatCode = "";
-                        
+
                         long now = System.currentTimeMillis();
                         String currentUserId = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() != null
                                 ? com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid()
@@ -249,12 +272,12 @@ public class SeatSelectionActivity extends AppCompatActivity {
                             SeatDTO seat = doc.toObject(SeatDTO.class);
                             if (seat != null) {
                                 seat.seatId = doc.getId();
-                                
-                                boolean isAvailable = "available".equalsIgnoreCase(seat.status) 
+
+                                boolean isAvailable = "available".equalsIgnoreCase(seat.status)
                                         || ("held".equalsIgnoreCase(seat.status) && seat.heldUntil < now);
-                                
-                                boolean isHeldByMe = "held".equalsIgnoreCase(seat.status) 
-                                        && (seat.heldUntil >= now) 
+
+                                boolean isHeldByMe = "held".equalsIgnoreCase(seat.status)
+                                        && (seat.heldUntil >= now)
                                         && currentUserId.equals(seat.heldBy);
 
                                 // Check if this seat was selected by me previously
@@ -278,8 +301,8 @@ public class SeatSelectionActivity extends AppCompatActivity {
                         }
 
                         if (seatStolen) {
-                            Toast.makeText(SeatSelectionActivity.this, 
-                                    "Ghế " + stolenSeatCode + " đã được người khác giữ hoặc đặt trước!", 
+                            Toast.makeText(SeatSelectionActivity.this,
+                                    "Ghế " + stolenSeatCode + " đã được người khác giữ hoặc đặt trước!",
                                     Toast.LENGTH_LONG).show();
                         }
 

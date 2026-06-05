@@ -120,7 +120,16 @@ public class SeatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     && (seat.heldUntil > now) 
                     && !currentUserId.equals(seat.heldBy);
 
-            if (isBooked) {
+            boolean isLocked = "LOCKED".equalsIgnoreCase(seat.status)
+                    || "LOCKED".equalsIgnoreCase(seat.seatType);
+
+            if (isLocked) {
+                // PHYSICALLY LOCKED: dark gray color, disabled
+                tvSeat.setBackgroundResource(R.drawable.couch_solid_full);
+                tvSeat.setTextColor(0xFF444444);
+                itemView.setEnabled(false);
+                itemView.setAlpha(0.3f);
+            } else if (isBooked) {
                 // BOOKED: slate color
                 tvSeat.setBackgroundResource(R.drawable.couch_solid_full);
                 tvSeat.setTextColor(0xFF555566);

@@ -45,14 +45,10 @@ public class SecurityConfig {
                                 "/api/v1/cinemas",
                                 "/api/v1/cinemas/**",
 
-                                "/api/v1/bookings",
-                                "/api/v1/bookings/**",
-
                                 "/api/v1/showtimes",
                                 "/api/v1/showtimes/**",
 
-                                "/api/v1/seats",
-                                "/api/v1/seats/**",
+                                "/api/v1/seats/showtime/**",
 
                                 "/api/v1/health",
                                 "/api/v1/version"
@@ -61,7 +57,12 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/v1/profile",
                                 "/api/v1/profile/**",
+                                "/api/v1/bookings",
+                                "/api/v1/bookings/**",
                                 "/api/v1/booking/**",
+                                "/api/v1/seats/lock",
+                                "/api/v1/seats/release",
+                                "/api/v1/seats/release-by-staff",
                                 "/api/v1/payment/**",
                                 "/api/v1/user/**"
                         ).authenticated()

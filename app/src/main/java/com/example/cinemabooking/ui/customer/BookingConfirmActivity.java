@@ -2,6 +2,7 @@ package com.example.cinemabooking.ui.customer;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,15 +25,15 @@ import java.util.Locale;
 
 public class BookingConfirmActivity extends AppCompatActivity {
 
-    public static final String EXTRA_SHOWTIME_ID   = "showtimeId";
-    public static final String EXTRA_MOVIE_TITLE   = "movieTitle";
-    public static final String EXTRA_MOVIE_ID      = "movieId";
-    public static final String EXTRA_POSTER_URL    = "posterUrl";
-    public static final String EXTRA_CINEMA_NAME   = "cinemaName";
+    public static final String EXTRA_SHOWTIME_ID = "showtimeId";
+    public static final String EXTRA_MOVIE_TITLE = "movieTitle";
+    public static final String EXTRA_MOVIE_ID = "movieId";
+    public static final String EXTRA_POSTER_URL = "posterUrl";
+    public static final String EXTRA_CINEMA_NAME = "cinemaName";
     public static final String EXTRA_SHOWTIME_START = "showtimeStart";
-    public static final String EXTRA_TOTAL         = "total";
-    public static final String EXTRA_SEAT_CODES    = "seatCodes";
-    public static final String EXTRA_SEAT_IDS      = "seatIds";
+    public static final String EXTRA_TOTAL = "total";
+    public static final String EXTRA_SEAT_CODES = "seatCodes";
+    public static final String EXTRA_SEAT_IDS = "seatIds";
 
     private String showtimeId, movieTitle, movieId, cinemaName, imageUrl;
     private long showtimeStart;
@@ -54,9 +55,9 @@ public class BookingConfirmActivity extends AppCompatActivity {
     private com.google.android.material.switchmaterial.SwitchMaterial switchStars;
     private TextView btnPromo;
 
-    // Phase 4 MoMo Payment Fields
+    // Phase 4 Payment Fields
     private android.widget.RadioGroup rgPayment;
-    private String selectedPaymentMethod = "cash";
+    private String selectedPaymentMethod = "CASH";
     private com.google.android.material.bottomsheet.BottomSheetDialog momoDialog;
 
     // Phase 5 Age Rating Fields
@@ -71,15 +72,15 @@ public class BookingConfirmActivity extends AppCompatActivity {
         setContentView(R.layout.activity_booking_confirm);
 
         // Nhận data
-        showtimeId   = getIntent().getStringExtra(EXTRA_SHOWTIME_ID);
-        movieTitle   = getIntent().getStringExtra(EXTRA_MOVIE_TITLE);
-        movieId      = getIntent().getStringExtra(EXTRA_MOVIE_ID);
-        cinemaName   = getIntent().getStringExtra(EXTRA_CINEMA_NAME);
-        imageUrl     = getIntent().getStringExtra(EXTRA_POSTER_URL);
+        showtimeId = getIntent().getStringExtra(EXTRA_SHOWTIME_ID);
+        movieTitle = getIntent().getStringExtra(EXTRA_MOVIE_TITLE);
+        movieId = getIntent().getStringExtra(EXTRA_MOVIE_ID);
+        cinemaName = getIntent().getStringExtra(EXTRA_CINEMA_NAME);
+        imageUrl = getIntent().getStringExtra(EXTRA_POSTER_URL);
         showtimeStart = getIntent().getLongExtra(EXTRA_SHOWTIME_START, 0);
-        total        = getIntent().getDoubleExtra(EXTRA_TOTAL, 0);
-        seatCodes    = getIntent().getStringArrayListExtra(EXTRA_SEAT_CODES);
-        seatIds      = getIntent().getStringArrayListExtra(EXTRA_SEAT_IDS);
+        total = getIntent().getDoubleExtra(EXTRA_TOTAL, 0);
+        seatCodes = getIntent().getStringArrayListExtra(EXTRA_SEAT_CODES);
+        seatIds = getIntent().getStringArrayListExtra(EXTRA_SEAT_IDS);
 
         tvTimer = findViewById(R.id.tvTimer);
 
@@ -129,7 +130,7 @@ public class BookingConfirmActivity extends AppCompatActivity {
         TextView tvCinema = findViewById(R.id.tvCinemaName);
         TextView tvTime = findViewById(R.id.tvShowtime);
         TextView tvSeats = findViewById(R.id.tvSeats);
-        
+
         tvOriginalPrice = findViewById(R.id.tvOriginalPrice);
         tvTotal = findViewById(R.id.tvTotal);
         btnPromo = findViewById(R.id.btnPromo);
@@ -142,26 +143,27 @@ public class BookingConfirmActivity extends AppCompatActivity {
         if (tvCinema != null && cinemaName != null) tvCinema.setText(cinemaName);
 
         if (tvTime != null && showtimeStart > 0) {
-            SimpleDateFormat fmt = new SimpleDateFormat(
-                    "HH:mm - dd/MM/yyyy", Locale.getDefault());
+            SimpleDateFormat fmt = new SimpleDateFormat("HH:mm - dd/MM/yyyy", Locale.getDefault());
             tvTime.setText(fmt.format(new Date(showtimeStart)));
         }
 
-        if (tvSeats != null && seatCodes != null)
+        if (tvSeats != null && seatCodes != null) {
             tvSeats.setText(String.join(", ", seatCodes));
+        }
 
-        if (tvTotal != null)
+        if (tvTotal != null) {
             tvTotal.setText(String.format(Locale.getDefault(), "%,.0f đ", total));
+        }
 
         rgPayment = findViewById(R.id.rgPayment);
         if (rgPayment != null) {
             rgPayment.setOnCheckedChangeListener((group, checkedId) -> {
                 if (checkedId == R.id.rbPayCash) {
-                    selectedPaymentMethod = "cash";
+                    selectedPaymentMethod = "CASH";
                 } else if (checkedId == R.id.rbPayBank) {
-                    selectedPaymentMethod = "bank";
+                    selectedPaymentMethod = "BANK_TRANSFER";
                 } else if (checkedId == R.id.rbPayMomo) {
-                    selectedPaymentMethod = "momo";
+                    selectedPaymentMethod = "MOMO";
                 }
             });
         }
@@ -232,7 +234,7 @@ public class BookingConfirmActivity extends AppCompatActivity {
     }
 
     private void showAgeWarningDialog(int minAge, Runnable onConfirm) {
-        com.google.android.material.bottomsheet.BottomSheetDialog warnDialog = 
+        com.google.android.material.bottomsheet.BottomSheetDialog warnDialog =
                 new com.google.android.material.bottomsheet.BottomSheetDialog(this);
         android.view.View view = getLayoutInflater().inflate(R.layout.dialog_age_warning, null);
         warnDialog.setContentView(view);
@@ -266,21 +268,21 @@ public class BookingConfirmActivity extends AppCompatActivity {
 
     private void loadUserProfile() {
         new com.example.cinemabooking.service.AuthenticationService(this).getCurrentAuthUser(
-            new com.example.cinemabooking.domain.common.ResultCallback<com.example.cinemabooking.domain.model.User>() {
-                @Override
-                public void onSuccess(com.example.cinemabooking.domain.model.User user) {
-                    if (user != null) {
-                        currentUser = user;
-                        applyTierDiscount();
-                        updateStarsUI();
+                new com.example.cinemabooking.domain.common.ResultCallback<com.example.cinemabooking.domain.model.User>() {
+                    @Override
+                    public void onSuccess(com.example.cinemabooking.domain.model.User user) {
+                        if (user != null) {
+                            currentUser = user;
+                            applyTierDiscount();
+                            updateStarsUI();
+                        }
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        // Fail silently
                     }
                 }
-
-                @Override
-                public void onError(String message) {
-                    // Fail silently
-                }
-            }
         );
     }
 
@@ -290,19 +292,19 @@ public class BookingConfirmActivity extends AppCompatActivity {
         double factor = 0;
         String levelName = "Thành viên";
         if (level.contains("vip")) {
-            factor = 0.10; // 10%
+            factor = 0.10;
             levelName = "VIP";
         } else if (level.contains("platinum")) {
-            factor = 0.15; // 15%
+            factor = 0.15;
             levelName = "Platinum";
         } else if (level.contains("gold")) {
-            factor = 0.08; // 8%
+            factor = 0.08;
             levelName = "Gold";
         }
         if (factor > 0) {
             discountRank = total * factor;
             if (tvAppliedPromo != null) {
-                tvAppliedPromo.setText("Đã áp dụng ưu đãi hạng " + levelName + " (-" + (int)(factor * 100) + "%)");
+                tvAppliedPromo.setText("Đã áp dụng ưu đãi hạng " + levelName + " (-" + (int) (factor * 100) + "%)");
             }
         }
         updateTotalPrice();
@@ -319,7 +321,6 @@ public class BookingConfirmActivity extends AppCompatActivity {
             switchStars.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 isStarsApplied = isChecked;
                 if (isChecked) {
-                    // 1 Stars = 1,000 VND
                     discountStars = points * 1000.0;
                 } else {
                     discountStars = 0;
@@ -351,7 +352,7 @@ public class BookingConfirmActivity extends AppCompatActivity {
     }
 
     private void showPromoDialog() {
-        com.google.android.material.bottomsheet.BottomSheetDialog dialog = 
+        com.google.android.material.bottomsheet.BottomSheetDialog dialog =
                 new com.google.android.material.bottomsheet.BottomSheetDialog(this);
         android.view.View view = getLayoutInflater().inflate(R.layout.dialog_promo_input, null);
         dialog.setContentView(view);
@@ -414,7 +415,7 @@ public class BookingConfirmActivity extends AppCompatActivity {
     }
 
     private void confirmBooking() {
-        if ("momo".equals(selectedPaymentMethod)) {
+        if ("MOMO".equalsIgnoreCase(selectedPaymentMethod)) {
             showMomoCheckoutDialog(selectedPaymentMethod);
         } else {
             createBookingOnBackend(selectedPaymentMethod);
@@ -446,10 +447,10 @@ public class BookingConfirmActivity extends AppCompatActivity {
                     isBookingConfirmed = true;
                     BookingTimerManager.getInstance().stopTimer(BookingConfirmActivity.this);
 
-                    if ("momo".equals(paymentMethod) || "bank".equals(paymentMethod)) {
+                    if ("MOMO".equalsIgnoreCase(paymentMethod) || "BANK_TRANSFER".equalsIgnoreCase(paymentMethod)) {
                         Intent intent = new Intent(BookingConfirmActivity.this, PaymentInstructionActivity.class);
                         intent.putExtra(PaymentInstructionActivity.EXTRA_BOOKING_ID, booking.bookingId);
-                        intent.putExtra(PaymentInstructionActivity.EXTRA_PAYMENT_ID, (String) null); // will query via bookingId
+                        intent.putExtra(PaymentInstructionActivity.EXTRA_PAYMENT_ID, (String) null);
                         intent.putExtra(PaymentInstructionActivity.EXTRA_PAYMENT_CODE, booking.paymentCode);
                         intent.putExtra(PaymentInstructionActivity.EXTRA_AMOUNT, booking.total);
                         intent.putExtra(PaymentInstructionActivity.EXTRA_PAYMENT_METHOD, paymentMethod);
@@ -528,14 +529,14 @@ public class BookingConfirmActivity extends AppCompatActivity {
 
     private void releaseLockedSeats() {
         if (seatIds == null || seatIds.isEmpty() || showtimeId == null) return;
-        
-        com.example.cinemabooking.data.dto.SeatLockRequestDTO releaseReq = 
+
+        com.example.cinemabooking.data.dto.SeatLockRequestDTO releaseReq =
                 new com.example.cinemabooking.data.dto.SeatLockRequestDTO(showtimeId, seatIds);
-        
-        com.example.cinemabooking.data.remote.api.SeatApiService seatApi = 
+
+        com.example.cinemabooking.data.remote.api.SeatApiService seatApi =
                 com.example.cinemabooking.data.remote.api.RetrofitClient.getInstance()
-                .create(com.example.cinemabooking.data.remote.api.SeatApiService.class);
-        
+                        .create(com.example.cinemabooking.data.remote.api.SeatApiService.class);
+
         seatApi.releaseSeats(releaseReq).enqueue(new retrofit2.Callback<com.example.cinemabooking.data.dto.ApiResponse<Void>>() {
             @Override
             public void onResponse(retrofit2.Call<com.example.cinemabooking.data.dto.ApiResponse<Void>> call, retrofit2.Response<com.example.cinemabooking.data.dto.ApiResponse<Void>> response) {

@@ -107,7 +107,13 @@ public class SeatSelectionActivity extends AppCompatActivity {
             boolean isHeldByOther = "held".equalsIgnoreCase(seat.status) 
                     && (seat.heldUntil > now) 
                     && !currentUserId.equals(seat.heldBy);
-            
+            boolean isLocked = "LOCKED".equalsIgnoreCase(seat.status)
+                    || "LOCKED".equalsIgnoreCase(seat.seatType);
+
+            if (isLocked) {
+                Toast.makeText(this, "Ghế đã bị khóa!", Toast.LENGTH_SHORT).show();
+                return;
+            }
             if (isBooked) {
                 Toast.makeText(this, "Ghế đã được đặt trước!", Toast.LENGTH_SHORT).show();
                 return;
@@ -160,12 +166,28 @@ public class SeatSelectionActivity extends AppCompatActivity {
                         goToBookingConfirm(selected);
                     } else {
                         String errMsg = "Ghế đã có người khác chọn hoặc hết hạn khóa ghế. Vui lòng chọn ghế khác!";
-                        if (response.body() != null && response.body().getMessage() != null) {
-                            errMsg = response.body().getMessage();
+                        try {
+                            if (response.errorBody() != null) {
+                                String errorJson = response.errorBody().string();
+                                com.example.cinemabooking.data.dto.ApiResponse<?> apiError = 
+                                        new com.google.gson.Gson().fromJson(errorJson, com.example.cinemabooking.data.dto.ApiResponse.class);
+                                if (apiError != null && apiError.getMessage() != null) {
+                                    errMsg = apiError.getMessage();
+                                }
+                            }
+                        } catch (Exception ignored) {
+                        }
+
+                        if (response.code() == 404) {
+                            errMsg = "Lỗi kết nối (404 Not Found): Endpoint không tồn tại trên server.";
                         } else if (response.code() == 409) {
-                            errMsg = "Xung đột: Ghế đã có người giữ hoặc đã được đặt!";
+                            if (errMsg.equals("Ghế đã có người khác chọn hoặc hết hạn khóa ghế. Vui lòng chọn ghế khác!")) {
+                                errMsg = "Xung đột (409 Conflict): Ghế đã có người giữ hoặc đã được đặt!";
+                            }
                         } else if (response.code() == 401 || response.code() == 403) {
-                            errMsg = "Lỗi xác thực: Vui lòng đăng nhập lại!";
+                            errMsg = "Lỗi xác thực (401/403): Vui lòng đăng nhập lại!";
+                        } else if (response.code() >= 500) {
+                            errMsg = "Lỗi máy chủ (500 Internal Server Error): Vui lòng thử lại sau.";
                         }
                         Toast.makeText(SeatSelectionActivity.this, errMsg, Toast.LENGTH_LONG).show();
                         loadSeats(); // Refresh seat map
