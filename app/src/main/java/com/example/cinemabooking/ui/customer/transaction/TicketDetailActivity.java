@@ -114,6 +114,7 @@ public class TicketDetailActivity extends AppCompatActivity {
             @Override
             public void onSuccess(Booking booking) {
                 boolean isPaid = "paid".equalsIgnoreCase(booking.paymentStatus)
+                        || "success".equalsIgnoreCase(booking.paymentStatus)
                         || "confirmed".equalsIgnoreCase(booking.bookingStatus)
                         || "success".equalsIgnoreCase(booking.bookingStatus);
                 if (isPaid) {

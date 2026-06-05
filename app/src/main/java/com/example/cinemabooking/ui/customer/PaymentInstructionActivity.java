@@ -163,8 +163,8 @@ public class PaymentInstructionActivity extends AppCompatActivity {
                 .listener(new com.bumptech.glide.request.RequestListener<android.graphics.drawable.Drawable>() {
                     @Override
                     public boolean onLoadFailed(com.bumptech.glide.load.engine.GlideException e, Object model,
-                                                 com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable> target,
-                                                 boolean isFirstResource) {
+                                                com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable> target,
+                                                boolean isFirstResource) {
                         pbQrLoading.setVisibility(View.GONE);
                         Toast.makeText(PaymentInstructionActivity.this, "Không thể tải mã QR", Toast.LENGTH_SHORT).show();
                         return false;
