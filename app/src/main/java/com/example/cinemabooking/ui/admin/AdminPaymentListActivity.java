@@ -317,8 +317,8 @@ public class AdminPaymentListActivity extends BaseActivity implements AdminPayme
                 "updatedAt", now);
 
         batch.update(db.collection("bookings").document(booking.bookingId),
-                "bookingStatus", "confirmed",
-                "paymentStatus", "paid",
+                "bookingStatus", "CONFIRMED",
+                "paymentStatus", "SUCCESS",
                 "updatedAt", now);
 
         batch.commit()
@@ -344,8 +344,8 @@ public class AdminPaymentListActivity extends BaseActivity implements AdminPayme
                 "updatedAt", now);
 
         batch.update(db.collection("bookings").document(booking.bookingId),
-                "bookingStatus", "cancelled",
-                "paymentStatus", "failed",
+                "bookingStatus", "CANCELLED",
+                "paymentStatus", "FAILED",
                 "updatedAt", now);
 
         batch.commit()
