@@ -64,7 +64,8 @@ public class SecurityConfig {
                                 "/api/v1/seats/release",
                                 "/api/v1/seats/release-by-staff",
                                 "/api/v1/payment/**",
-                                "/api/v1/user/**"
+                                "/api/v1/user/**",
+                                "/api/v1/chat/**"
                         ).authenticated()
 
                         .anyRequest().authenticated()

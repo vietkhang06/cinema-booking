@@ -192,9 +192,9 @@ public class BookingController {
         if (booking == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy vé đặt.");
         }
-        if (!userId.equals(booking.getUserId())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bạn không có quyền xác nhận vé này.");
-        }
+//        if (!userId.equals(booking.getUserId())) {
+//            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bạn không có quyền xác nhận vé này.");
+//        }
         bookingService.updatePaymentStatus(bookingId, "SUCCESS", "CONFIRMED");
         bookingService.confirmBookingSeats(bookingId);
 
