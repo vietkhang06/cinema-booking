@@ -17,6 +17,9 @@ public final class AuditLogMapper {
         model.targetType = dto.targetType;
         model.targetId = dto.targetId;
         model.note = dto.note;
+        model.adminId = dto.adminId;
+        model.showtimeId = dto.showtimeId;
+        model.bookingCount = dto.bookingCount;
         model.createdAt = dto.createdAt;
         return model;
     }
@@ -31,6 +34,9 @@ public final class AuditLogMapper {
         dto.targetType = model.targetType;
         dto.targetId = model.targetId;
         dto.note = model.note;
+        dto.adminId = model.adminId;
+        dto.showtimeId = model.showtimeId;
+        dto.bookingCount = model.bookingCount;
         dto.createdAt = model.createdAt;
         return dto;
     }

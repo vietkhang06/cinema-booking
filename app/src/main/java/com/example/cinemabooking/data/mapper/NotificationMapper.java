@@ -13,7 +13,7 @@ public final class NotificationMapper {
         model.notificationId = dto.notificationId;
         model.userId = dto.userId;
         model.title = dto.title;
-        model.body = dto.body;
+        model.message = dto.message;
         model.type = dto.type;
         model.refId = dto.refId;
         model.isRead = dto.isRead;
@@ -28,7 +28,7 @@ public final class NotificationMapper {
         dto.notificationId = model.notificationId;
         dto.userId = model.userId;
         dto.title = model.title;
-        dto.body = model.body;
+        dto.message = model.message;
         dto.type = model.type;
         dto.refId = model.refId;
         dto.isRead = model.isRead;
