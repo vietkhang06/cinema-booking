@@ -11,13 +11,12 @@ public final class ChatMessageMapper {
         if (dto == null) return null;
         ChatMessage model = new ChatMessage();
         model.messageId = dto.messageId;
-        model.threadId = dto.threadId;
+        model.convoId = dto.threadId;
         model.senderId = dto.senderId;
         model.receiverId = dto.receiverId;
         model.content = dto.content;
         model.type = dto.type;
-        model.imageUrl = dto.imageUrl;
-        model.isRead = dto.isRead;
+        model.imgUrl = dto.imageUrl;
         model.sentAt = dto.sentAt;
         return model;
     }
@@ -26,13 +25,12 @@ public final class ChatMessageMapper {
         if (model == null) return null;
         ChatMessageDTO dto = new ChatMessageDTO();
         dto.messageId = model.messageId;
-        dto.threadId = model.threadId;
+        dto.threadId = model.convoId;
         dto.senderId = model.senderId;
         dto.receiverId = model.receiverId;
         dto.content = model.content;
         dto.type = model.type;
-        dto.imageUrl = model.imageUrl;
-        dto.isRead = model.isRead;
+        dto.imageUrl = model.imgUrl;
         dto.sentAt = model.sentAt;
         return dto;
     }
