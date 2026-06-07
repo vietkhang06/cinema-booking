@@ -57,7 +57,7 @@ public class BookingConfirmActivity extends AppCompatActivity {
 
     // Phase 4 Payment Fields
     private android.widget.RadioGroup rgPayment;
-    private String selectedPaymentMethod = "CASH";
+    private String selectedPaymentMethod = "cash";
     private com.google.android.material.bottomsheet.BottomSheetDialog momoDialog;
 
     // Phase 5 Age Rating Fields
@@ -159,11 +159,11 @@ public class BookingConfirmActivity extends AppCompatActivity {
         if (rgPayment != null) {
             rgPayment.setOnCheckedChangeListener((group, checkedId) -> {
                 if (checkedId == R.id.rbPayCash) {
-                    selectedPaymentMethod = "CASH";
+                    selectedPaymentMethod = "cash";
                 } else if (checkedId == R.id.rbPayBank) {
-                    selectedPaymentMethod = "BANK_TRANSFER";
+                    selectedPaymentMethod = "bank";
                 } else if (checkedId == R.id.rbPayMomo) {
-                    selectedPaymentMethod = "MOMO";
+                    selectedPaymentMethod = "momo";
                 }
             });
         }
@@ -415,7 +415,7 @@ public class BookingConfirmActivity extends AppCompatActivity {
     }
 
     private void confirmBooking() {
-        if ("MOMO".equalsIgnoreCase(selectedPaymentMethod)) {
+        if ("momo".equals(selectedPaymentMethod)) {
             showMomoCheckoutDialog(selectedPaymentMethod);
         } else {
             createBookingOnBackend(selectedPaymentMethod);
@@ -447,7 +447,7 @@ public class BookingConfirmActivity extends AppCompatActivity {
                     isBookingConfirmed = true;
                     BookingTimerManager.getInstance().stopTimer(BookingConfirmActivity.this);
 
-                    if ("MOMO".equalsIgnoreCase(paymentMethod) || "BANK_TRANSFER".equalsIgnoreCase(paymentMethod)) {
+                    if ("momo".equals(paymentMethod) || "bank".equals(paymentMethod)) {
                         Intent intent = new Intent(BookingConfirmActivity.this, PaymentInstructionActivity.class);
                         intent.putExtra(PaymentInstructionActivity.EXTRA_BOOKING_ID, booking.bookingId);
                         intent.putExtra(PaymentInstructionActivity.EXTRA_PAYMENT_ID, (String) null);
