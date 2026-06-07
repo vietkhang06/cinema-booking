@@ -4,6 +4,7 @@ import android.animation.ObjectAnimator;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 
@@ -11,9 +12,9 @@ import com.example.cinemabooking.R;
 import com.example.cinemabooking.core.base.BaseActivity;
 import com.example.cinemabooking.core.navigation.AppNavigator;
 
-
 public class SplashActivity extends BaseActivity {
 
+    private static final String TAG = "SPLASH_DEBUG";
     private static final long SPLASH_DELAY = 2500L;
 
     private View[] dots;
@@ -27,13 +28,36 @@ public class SplashActivity extends BaseActivity {
         startDotAnimation();
 
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            if (sessionManager.isLoggedIn()) {
-                // Đã đăng nhập → vào đúng màn hình theo vai trò
-                AppNavigator.goToHomeByRole(this, sessionManager.getRole());
+
+            boolean isLoggedIn = sessionManager.isLoggedIn();
+            String role = sessionManager.getRole();
+
+            Log.e(TAG, "========== SPLASH TRACE ==========");
+            Log.e(TAG, "isLoggedIn = " + isLoggedIn);
+            Log.e(TAG, "role = [" + role + "]");
+            Log.e(TAG, "==================================");
+
+            if (isLoggedIn) {
+
+                Log.e(TAG,
+                        "Navigating by role -> "
+                                + role);
+
+                AppNavigator.goToHomeByRole(
+                        this,
+                        role
+                );
+
             } else {
-                // Chưa đăng nhập → vào HomeActivity ở chế độ guest (không ép đăng nhập)
-                AppNavigator.goToCustomerHome(this);
+
+                Log.e(TAG,
+                        "Guest mode -> Customer Home");
+
+                AppNavigator.goToCustomerHome(
+                        this
+                );
             }
+
         }, SPLASH_DELAY);
     }
 
@@ -57,10 +81,20 @@ public class SplashActivity extends BaseActivity {
             dot.setScaleX(1f);
             dot.setScaleY(1f);
 
-            ObjectAnimator animator = ObjectAnimator.ofFloat(dot, "translationY", 0f, -10f, 0f);
+            ObjectAnimator animator =
+                    ObjectAnimator.ofFloat(
+                            dot,
+                            "translationY",
+                            0f,
+                            -10f,
+                            0f
+                    );
+
             animator.setDuration(500L);
             animator.setRepeatCount(ObjectAnimator.INFINITE);
-            animator.setInterpolator(new AccelerateDecelerateInterpolator());
+            animator.setInterpolator(
+                    new AccelerateDecelerateInterpolator()
+            );
             animator.setStartDelay(i * delayStep);
             animator.start();
         }
