@@ -11,6 +11,7 @@ public final class FirestoreCollections {
     public static final String CINEMA_CONTENTS = "cinema_contents";
     public static final String ROOMS = "rooms";
     public static final String SHOWTIMES = "showtimes";
+    public static final String SHOWTIME_SCHEDULES = "showtime_schedules";
     public static final String BOOKINGS = "bookings";
     public static final String REVIEWS = "reviews";
     public static final String FAVORITES = "favorites";

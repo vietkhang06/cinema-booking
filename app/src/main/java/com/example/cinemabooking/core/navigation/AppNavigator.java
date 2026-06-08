@@ -90,6 +90,12 @@ public final class AppNavigator {
     }
 
     public static void goToHomeByRole(Activity activity, String role) {
+
+        android.util.Log.e(
+                "ROLE_DEBUG",
+                "ROLE RECEIVED = [" + role + "]"
+        );
+
         String safeRole = role == null ? "customer" : role.trim().toLowerCase();
 
         if ("admin".equals(safeRole)) {

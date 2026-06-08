@@ -25,6 +25,9 @@ public final class ShowtimeMapper {
         model.createdAt = dto.createdAt;
         model.updatedAt = dto.updatedAt;
         model.deleted = dto.deleted;
+        model.isScheduled = dto.isScheduled;
+        model.executed = dto.executed;
+        model.executedAt = dto.executedAt;
         return model;
     }
 
@@ -46,6 +49,9 @@ public final class ShowtimeMapper {
         dto.createdAt = model.createdAt;
         dto.updatedAt = model.updatedAt;
         dto.deleted = model.deleted;
+        dto.isScheduled = model.isScheduled;
+        dto.executed = model.executed;
+        dto.executedAt = model.executedAt;
         return dto;
     }
 }

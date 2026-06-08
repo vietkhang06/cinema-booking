@@ -15,4 +15,8 @@ public interface ShowtimeRepository {
     void updateShowtime(Showtime showtime, ResultCallback<Showtime> callback);
     void changeShowtimeStatus(String showtimeId, String status, ResultCallback<Showtime> callback);
     void softDeleteShowtime(String showtimeId, ResultCallback<Void> callback);
+    void createShowtimeSchedule(Showtime showtime, ResultCallback<Showtime> callback);
+    void getAllShowtimeSchedules(ResultCallback<List<Showtime>> callback);
+    void deleteShowtimeSchedule(String scheduleId, ResultCallback<Void> callback);
+    void cancelShowtime(String showtimeId, String adminId, ResultCallback<String> callback);
 }

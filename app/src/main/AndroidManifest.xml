@@ -92,6 +92,9 @@
         <activity
             android:name=".ui.staff.StaffInvoiceActivity"
             android:exported="false" />
+        <activity
+            android:name=".ui.customer.chat.CustomerSupportActivity"
+            android:exported="false" />
 
         <activity
             android:name=".ui.admin.cinema.AdminCinemaListActivity"
@@ -113,6 +116,9 @@
             android:exported="false" />
         <activity
             android:name=".ui.admin.showtime.AdminShowtimeAddEditActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.admin.showtime.AdminShowtimeScheduleActivity"
             android:exported="false" />
         <activity
             android:name=".ui.admin.movie.AdminMovieListActivity"

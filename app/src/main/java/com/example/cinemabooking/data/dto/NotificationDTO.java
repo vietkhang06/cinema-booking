@@ -4,7 +4,7 @@ public class NotificationDTO {
     public String notificationId;
     public String userId;
     public String title;
-    public String body;
+    public String message;
     public String type;
     public String refId;
     public boolean isRead;

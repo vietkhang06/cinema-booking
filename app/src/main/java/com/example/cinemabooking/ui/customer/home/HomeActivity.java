@@ -3,6 +3,9 @@ package com.example.cinemabooking.ui.customer.home;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
+import com.example.cinemabooking.ui.customer.chat.CustomerSupportActivity;
+import com.example.cinemabooking.core.navigation.AppNavigator;
+import com.example.cinemabooking.domain.model.User;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -54,6 +57,8 @@ import java.util.Locale;
 
 
 public class HomeActivity extends BaseActivity {
+
+    private com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton fabSupportChat;
 
     private static final String FILTER_NOW_SHOWING = HomeMovieItem.NOW_SHOWING;
     private static final String FILTER_COMING_SOON = HomeMovieItem.COMING_SOON;
@@ -213,7 +218,27 @@ public class HomeActivity extends BaseActivity {
             sheet.show(getSupportFragmentManager(), "location_picker");
         });
         chipGroupGenre = findViewById(R.id.chipGroupGenre);
+        fabSupportChat = findViewById(R.id.fabSupportChat);
+        fabSupportChat.setOnClickListener(v -> {
+            User cachedProfile = ServiceProvider.getInstance().getProfileService().getCachedProfile();
+            String currentUid = null;
+            if (cachedProfile != null) {
+                currentUid = cachedProfile.uid;
+            } else {
+                FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+                if (firebaseUser != null) {
+                    currentUid = firebaseUser.getUid();
+                }
+            }
 
+            if (currentUid == null) {
+                showToast("Bạn cần đăng nhập tài khoản để tiếp tục.");
+                AppNavigator.goToLoginForBooking(HomeActivity.this);
+            } else {
+                Intent intent = new Intent(HomeActivity.this, CustomerSupportActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     private void initMovieUseCase() {

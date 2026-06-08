@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F9F9FB"
+    tools:context=".ui.customer.chat.CustomerSupportActivity">
+
+    <!-- Header / Toolbar -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        android:background="#FFFFFF"
+        android:elevation="4dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <!-- Back button -->
+            <ImageButton
+                android:id="@+id/btnBack"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_arrow_back"
+                app:tint="#1E1A23"
+                android:contentDescription="Quay lại" />
+
+            <!-- Avatar -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cvAvatar"
+                android:layout_width="38dp"
+                android:layout_height="38dp"
+                android:layout_marginStart="8dp"
+                app:cardCornerRadius="19dp"
+                app:strokeWidth="0dp"
+                app:cardElevation="0dp">
+                <ImageView
+                    android:id="@+id/ivAvatar"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/user_solid_full" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Name and Status -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="10dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvSupportName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Trợ lý ảo Cinema"
+                    android:textColor="#1E1A23"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvOnlineStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Trực tuyến"
+                    android:textColor="#4CAF50"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <!-- Clear chat button -->
+            <ImageButton
+                android:id="@+id/btnClearChat"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginEnd="12dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/trash_solid_full"
+                app:tint="#1E1A23"
+                android:contentDescription="Xoá hội thoại" />
+        </LinearLayout>
+    </androidx.appcompat.widget.Toolbar>
+
+    <!-- Status Banner -->
+    <LinearLayout
+        android:id="@+id/statusBanner"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="#E8EAF6"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingVertical="8dp"
+        android:paddingHorizontal="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbar">
+
+        <TextView
+            android:id="@+id/tvStatusText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Trợ lý ảo đang hỗ trợ"
+            android:textColor="#3F51B5"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <!-- Chat Messages RecyclerView -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewMessages"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:clipToPadding="false"
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="8dp"
+        app:layout_constraintBottom_toTopOf="@id/quickActionsScroll"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/statusBanner" />
+
+    <!-- FAQ Chips Group -->
+    <HorizontalScrollView
+        android:id="@+id/quickActionsScroll"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:scrollbars="none"
+        android:background="#FFFFFF"
+        android:paddingVertical="8dp"
+        android:paddingHorizontal="8dp"
+        app:layout_constraintBottom_toTopOf="@id/inputBar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chipGroupFaq"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:singleLine="true">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipMovies"
+                style="@style/Widget.MaterialComponents.Chip.Action"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Phim đang chiếu"
+                app:chipBackgroundColor="#F1F1F5"
+                app:chipStrokeWidth="0dp"
+                android:textColor="#1E1A23" />
+ 
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipShowtimes"
+                style="@style/Widget.MaterialComponents.Chip.Action"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Lịch chiếu hôm nay"
+                app:chipBackgroundColor="#F1F1F5"
+                app:chipStrokeWidth="0dp"
+                android:textColor="#1E1A23" />
+ 
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipMyBooking"
+                style="@style/Widget.MaterialComponents.Chip.Action"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Vé của tôi"
+                app:chipBackgroundColor="#F1F1F5"
+                app:chipStrokeWidth="0dp"
+                android:textColor="#1E1A23" />
+ 
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipMyVouchers"
+                style="@style/Widget.MaterialComponents.Chip.Action"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Voucher của tôi"
+                app:chipBackgroundColor="#F1F1F5"
+                app:chipStrokeWidth="0dp"
+                android:textColor="#1E1A23" />
+        </com.google.android.material.chip.ChipGroup>
+    </HorizontalScrollView>
+
+    <!-- Bottom Input Bar -->
+    <LinearLayout
+        android:id="@+id/inputBar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="#FFFFFF"
+        android:elevation="8dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="10dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <!-- Input field card -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="0dp"
+            app:strokeColor="#E0E0E0"
+            app:strokeWidth="1dp"
+            app:cardBackgroundColor="#F5F5F7">
+
+            <EditText
+                android:id="@+id/etMessage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:hint="Nhập nội dung hỗ trợ..."
+                android:inputType="textShortMessage"
+                android:maxLines="4"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="10dp"
+                android:textColor="#1E1A23"
+                android:textColorHint="#9E9E9E"
+                android:textSize="15sp" />
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Send Button -->
+        <ImageButton
+            android:id="@+id/btnSend"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_message_send"
+            app:tint="#E8640C"
+            android:contentDescription="Gửi" />
+    </LinearLayout>
+
+    <!-- Bottom Reset Bot Bar -->
+    <LinearLayout
+        android:id="@+id/layoutResetBot"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="#FFFFFF"
+        android:elevation="8dp"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:gravity="center"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnResetBot"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="Bắt đầu hội thoại mới với Bot"
+            android:textColor="#FFFFFF"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            app:backgroundTint="#3F51B5"
+            app:cornerRadius="25dp" />
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

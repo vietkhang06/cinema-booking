@@ -96,7 +96,15 @@ public class LoginActivity extends BaseActivity {
                     @Override
                     public void onSuccess(User user) {
                         if (fromBooking) finish();
-                        else AppNavigator.goToHomeByRole(LoginActivity.this, user.role);
+                        else
+                        {
+                            Log.e(
+                                    "ROLE_DEBUG",
+                                    "EMAIL=" + user.getEmail()
+                                            + " ROLE=" + user.getRole()
+                            );
+                            AppNavigator.goToHomeByRole(LoginActivity.this, user.role);
+                        }
                     }
 
                     @Override

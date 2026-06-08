@@ -194,4 +194,18 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />
 
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/fabSupportChat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="86dp"
+        app:icon="@drawable/ic_message"
+        app:iconTint="#FFFFFF"
+        android:text="Trợ giúp"
+        android:textColor="#FFFFFF"
+        app:backgroundTint="#E8640C"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
