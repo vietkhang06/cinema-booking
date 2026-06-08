@@ -13,6 +13,8 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -31,9 +33,12 @@ import com.example.cinemabooking.data.repository.ShowtimeRepositoryImpl;
 import com.example.cinemabooking.domain.common.ResultCallback;
 import com.example.cinemabooking.domain.model.Cinema;
 import com.example.cinemabooking.domain.model.Movie;
+import com.example.cinemabooking.domain.model.Review;
 import com.example.cinemabooking.domain.model.Showtime;
 import com.example.cinemabooking.domain.repository.MovieRepository;
 import com.example.cinemabooking.domain.usecase.movie.GetMovieByIdUseCase;
+import com.example.cinemabooking.domain.usecase.review.AddReviewUseCase;
+import com.example.cinemabooking.domain.usecase.review.GetReviewsByMovieUseCase;
 import com.example.cinemabooking.ui.customer.SeatSelectionActivity;
 import com.example.cinemabooking.ui.customer.model.MovieDetailScheduleCatalog;
 import com.example.cinemabooking.ui.customer.model.MovieDetailScheduleCatalog.CinemaSection;
@@ -43,6 +48,7 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
+
 
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
@@ -105,6 +111,10 @@ public class MovieDetailActivity extends BaseActivity {
 
     private MaterialButton btnBookTickets;
 
+    private androidx.recyclerview.widget.RecyclerView rvReviews;
+    private EditText etCommentInput;
+    private Button btnPostComment;
+
     private MovieDetailScheduleCatalog scheduleCatalog;
     private GetMovieByIdUseCase getMovieByIdUseCase;
     private ShowtimeRepositoryImpl showtimeRepository;
@@ -123,6 +133,10 @@ public class MovieDetailActivity extends BaseActivity {
     private String selectedShowtime = "";
     /** Lưu đối tượng suất chiếu đang chọn — dùng khi nhấn nút "Đặt vé ngay" */
     private MovieDetailScheduleCatalog.ShowtimeItem selectedShowtimeItem = null;
+
+    private AddReviewUseCase addReviewUseCase;
+    private GetReviewsByMovieUseCase getReviewsByMovieUseCase;
+    private com.example.cinemabooking.ui.customer.adapter.ReviewAdapter reviewAdapter;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -174,6 +188,14 @@ public class MovieDetailActivity extends BaseActivity {
 
         btnBookTickets = findViewById(R.id.btnBookTickets);
         btnBookTickets.setVisibility(View.GONE);
+
+        rvReviews = findViewById(R.id.rvReviews);
+        rvReviews.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(this));
+        reviewAdapter = new com.example.cinemabooking.ui.customer.adapter.ReviewAdapter();
+        rvReviews.setAdapter(reviewAdapter);
+
+        etCommentInput = findViewById(R.id.etCommentInput);
+        btnPostComment = findViewById(R.id.btnPostComment);
     }
 
     private void initUseCase() {
@@ -181,6 +203,8 @@ public class MovieDetailActivity extends BaseActivity {
         getMovieByIdUseCase = new GetMovieByIdUseCase(movieRepository);
         showtimeRepository = new ShowtimeRepositoryImpl(true);
         cinemaRepository = new CinemaRepositoryImpl();
+        addReviewUseCase = appContainer.getAddReviewUseCase();
+        getReviewsByMovieUseCase = appContainer.getGetReviewsByMovieUseCase();
     }
 
     private void initScheduleCatalog() {
@@ -233,6 +257,7 @@ public class MovieDetailActivity extends BaseActivity {
         });
 
         loadShowtimesFromFirestore();
+        loadReviews();
     }
 
     private void loadShowtimesFromFirestore() {
@@ -322,6 +347,51 @@ public class MovieDetailActivity extends BaseActivity {
             @Override
             public void onError(@NonNull String message) {
                 Log.e("MovieDetail", "Error loading showtimes: " + message);
+            }
+        });
+    }
+
+    // Hàm tải danh sách bình luận (gọi trong loadMovieFromFirestore)
+    private void loadReviews() {
+        getReviewsByMovieUseCase.execute(selectedMovieId, new ResultCallback<List<Review>>() {
+            @Override
+            public void onSuccess(List<Review> data) {
+                // Hiển thị data lên RecyclerView bình luận
+                Log.d("Review", "Số lượng bình luận: " + data.size());
+                if (reviewAdapter != null) {
+                    reviewAdapter.setReviews(data);
+                }
+            }
+            @Override
+            public void onError(String message) {
+                Log.e("Review", message);
+            }
+        });
+    }
+
+    private void postComment(String content, int rating) {
+        if (com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() == null) {
+            showLoginRequiredDialog();
+            return;
+        }
+
+        Review newReview = new Review();
+        newReview.movieId = selectedMovieId;
+        newReview.userId = com.google.firebase.auth.FirebaseAuth.getInstance().getUid();
+        newReview.content = content;
+        newReview.rating = rating;
+        newReview.movieTitleSnapshot = tvMovieTitle.getText().toString();
+
+        addReviewUseCase.execute(newReview, new ResultCallback<Review>() {
+            @Override
+            public void onSuccess(Review data) {
+                showToast("Đã đăng bình luận!");
+                etCommentInput.setText("");
+                loadReviews(); // Tải lại danh sách
+            }
+            @Override
+            public void onError(String message) {
+                showToast(message);
             }
         });
     }
@@ -821,6 +891,16 @@ public class MovieDetailActivity extends BaseActivity {
         btnPlayTrailer.setOnClickListener(v -> openTrailer());
 
         btnBookTickets.setOnClickListener(v -> prepareBookingPayload());
+
+        btnPostComment.setOnClickListener(v -> {
+            String content = etCommentInput.getText().toString().trim();
+
+            if (TextUtils.isEmpty(content)) {
+                showToast("Vui lòng nhập bình luận");
+                return;
+            }
+            postComment(content, 0); // Rating is unused now
+        });
     }
 
     private void shareMovie() {
