@@ -700,12 +700,22 @@ public class MovieDetailActivity extends BaseActivity {
         styleTimeButton(button, selected);
 
         button.setOnClickListener(v -> {
+            // 1. Kiểm tra xem suất chiếu này có đang được chọn hay không
+            boolean isCurrentlySelected = (cinemaName != null && cinemaName.equals(selectedCinema))
+                    && (roomType != null && roomType.equals(selectedRoomType))
+                    && (item != null && item.timeText != null && item.timeText.equals(selectedShowtime));
+
+            if (isCurrentlySelected) {
+                // 2. Nếu đang chọn suất này rồi -> Bấm lại sẽ là BỎ CHỌN
+                selectedShowtime = "";
+                selectedShowtimeItem = null;
+            } else {
             // Chỉ lưu lựa chọn, KHÔNG check đăng nhập — việc đó sẽ thực hiện khi nhấn "Đặt vé ngay"
             selectedCinema      = cinemaName;
             selectedRoomType    = roomType;
             selectedShowtime    = item.timeText;
             selectedShowtimeItem = item;   // lưu để dùng sau
-
+            }
             renderCinemaGroups(); // làm mới UI nút thời gian để highlight suất đang chọn
         });
 
