@@ -185,7 +185,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="6dp"
                         android:paddingEnd="4dp"
-                        android:text="Lịch sử"
+                        android:text="Nhật ký"
                         android:textColor="#1E1A23"
                         android:textSize="12sp"
                         android:textStyle="bold"

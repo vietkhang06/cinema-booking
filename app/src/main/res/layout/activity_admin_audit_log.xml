@@ -55,57 +55,27 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <!-- Visual Description Card -->
-        <com.google.android.material.card.MaterialCardView
+        <!-- Log List -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/audit_logs_rv"
             android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginTop="16dp"
+            android:clipToPadding="false"
+            android:paddingBottom="8dp" />
+
+        <!-- Empty State -->
+        <TextView
+            android:id="@+id/tv_no_logs"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="24dp"
-            app:cardBackgroundColor="#FFFFFF"
-            app:strokeColor="#ECE8F0"
-            app:strokeWidth="1.5dp"
-            app:cardElevation="2dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="24dp"
-                android:gravity="center">
-
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="64dp"
-                    android:layout_height="64dp"
-                    app:cardCornerRadius="32dp"
-                    app:cardBackgroundColor="#F6F4F8"
-                    app:strokeWidth="0dp"
-                    app:cardElevation="0dp">
-                    <ImageView
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
-                        android:layout_gravity="center"
-                        android:src="@drawable/clipboard_solid_full"
-                        app:tint="#1E1A23" />
-                </com.google.android.material.card.MaterialCardView>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:text="Audit Logs"
-                    android:textColor="#1E1A23"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="Chức năng ghi nhận và truy vết lịch sử hoạt động, thay đổi thông tin dữ liệu của toàn bộ quản trị viên."
-                    android:textColor="#7A757F"
-                    android:textSize="14sp"
-                    android:gravity="center" />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+            android:layout_gravity="center"
+            android:layout_marginTop="32dp"
+            android:text="Chưa có nhật ký hoạt động nào"
+            android:textColor="#7A757F"
+            android:textSize="14sp"
+            android:visibility="gone" />
 
     </LinearLayout>
 
