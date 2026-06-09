@@ -1,13 +1,23 @@
 package com.example.cinemabooking.ui.admin;
 
+import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.widget.ImageViewCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.card.MaterialCardView;
+import com.example.cinemabooking.ui.staff.StaffProfileActivity;
 
 import com.example.cinemabooking.R;
 import com.example.cinemabooking.core.navigation.AppNavigator;
@@ -61,6 +71,8 @@ public class AdminDashboardActivity extends AppCompatActivity {
     private AdminLineChartView lineChartUsers;
     private AdminHorizontalBarChartView barChartMovies;
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -102,6 +114,8 @@ public class AdminDashboardActivity extends AppCompatActivity {
             ServiceProvider.getInstance(getApplicationContext()).getAuthenticationService().logOut();
             AppNavigator.goToLogin(this);
         });
+
+        setupBottomNavigation();
     }
 
     private void loadRealStats() {
@@ -277,5 +291,9 @@ public class AdminDashboardActivity extends AppCompatActivity {
         items.add(new AdminFeatureItem("Báo cáo", "Thống kê doanh thu", R.drawable.chart_line_solid_full, AdminReportActivity.class));
         items.add(new AdminFeatureItem("Nhật ký", "Audit log hệ thống", R.drawable.clipboard_solid_full, AdminAuditLogActivity.class));
         return items;
+    }
+
+    private void setupBottomNavigation() {
+        AdminBottomNavHelper.setupAdminBottomNavigation(this, 0);
     }
 }
