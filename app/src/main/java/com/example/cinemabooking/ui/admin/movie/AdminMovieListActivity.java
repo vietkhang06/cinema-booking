@@ -17,6 +17,7 @@ import com.example.cinemabooking.data.repository.MovieRepositoryImpl;
 import com.example.cinemabooking.domain.common.ResultCallback;
 import com.example.cinemabooking.domain.model.Movie;
 import com.example.cinemabooking.domain.repository.MovieRepository;
+import com.example.cinemabooking.ui.admin.AdminBottomNavHelper;
 import com.example.cinemabooking.ui.admin.movie.adapter.AdminMovieAdapter;
 import com.google.android.material.button.MaterialButton;
 
@@ -41,6 +42,8 @@ public class AdminMovieListActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin_movie_list);
+
+        AdminBottomNavHelper.setupAdminBottomNavigation(this, 2);
 
         // ✅ FIX: inject đúng datasource
         movieRepository = new MovieRepositoryImpl(new MovieRemoteDataSource());

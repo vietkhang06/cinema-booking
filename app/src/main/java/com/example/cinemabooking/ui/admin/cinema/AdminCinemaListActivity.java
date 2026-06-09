@@ -13,6 +13,7 @@ import com.example.cinemabooking.core.base.BaseActivity;
 import com.example.cinemabooking.data.repository.CinemaRepositoryImpl;
 import com.example.cinemabooking.domain.common.ResultCallback;
 import com.example.cinemabooking.domain.model.Cinema;
+import com.example.cinemabooking.ui.admin.AdminBottomNavHelper;
 import com.example.cinemabooking.ui.admin.cinema.adapter.AdminCinemaAdapter;
 import com.google.android.material.button.MaterialButton;
 
@@ -34,6 +35,8 @@ public class AdminCinemaListActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin_cinema_list);
+
+        AdminBottomNavHelper.setupAdminBottomNavigation(this, 1);
 
         repo = new CinemaRepositoryImpl();
 
