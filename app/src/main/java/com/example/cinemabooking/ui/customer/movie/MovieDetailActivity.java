@@ -108,6 +108,7 @@ public class MovieDetailActivity extends BaseActivity {
     private MaterialAutoCompleteTextView actvCinema;
     private LinearLayout layoutDateChips;
     private LinearLayout layoutCinemaGroups;
+    private LinearLayout layoutEmptySchedule;
 
     private MaterialButton btnBookTickets;
 
@@ -185,6 +186,7 @@ public class MovieDetailActivity extends BaseActivity {
         actvCinema = findViewById(R.id.actvCinema);
         layoutDateChips = findViewById(R.id.layoutDateChips);
         layoutCinemaGroups = findViewById(R.id.layoutCinemaGroups);
+        layoutEmptySchedule = findViewById(R.id.layoutEmptySchedule);
 
         btnBookTickets = findViewById(R.id.btnBookTickets);
         btnBookTickets.setVisibility(View.GONE);
@@ -628,13 +630,12 @@ public class MovieDetailActivity extends BaseActivity {
 
         List<CinemaSection> sections = scheduleCatalog.getCinemas(selectedCity);
         if (sections == null || sections.isEmpty()) {
-            TextView empty = new TextView(this);
-            empty.setText("Chưa có dữ liệu rạp cho khu vực này.");
-            empty.setTextColor(Color.parseColor("#555555"));
-            empty.setGravity(Gravity.CENTER);
-            empty.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-            layoutCinemaGroups.addView(empty);
+            layoutCinemaGroups.setVisibility(android.view.View.GONE);
+            if (layoutEmptySchedule != null) layoutEmptySchedule.setVisibility(android.view.View.VISIBLE);
             return;
+        } else {
+            layoutCinemaGroups.setVisibility(android.view.View.VISIBLE);
+            if (layoutEmptySchedule != null) layoutEmptySchedule.setVisibility(android.view.View.GONE);
         }
 
         for (CinemaSection section : sections) {

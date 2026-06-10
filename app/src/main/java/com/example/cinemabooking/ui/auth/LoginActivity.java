@@ -100,11 +100,7 @@ public class LoginActivity extends BaseActivity {
                         } else if (fromBooking) {
                             finish();
                         } else {
-                            Log.e(
-                                    "ROLE_DEBUG",
-                                    "EMAIL=" + user.getEmail()
-                                            + " ROLE=" + user.getRole()
-                            );
+                            Log.e("ROLE_DEBUG", "EMAIL=" + user.getEmail() + " ROLE=" + user.getRole());
                             AppNavigator.goToHomeByRole(LoginActivity.this, user.role);
                         }
                     }
@@ -399,10 +395,7 @@ public class LoginActivity extends BaseActivity {
                             } else if (fromBooking) {
                                 finish();
                             } else {
-                                AppNavigator.goToHomeByRole(
-                                        LoginActivity.this,
-                                        user.role
-                                );
+                                AppNavigator.goToHomeByRole(LoginActivity.this, user.role);
                             }
                         }
 
