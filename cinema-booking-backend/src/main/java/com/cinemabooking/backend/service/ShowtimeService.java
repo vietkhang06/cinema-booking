@@ -14,7 +14,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 @Service
-public class ShowtimeService {
+public class  ShowtimeService {
 
     private static final Logger logger = LoggerFactory.getLogger(ShowtimeService.class);
     private static final String COLLECTION = "showtimes";
@@ -253,6 +253,18 @@ public class ShowtimeService {
             ShowtimeDTO t_showtime = transaction.get(documentReference).get().toObject(ShowtimeDTO.class);
             if (t_showtime == null) {
                 throw new RuntimeException("Showtime not found with ID: " + t_showtime.getShowtimeId());
+            }
+
+            if (t_showtime.getBookedSeatsCount() > 0) {
+                boolean hasRestrictedChanges =
+                        showtime.getStartAt() != t_showtime.getStartAt() ||
+                                showtime.getEndAt() != t_showtime.getEndAt() ||
+                                (showtime.getRoomId() != null && !showtime.getRoomId().equals(t_showtime.getRoomId())) ||
+                                (showtime.getCinemaId() != null && !showtime.getCinemaId().equals(t_showtime.getCinemaId()));
+
+                if (hasRestrictedChanges) {
+                    throw new IllegalArgumentException("SHOWTIME_HAS_BOOKINGS");
+                }
             }
 
             t_showtime.setBasePrice(showtime.getBasePrice());
