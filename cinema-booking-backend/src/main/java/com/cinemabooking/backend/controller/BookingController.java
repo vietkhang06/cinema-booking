@@ -171,6 +171,10 @@ public class BookingController {
                 bookingDTO.getTotal()
         );
 
+        if ("cash".equalsIgnoreCase(bookingDTO.getPaymentMethod())) {
+            bookingService.confirmBookingSeats(bookingDTO.getBookingId());
+        }
+
         return ResponseEntity.ok(
             ApiResponse.<BookingDTO>builder()
                     .success(true)

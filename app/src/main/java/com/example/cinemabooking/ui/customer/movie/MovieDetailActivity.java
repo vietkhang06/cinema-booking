@@ -327,7 +327,8 @@ public class MovieDetailActivity extends BaseActivity {
                             selectedCinema = cinemasInCity.get(0);
                             scheduleCatalog.setExpandedCinema(selectedCity, selectedCinema);
                             selectedRoomType = getFirstRoomType(selectedCity, selectedCinema);
-                            selectedShowtime = getFirstShowtime(selectedCity, selectedCinema, selectedRoomType);
+                            selectedShowtimeItem = getFirstShowtimeItem(selectedCity, selectedCinema, selectedRoomType);
+                            selectedShowtime = selectedShowtimeItem != null ? selectedShowtimeItem.timeText : "";
                         }
                     }
                 } else {
@@ -492,7 +493,8 @@ public class MovieDetailActivity extends BaseActivity {
 
         selectedCinema = getFirstCinemaName(city);
         selectedRoomType = getFirstRoomType(city, selectedCinema);
-        selectedShowtime = getFirstShowtime(city, selectedCinema, selectedRoomType);
+        selectedShowtimeItem = getFirstShowtimeItem(city, selectedCinema, selectedRoomType);
+        selectedShowtime = selectedShowtimeItem != null ? selectedShowtimeItem.timeText : "";
 
         scheduleCatalog.setExpandedCinema(city, selectedCinema);
 
@@ -504,7 +506,8 @@ public class MovieDetailActivity extends BaseActivity {
     private void onCinemaSelected(String cinemaName) {
         selectedCinema = cinemaName;
         selectedRoomType = getFirstRoomType(selectedCity, cinemaName);
-        selectedShowtime = getFirstShowtime(selectedCity, cinemaName, selectedRoomType);
+        selectedShowtimeItem = getFirstShowtimeItem(selectedCity, cinemaName, selectedRoomType);
+        selectedShowtime = selectedShowtimeItem != null ? selectedShowtimeItem.timeText : "";
 
         actvCinema.setText(cinemaName, false);
         scheduleCatalog.setExpandedCinema(selectedCity, cinemaName);
@@ -601,7 +604,8 @@ public class MovieDetailActivity extends BaseActivity {
                 selectedCinema = cinemas.get(0);
                 scheduleCatalog.setExpandedCinema(selectedCity, selectedCinema);
                 selectedRoomType = getFirstRoomType(selectedCity, selectedCinema);
-                selectedShowtime = getFirstShowtime(selectedCity, selectedCinema, selectedRoomType);
+                selectedShowtimeItem = getFirstShowtimeItem(selectedCity, selectedCinema, selectedRoomType);
+                selectedShowtime = selectedShowtimeItem != null ? selectedShowtimeItem.timeText : "";
             } else {
                 selectedCinema = "";
                 selectedRoomType = "";
@@ -810,7 +814,8 @@ public class MovieDetailActivity extends BaseActivity {
                 if (section.expanded) {
                     selectedCinema = section.name;
                     selectedRoomType = getFirstRoomType(selectedCity, selectedCinema);
-                    selectedShowtime = getFirstShowtime(selectedCity, selectedCinema, selectedRoomType);
+                    selectedShowtimeItem = getFirstShowtimeItem(selectedCity, selectedCinema, selectedRoomType);
+                    selectedShowtime = selectedShowtimeItem != null ? selectedShowtimeItem.timeText : "";
                 }
             } else {
                 section.expanded = false;
@@ -1004,24 +1009,24 @@ public class MovieDetailActivity extends BaseActivity {
         return "";
     }
 
-    private String getFirstShowtime(String city, String cinemaName, String roomType) {
+    private MovieDetailScheduleCatalog.ShowtimeItem getFirstShowtimeItem(String city, String cinemaName, String roomType) {
         if (TextUtils.isEmpty(city) || TextUtils.isEmpty(cinemaName) || TextUtils.isEmpty(roomType)) {
-            return "";
+            return null;
         }
         List<CinemaSection> sections = scheduleCatalog.getCinemas(city);
         if (sections == null) {
-            return "";
+            return null;
         }
         for (CinemaSection section : sections) {
             if (section != null && cinemaName.equals(section.name) && section.groups != null) {
                 for (ShowtimeGroup group : section.groups) {
                     if (group != null && roomType.equals(group.title) && group.showtimes != null && !group.showtimes.isEmpty()) {
-                        return group.showtimes.get(0).timeText;
+                        return group.showtimes.get(0);
                     }
                 }
             }
         }
-        return "";
+        return null;
     }
 
     private String safe(String value, String fallback) {
