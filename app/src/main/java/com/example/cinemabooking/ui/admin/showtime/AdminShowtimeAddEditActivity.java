@@ -267,6 +267,7 @@ public class AdminShowtimeAddEditActivity extends AppCompatActivity {
         showtimeRepository.getShowtimeById(currentShowtimeId, new ResultCallback<Showtime>() {
             @Override
             public void onSuccess(Showtime showtime) {
+                showToast("bookedSeatsCount nhận được: " + showtime.bookedSeatsCount);
                 currentShowtime = showtime;
                 selectedMovieId = showtime.movieId;
                 selectedCinemaId = showtime.cinemaId;
@@ -313,6 +314,23 @@ public class AdminShowtimeAddEditActivity extends AppCompatActivity {
                 actvFormat.setText(showtime.format, false);
                 actvLanguage.setText(showtime.language, false);
                 tietBasePrice.setText(String.valueOf((int) showtime.basePrice));
+
+                if (showtime.bookedSeatsCount > 0) {
+                    // Disable các trường chọn Phim, Rạp, Phòng
+                    actvMovie.setEnabled(false);
+                    actvCinema.setEnabled(false);
+                    actvRoom.setEnabled(false);
+                    // Disable các trường chọn Ngày, Giờ bắt đầu, Giờ kết thúc
+                    tietDate.setEnabled(false);
+                    tietStartTime.setEnabled(false);
+                    tietEndTime.setEnabled(false);
+                    // Hiển thị hộp thoại cảnh báo
+                    new AlertDialog.Builder(AdminShowtimeAddEditActivity.this)
+                            .setTitle("Cảnh báo")
+                            .setMessage("Suất chiếu này đã có khách đặt vé.\nKhông thể thay đổi thời gian và phòng chiếu.")
+                            .setPositiveButton("Đã hiểu", null)
+                            .show();
+                }
             }
 
             @Override

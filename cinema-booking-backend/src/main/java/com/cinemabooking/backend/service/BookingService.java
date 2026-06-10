@@ -29,9 +29,17 @@ public class BookingService {
     public BookingDTO createBooking(
             BookingDTO data
     ) throws ExecutionException, InterruptedException{
-        firestore.collection(COLLECTION).document(data.getBookingId()).set(data).get();
+        WriteBatch batch = firestore.batch();
+
+        batch.set(firestore.collection(COLLECTION).document(data.getBookingId()), data);
+
+        DocumentReference showtimeRef = firestore.collection("showtimes").document(data.getShowtimeId());
+        batch.update(showtimeRef, "bookedSeatsCount", FieldValue.increment(data.getSeatIds().size()));
+
+        batch.commit().get();
         return data;
     }
+
 
     public void updatePaymentStatus(String bookingId, String paymentStatus, String bookingStatus) throws ExecutionException, InterruptedException {
         firestore.collection(COLLECTION).document(bookingId).set(
@@ -71,6 +79,7 @@ public class BookingService {
         batch.commit().get();
     }
 
+
     public void releaseBookingSeats(String bookingId) throws ExecutionException, InterruptedException {
         BookingDTO booking = getBookingById(bookingId);
         if (booking == null) return;
@@ -87,8 +96,13 @@ public class BookingService {
                     "heldUntil", 0L
             );
         }
+
+        DocumentReference showtimeRef = firestore.collection("showtimes").document(booking.getShowtimeId());
+        batch.update(showtimeRef, "bookedSeatsCount", FieldValue.increment(-seatIds.size()));
+
         batch.commit().get();
     }
+
 
     public void updateCheckInTime(String bookingId, long checkInAt) throws ExecutionException, InterruptedException {
         firestore.collection(COLLECTION).document(bookingId).set(
