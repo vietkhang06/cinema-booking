@@ -5,5 +5,6 @@ public enum NotificationType {
     BOOKING_SUCCESS,
     BOOKING_FAILED,
     CHECK_IN_SUCCESS,
-    ADMIN_MESSAGE
+    ADMIN_MESSAGE,
+    VOUCHER_RECEIVED
 }

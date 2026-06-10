@@ -82,14 +82,7 @@ public class BookingTimerManager {
                 .remove(KEY_IS_RUNNING)
                 .apply();
 
-        // Notify listeners on main thread
-        mainHandler.post(() -> {
-            synchronized (BookingTimerManager.this) {
-                for (TimerListener listener : new ArrayList<>(listeners)) {
-                    listener.onFinish();
-                }
-            }
-        });
+
     }
 
     public synchronized boolean isTimerActive(Context context) {

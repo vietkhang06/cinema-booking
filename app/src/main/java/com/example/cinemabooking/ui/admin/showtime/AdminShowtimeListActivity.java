@@ -215,11 +215,22 @@ public class AdminShowtimeListActivity extends AppCompatActivity implements Admi
                 .whereEqualTo("showtimeId", showtime.showtimeId)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
-                    if (queryDocumentSnapshots != null && !queryDocumentSnapshots.isEmpty()) {
+                    int bookingCount = 0;
+                    if (queryDocumentSnapshots != null) {
+                        for (com.google.firebase.firestore.DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
+                            String status = doc.getString("status");
+                            if (!com.example.cinemabooking.core.constants.BookingStatus.CANCELLED.equals(status)) {
+                                bookingCount++;
+                            }
+                        }
+                    }
+
+                    if (bookingCount > 0) {
                         new AlertDialog.Builder(this)
-                                .setTitle("Không thể xóa")
-                                .setMessage("Suất chiếu này đã có vé được đặt. Vui lòng không xóa để tránh lỗi dữ liệu.")
-                                .setPositiveButton("Đã hiểu", null)
+                                .setTitle("Cảnh báo: Suất chiếu đã có khách đặt")
+                                .setMessage("Suất chiếu này đang có " + bookingCount + " vé được đặt. Việc hủy sẽ tự động hủy các vé liên quan, tạo yêu cầu hoàn tiền (REFUND_PENDING) và gửi Voucher bồi thường cho khách. Bạn có chắc chắn muốn tiếp tục?")
+                                .setPositiveButton("Hủy suất chiếu", (dialog, which) -> cancelShowtimeWithBookings(showtime))
+                                .setNegativeButton("Quay lại", null)
                                 .show();
                     } else {
                         // Confirm deletion
@@ -252,6 +263,25 @@ public class AdminShowtimeListActivity extends AppCompatActivity implements Admi
             @Override
             public void onError(String message) {
                 showToast("Xóa suất chiếu thất bại: " + message);
+            }
+        });
+    }
+
+    private void cancelShowtimeWithBookings(Showtime showtime) {
+        String adminId = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() != null 
+                ? com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid() 
+                : "UNKNOWN_ADMIN";
+                
+        showtimeRepository.cancelShowtime(showtime.showtimeId, adminId, new ResultCallback<String>() {
+            @Override
+            public void onSuccess(String result) {
+                showToast("Đã hủy suất chiếu và xử lý hoàn tiền thành công");
+                loadShowtimes();
+            }
+
+            @Override
+            public void onError(String message) {
+                showToast("Hủy suất chiếu thất bại: " + message);
             }
         });
     }
