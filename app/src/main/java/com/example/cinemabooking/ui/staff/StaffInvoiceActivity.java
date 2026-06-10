@@ -123,6 +123,9 @@ public class StaffInvoiceActivity extends AuthActivity {
                     if (response.isSuccessful()) {
                         writeAuditLog("CHECKIN", "Successfully check-in customer");
                         showToast("Check-in thành công");
+                        if (invoiceDetail != null && invoiceDetail.booking != null) {
+                            createCheckinNotification(invoiceDetail.booking.userId, invoiceDetail.booking.movieTitleSnapshot);
+                        }
                         retrieveDataFromNavigator();
                     } else {
                         showLoading(false);
@@ -235,5 +238,20 @@ public class StaffInvoiceActivity extends AuthActivity {
             @Override
             public void onFailure(Call<ApiResponse<Void>> call, Throwable t) {}
         });
+    }
+
+    private void createCheckinNotification(String userId, String movieTitle) {
+        if (userId == null) return;
+        com.example.cinemabooking.domain.model.Notification notification = new com.example.cinemabooking.domain.model.Notification();
+        notification.userId = userId;
+        notification.title = "Check-in thành công";
+        notification.message = "Cảm ơn bạn đã check-in xem phim " + (movieTitle != null ? movieTitle : "") + ". Chúc bạn xem phim vui vẻ!";
+        notification.type = "CHECKIN_SUCCESS";
+        notification.isRead = false;
+        notification.createdAt = System.currentTimeMillis();
+        notification.updatedAt = System.currentTimeMillis();
+
+        new com.example.cinemabooking.data.repository.NotificationRepositoryImpl()
+            .createNotification(notification, null);
     }
 }

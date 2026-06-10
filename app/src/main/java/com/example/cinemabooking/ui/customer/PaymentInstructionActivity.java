@@ -288,6 +288,7 @@ public class PaymentInstructionActivity extends AppCompatActivity {
             stopAllListeners();
             BookingTimerManager.getInstance().stopTimer(this);
 
+            createNotification("Thanh toán thành công", "Giao dịch thanh toán vé xem phim của bạn đã thành công. Chúc bạn xem phim vui vẻ!", "BOOKING_SUCCESS");
             Toast.makeText(this, "Thanh toán thành công! Đang xuất vé...", Toast.LENGTH_LONG).show();
 
             Intent intent = new Intent(this, TicketDetailActivity.class);
@@ -297,6 +298,8 @@ public class PaymentInstructionActivity extends AppCompatActivity {
 
         } else if ("FAILED".equalsIgnoreCase(status) || "CANCELLED".equalsIgnoreCase(status)) {
             if (!paymentHandled) {
+                paymentHandled = true;
+                createNotification("Thanh toán thất bại", "Giao dịch thanh toán của bạn đã thất bại hoặc bị hủy.", "BOOKING_FAILED");
                 tvStatusText.setText("Trạng thái: Giao dịch thất bại hoặc đã bị huỷ");
                 View banner = findViewById(R.id.layoutStatusBanner);
                 if (banner != null) {
@@ -375,6 +378,23 @@ public class PaymentInstructionActivity extends AppCompatActivity {
             bookingListener.remove();
             bookingListener = null;
         }
+    }
+
+    private void createNotification(String title, String message, String type) {
+        String userId = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() != null ? 
+                        com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid() : null;
+        if (userId == null) return;
+        com.example.cinemabooking.domain.model.Notification notification = new com.example.cinemabooking.domain.model.Notification();
+        notification.userId = userId;
+        notification.title = title;
+        notification.message = message;
+        notification.type = type;
+        notification.isRead = false;
+        notification.createdAt = System.currentTimeMillis();
+        notification.updatedAt = System.currentTimeMillis();
+
+        new com.example.cinemabooking.data.repository.NotificationRepositoryImpl()
+            .createNotification(notification, null);
     }
 
     @Override

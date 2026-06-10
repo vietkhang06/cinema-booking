@@ -19,11 +19,7 @@ val baseUrl: String = localProperties.getProperty(
 
 android {
     namespace = "com.example.cinemabooking"
-    compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
-    }
+    compileSdk = 36
 
     buildFeatures {
         buildConfig = true
@@ -104,3 +100,6 @@ dependencies {
     implementation(libs.credentialsPlayServicesAuth)
     implementation(libs.googleIdentity)
 }
+
+// Dummy task to workaround Android Studio Sync error
+tasks.register("prepareKotlinBuildScriptModel") {}

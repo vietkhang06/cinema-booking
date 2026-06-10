@@ -89,6 +89,9 @@ public class HomeActivity extends BaseActivity {
     private ImageView navCartIcon;
     private ImageView navMovieIcon;
     private ImageView navProfileIcon;
+    
+    private TextView navProfileBadge;
+    private com.google.firebase.firestore.ListenerRegistration notificationListener;
 
     private final int activeColor = Color.parseColor("#1E1A23");
     private final int inactiveTint = Color.parseColor("#4A4650");
@@ -162,6 +165,54 @@ public class HomeActivity extends BaseActivity {
         loadMoviesFromFirestore();
         initBannerUseCase();
         loadBannersFromFirestore();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        listenToNotifications();
+    }
+
+    private void listenToNotifications() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) return;
+        
+        com.example.cinemabooking.domain.repository.NotificationRepository repo = new com.example.cinemabooking.data.repository.NotificationRepositoryImpl();
+        notificationListener = repo.listenToUserNotifications(user.getUid(), new ResultCallback<List<com.example.cinemabooking.domain.model.Notification>>() {
+            @Override
+            public void onSuccess(List<com.example.cinemabooking.domain.model.Notification> result) {
+                int unreadCount = 0;
+                if (result != null) {
+                    for (com.example.cinemabooking.domain.model.Notification notif : result) {
+                        if (!notif.isRead) {
+                            unreadCount++;
+                        }
+                    }
+                }
+                
+                if (navProfileBadge != null) {
+                    if (unreadCount > 0) {
+                        navProfileBadge.setText(unreadCount > 99 ? "99+" : String.valueOf(unreadCount));
+                        navProfileBadge.setVisibility(View.VISIBLE);
+                    } else {
+                        navProfileBadge.setVisibility(View.GONE);
+                    }
+                }
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                // Do nothing
+            }
+        });
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (notificationListener != null) {
+            notificationListener.remove();
+        }
     }
 
     private void initViews() {
@@ -427,6 +478,8 @@ public class HomeActivity extends BaseActivity {
         navCartIcon = findViewById(R.id.navCartIcon);
         navMovieIcon = findViewById(R.id.navMovieIcon);
         navProfileIcon = findViewById(R.id.navProfileIcon);
+        
+        navProfileBadge = findViewById(R.id.navProfileBadge);
 
         navHomeCard.setOnClickListener(v -> showHomeScreen());
         navShowtimeCard.setOnClickListener(v -> showRapPhimScreen());
