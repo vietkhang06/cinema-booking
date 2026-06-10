@@ -1,100 +1,92 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FAFAFC"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:background="#FAFAFC">
 
-    <!-- Elegant Toolbar with Back Card & Title -->
+    <!-- Scrollable/Listable Content Area -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:layout_marginBottom="24dp">
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:padding="16dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/adminBottomNav"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/btnAdminBack"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="?android:attr/selectableItemBackground"
-            app:cardCornerRadius="20dp"
-            app:cardBackgroundColor="#FFFFFF"
-            app:strokeColor="#ECE8F0"
-            app:strokeWidth="1.5dp"
-            app:cardElevation="1dp">
-            <ImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:layout_gravity="center"
-                android:src="@drawable/chevron_left_solid_full"
-                app:tint="#1E1A23" />
-        </com.google.android.material.card.MaterialCardView>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:text="Nhật ký hệ thống"
-            android:textColor="#1E1A23"
-            android:textSize="20sp"
-            android:textStyle="bold" />
-    </LinearLayout>
-
-    <!-- Visual Description Card -->
-    <com.google.android.material.card.MaterialCardView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:cardCornerRadius="24dp"
-        app:cardBackgroundColor="#FFFFFF"
-        app:strokeColor="#ECE8F0"
-        app:strokeWidth="1.5dp"
-        app:cardElevation="2dp">
-
+        <!-- Elegant Toolbar with Back Card & Title -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="24dp"
-            android:gravity="center">
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="24dp">
 
             <com.google.android.material.card.MaterialCardView
-                android:layout_width="64dp"
-                android:layout_height="64dp"
-                app:cardCornerRadius="32dp"
-                app:cardBackgroundColor="#F6F4F8"
-                app:strokeWidth="0dp"
-                app:cardElevation="0dp">
+                android:id="@+id/btnAdminBack"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?android:attr/selectableItemBackground"
+                app:cardCornerRadius="20dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:strokeColor="#ECE8F0"
+                app:strokeWidth="1.5dp"
+                app:cardElevation="1dp">
                 <ImageView
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:layout_gravity="center"
-                    android:src="@drawable/clipboard_solid_full"
+                    android:src="@drawable/chevron_left_solid_full"
                     app:tint="#1E1A23" />
             </com.google.android.material.card.MaterialCardView>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="Audit Logs"
+                android:layout_marginStart="16dp"
+                android:text="Nhật ký hệ thống"
                 android:textColor="#1E1A23"
-                android:textSize="18sp"
+                android:textSize="20sp"
                 android:textStyle="bold" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="Chức năng ghi nhận và truy vết lịch sử hoạt động, thay đổi thông tin dữ liệu của toàn bộ quản trị viên."
-                android:textColor="#7A757F"
-                android:textSize="14sp"
-                android:gravity="center" />
         </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
 
-</LinearLayout>
+        <!-- Log List -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/audit_logs_rv"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginTop="16dp"
+            android:clipToPadding="false"
+            android:paddingBottom="8dp" />
+
+        <!-- Empty State -->
+        <TextView
+            android:id="@+id/tv_no_logs"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="32dp"
+            android:text="Chưa có nhật ký hoạt động nào"
+            android:textColor="#7A757F"
+            android:textSize="14sp"
+            android:visibility="gone" />
+
+    </LinearLayout>
+
+    <!-- Bottom Navigation Bar -->
+    <include
+        android:id="@+id/adminBottomNav"
+        layout="@layout/view_admin_bottom_nav"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

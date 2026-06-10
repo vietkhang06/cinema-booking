@@ -457,6 +457,7 @@ public class BookingConfirmActivity extends AppCompatActivity {
                         startActivity(intent);
                         finish();
                     } else {
+                        createNotification("Đặt vé thành công", "Bạn đã đặt vé thành công. Vui lòng thanh toán tại quầy trước khi suất chiếu bắt đầu 15 phút.", "BOOKING_SUCCESS");
                         Toast.makeText(BookingConfirmActivity.this, "Đặt vé thành công (Chờ thanh toán tại quầy)!", Toast.LENGTH_SHORT).show();
                         finish();
                     }
@@ -469,6 +470,7 @@ public class BookingConfirmActivity extends AppCompatActivity {
                     } else if (response.body() != null && response.body().getMessage() != null) {
                         msg = response.body().getMessage();
                     }
+                    createNotification("Đặt vé thất bại", msg, "BOOKING_FAILED");
                     Toast.makeText(BookingConfirmActivity.this, msg, Toast.LENGTH_LONG).show();
                 }
             }
@@ -479,6 +481,23 @@ public class BookingConfirmActivity extends AppCompatActivity {
                 Toast.makeText(BookingConfirmActivity.this, "Kết nối mạng không ổn định. Vui lòng kiểm tra lại Wifi/4G.", Toast.LENGTH_LONG).show();
             }
         });
+    }
+
+    private void createNotification(String title, String message, String type) {
+        String userId = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() != null ? 
+                        com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid() : null;
+        if (userId == null) return;
+        com.example.cinemabooking.domain.model.Notification notification = new com.example.cinemabooking.domain.model.Notification();
+        notification.userId = userId;
+        notification.title = title;
+        notification.message = message;
+        notification.type = type;
+        notification.isRead = false;
+        notification.createdAt = System.currentTimeMillis();
+        notification.updatedAt = System.currentTimeMillis();
+
+        new com.example.cinemabooking.data.repository.NotificationRepositoryImpl()
+            .createNotification(notification, null);
     }
 
     private void showMomoCheckoutDialog(String paymentMethod) {

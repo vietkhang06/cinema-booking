@@ -250,6 +250,9 @@ public class AdminMovieFormActivity extends BaseActivity {
             movieRepository.updateMovie(movie, new ResultCallback<Movie>() {
                 @Override
                 public void onSuccess(Movie data) {
+                    com.example.cinemabooking.ui.admin.log.AdminAuditLogger.log(
+                            "UPDATE_MOVIE", "MOVIE", data.movieId, "Đã cập nhật phim: " + data.title
+                    );
                     showToast("Đã cập nhật phim");
                     finish();
                 }
@@ -264,6 +267,9 @@ public class AdminMovieFormActivity extends BaseActivity {
             movieRepository.createMovie(movie, new ResultCallback<Movie>() {
                 @Override
                 public void onSuccess(Movie data) {
+                    com.example.cinemabooking.ui.admin.log.AdminAuditLogger.log(
+                            "CREATE_MOVIE", "MOVIE", data.movieId, "Đã thêm phim mới: " + data.title
+                    );
                     showToast("Đã thêm phim");
                     finish();
                 }

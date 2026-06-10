@@ -267,6 +267,7 @@ public class AdminShowtimeAddEditActivity extends AppCompatActivity {
         showtimeRepository.getShowtimeById(currentShowtimeId, new ResultCallback<Showtime>() {
             @Override
             public void onSuccess(Showtime showtime) {
+                showToast("bookedSeatsCount nhận được: " + showtime.bookedSeatsCount);
                 currentShowtime = showtime;
                 selectedMovieId = showtime.movieId;
                 selectedCinemaId = showtime.cinemaId;
@@ -313,6 +314,23 @@ public class AdminShowtimeAddEditActivity extends AppCompatActivity {
                 actvFormat.setText(showtime.format, false);
                 actvLanguage.setText(showtime.language, false);
                 tietBasePrice.setText(String.valueOf((int) showtime.basePrice));
+
+                if (showtime.bookedSeatsCount > 0) {
+                    // Disable các trường chọn Phim, Rạp, Phòng
+                    actvMovie.setEnabled(false);
+                    actvCinema.setEnabled(false);
+                    actvRoom.setEnabled(false);
+                    // Disable các trường chọn Ngày, Giờ bắt đầu, Giờ kết thúc
+                    tietDate.setEnabled(false);
+                    tietStartTime.setEnabled(false);
+                    tietEndTime.setEnabled(false);
+                    // Hiển thị hộp thoại cảnh báo
+                    new AlertDialog.Builder(AdminShowtimeAddEditActivity.this)
+                            .setTitle("Cảnh báo")
+                            .setMessage("Suất chiếu này đã có khách đặt vé.\nKhông thể thay đổi thời gian và phòng chiếu.")
+                            .setPositiveButton("Đã hiểu", null)
+                            .show();
+                }
             }
 
             @Override
@@ -444,6 +462,9 @@ public class AdminShowtimeAddEditActivity extends AppCompatActivity {
             showtimeRepository.createShowtime(showtime, new ResultCallback<Showtime>() {
                 @Override
                 public void onSuccess(Showtime resultShowtime) {
+                    com.example.cinemabooking.ui.admin.log.AdminAuditLogger.log(
+                            "CREATE_SHOWTIME", "SHOWTIME", resultShowtime.showtimeId, "Đã thêm suất chiếu mới cho phim: " + actvMovie.getText().toString()
+                    );
                     // Generate showtime seats automatically!
                     seatRepository.generateSeatsForShowtime(resultShowtime.showtimeId, resultShowtime.roomId, new ResultCallback<Void>() {
                         @Override
@@ -471,6 +492,9 @@ public class AdminShowtimeAddEditActivity extends AppCompatActivity {
             showtimeRepository.updateShowtime(showtime, new ResultCallback<Showtime>() {
                 @Override
                 public void onSuccess(Showtime resultShowtime) {
+                    com.example.cinemabooking.ui.admin.log.AdminAuditLogger.log(
+                            "UPDATE_SHOWTIME", "SHOWTIME", resultShowtime.showtimeId, "Đã cập nhật suất chiếu cho phim: " + actvMovie.getText().toString()
+                    );
                     showToast("Cập nhật suất chiếu thành công");
                     setResult(RESULT_OK);
                     finish();

@@ -63,6 +63,7 @@ public class ShowtimeRepositoryImpl implements ShowtimeRepository {
                 .get()
                 .addOnSuccessListener(doc -> {
                     if (doc.exists()) {
+                        android.util.Log.d("DEBUG_SHOWTIME", "ID suất chiếu: " + doc.getId() + " | Dữ liệu thô: " + doc.getData());
                         Showtime showtime = doc.toObject(Showtime.class);
                         if (showtime != null) {
                             showtime.showtimeId = doc.getId();
@@ -240,16 +241,36 @@ public class ShowtimeRepositoryImpl implements ShowtimeRepository {
     @Override
     public void updateShowtime(Showtime showtime, ResultCallback<Showtime> callback) {
         showtime.updatedAt = System.currentTimeMillis();
-        firestore.collection(FirestoreCollections.SHOWTIMES)
-                .document(showtime.showtimeId)
-                .set(showtime)
-                .addOnSuccessListener(aVoid -> {
-                    if (callback != null) callback.onSuccess(showtime);
-                })
-                .addOnFailureListener(e -> {
-                    if (callback != null) callback.onError(e.getMessage());
-                });
+        // Gọi API của Spring Boot Backend để cập nhật và chạy Validation
+        showtimeApi.updateShowtime(showtime).enqueue(new Callback<ApiResponse<Showtime>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<Showtime>> call, Response<ApiResponse<Showtime>> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                    if (callback != null) callback.onSuccess(response.body().getData());
+                } else {
+                    String errMsg = "Cập nhật suất chiếu thất bại!";
+                    try {
+                        if (response.errorBody() != null) {
+                            String errorJson = response.errorBody().string();
+                            ApiResponse<?> apiError = new com.google.gson.Gson().fromJson(
+                                    errorJson, ApiResponse.class);
+                            if (apiError != null && apiError.getMessage() != null) {
+                                errMsg = apiError.getMessage();
+                            }
+                        }
+                    } catch (Exception ignored) {
+                    }
+                    if (callback != null) callback.onError(errMsg);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<Showtime>> call, Throwable t) {
+                if (callback != null) callback.onError("Lỗi kết nối: " + t.getMessage());
+            }
+        });
     }
+
 
     @Override
     public void changeShowtimeStatus(String showtimeId, String status, ResultCallback<Showtime> callback) {
@@ -342,7 +363,7 @@ public class ShowtimeRepositoryImpl implements ShowtimeRepository {
                     int bookingCount = 0;
                     List<DocumentSnapshot> activeBookings = new ArrayList<>();
                     for (DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
-                        String status = doc.getString("status");
+                        String status = doc.getString("bookingStatus");
                         if (!com.example.cinemabooking.core.constants.BookingStatus.CANCELLED.equals(status)) {
                             activeBookings.add(doc);
                             bookingCount++;

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_bottom_line"
+    android:backgroundTint="#FFFFFF"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:layout_margin="20dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Cộng/Trừ điểm tích lũy"
+        android:textColor="#1E1A23"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="8dp"/>
+
+    <TextView
+        android:id="@+id/tvCurrentPointsText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Điểm hiện tại: -"
+        android:textColor="#7B39F0"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- Input text layout -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        app:boxStrokeColor="#7B39F0"
+        app:hintTextColor="#7B39F0">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etPointsAmount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Nhập số điểm cần điều chỉnh"
+            android:inputType="number"
+            android:textColor="#1E1A23"/>
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Action buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="end">
+
+        <Button
+            android:id="@+id/btnCancelPoints"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hủy"
+            android:textColor="#7A757F"
+            android:layout_marginEnd="12dp" />
+
+        <Button
+            android:id="@+id/btnPointsSubtract"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Trừ điểm"
+            android:textColor="#C62828"
+            app:strokeColor="#C62828"
+            android:layout_marginEnd="8dp" />
+
+        <Button
+            android:id="@+id/btnPointsAdd"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cộng điểm"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#10B981" />
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -18,11 +18,13 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
+            <!-- Backdrop Section -->
             <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="420dp"
@@ -57,7 +59,7 @@
                         android:src="@drawable/chevron_left_solid_full"
                         android:padding="6dp"
                         android:background="?attr/selectableItemBackgroundBorderless"
-                        android:contentDescription="Back"
+                        android:contentDescription="Quay lại"
                         app:tint="#FFFFFF" />
 
                     <View
@@ -72,7 +74,7 @@
                         android:src="@drawable/share_solid_full"
                         android:padding="6dp"
                         android:background="?attr/selectableItemBackgroundBorderless"
-                        android:contentDescription="Back"
+                        android:contentDescription="Chia sẻ"
                         app:tint="#FFFFFF" />
                 </LinearLayout>
 
@@ -85,7 +87,6 @@
                     app:cardCornerRadius="36dp"
                     app:cardElevation="8dp"
                     app:strokeWidth="0dp">
-
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
@@ -97,6 +98,7 @@
                 </com.google.android.material.card.MaterialCardView>
             </FrameLayout>
 
+            <!-- Main Info Card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -105,7 +107,7 @@
                 android:layout_marginEnd="16dp"
                 app:cardBackgroundColor="#FFFFFF"
                 app:cardCornerRadius="28dp"
-                app:cardElevation="0dp"
+                app:cardElevation="4dp"
                 app:strokeWidth="0dp">
 
                 <LinearLayout
@@ -114,11 +116,11 @@
                     android:orientation="vertical"
                     android:padding="16dp">
 
+                    <!-- Movie Header -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal">
-
                         <com.google.android.material.card.MaterialCardView
                             android:layout_width="96dp"
                             android:layout_height="144dp"
@@ -126,12 +128,10 @@
                             app:cardCornerRadius="16dp"
                             app:cardElevation="4dp"
                             app:strokeWidth="0dp">
-
                             <ImageView
                                 android:id="@+id/imgPosterThumb"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
-                                android:contentDescription="@null"
                                 android:scaleType="centerCrop"
                                 tools:src="@drawable/login_icon" />
                         </com.google.android.material.card.MaterialCardView>
@@ -142,26 +142,20 @@
                             android:layout_marginStart="14dp"
                             android:layout_weight="1"
                             android:orientation="vertical">
-
                             <TextView
                                 android:id="@+id/tvMovieTitle"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:gravity="center"
-                                android:text="Heo Năm Móng"
-                                android:textAlignment="center"
+                                android:text="Tên phim"
                                 android:textColor="#111111"
                                 android:textSize="22sp"
                                 android:textStyle="bold" />
-
                             <TextView
                                 android:id="@+id/tvMovieTagline"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="6dp"
-                                android:gravity="center"
                                 android:text="Khám phá lịch chiếu và suất vé"
-                                android:textAlignment="center"
                                 android:textColor="#666666"
                                 android:textSize="13sp" />
 
@@ -169,47 +163,37 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="12dp"
-                                android:gravity="center"
                                 android:orientation="horizontal">
-
                                 <com.google.android.material.card.MaterialCardView
                                     android:layout_width="wrap_content"
                                     android:layout_height="28dp"
                                     android:layout_marginEnd="8dp"
                                     app:cardBackgroundColor="#FFF4D8"
                                     app:cardCornerRadius="14dp"
-                                    app:cardElevation="0dp"
-                                    app:strokeWidth="0dp">
-
+                                    app:cardElevation="0dp">
                                     <TextView
                                         android:id="@+id/tvRating"
                                         android:layout_width="wrap_content"
                                         android:layout_height="match_parent"
                                         android:gravity="center"
-                                        android:paddingStart="10dp"
-                                        android:paddingEnd="10dp"
+                                        android:paddingHorizontal="10dp"
                                         android:text="★ 8.5"
                                         android:textColor="#B56B00"
                                         android:textSize="13sp"
                                         android:textStyle="bold" />
                                 </com.google.android.material.card.MaterialCardView>
-
                                 <com.google.android.material.card.MaterialCardView
                                     android:layout_width="wrap_content"
                                     android:layout_height="28dp"
-                                    android:layout_marginEnd="8dp"
                                     app:cardBackgroundColor="#FFF0E8"
                                     app:cardCornerRadius="14dp"
-                                    app:cardElevation="0dp"
-                                    app:strokeWidth="0dp">
-
+                                    app:cardElevation="0dp">
                                     <TextView
                                         android:id="@+id/tvAgeRating"
                                         android:layout_width="wrap_content"
                                         android:layout_height="match_parent"
                                         android:gravity="center"
-                                        android:paddingStart="10dp"
-                                        android:paddingEnd="10dp"
+                                        android:paddingHorizontal="10dp"
                                         android:text="T18"
                                         android:textColor="#E06A00"
                                         android:textSize="13sp"
@@ -221,33 +205,27 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="10dp"
-                                android:gravity="center"
                                 android:orientation="horizontal">
-
                                 <TextView
                                     android:id="@+id/tvDuration"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_marginEnd="14dp"
-                                    android:gravity="center"
                                     android:text="⏱ 103 phút"
                                     android:textColor="#444444"
-                                    android:textSize="13sp"
-                                    android:textStyle="bold" />
-
+                                    android:textSize="13sp" />
                                 <TextView
                                     android:id="@+id/tvReleaseDate"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:gravity="center"
                                     android:text="📅 20/04/2026"
                                     android:textColor="#444444"
-                                    android:textSize="13sp"
-                                    android:textStyle="bold" />
+                                    android:textSize="13sp" />
                             </LinearLayout>
                         </LinearLayout>
                     </LinearLayout>
 
+                    <!-- Tabs -->
                     <com.google.android.material.button.MaterialButtonToggleGroup
                         android:id="@+id/toggleSections"
                         android:layout_width="match_parent"
@@ -256,7 +234,6 @@
                         app:checkedButton="@id/btnTabSchedule"
                         app:selectionRequired="true"
                         app:singleSelection="true">
-
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btnTabSchedule"
                             android:layout_width="0dp"
@@ -264,13 +241,7 @@
                             android:layout_weight="1"
                             android:text="Lịch chiếu"
                             android:textAllCaps="false"
-                            android:textColor="#FFFFFF"
-                            android:textSize="13sp"
-                            android:textStyle="bold"
-                            app:backgroundTint="#1E1A23"
-                            app:cornerRadius="15dp"
-                            app:strokeWidth="0dp" />
-
+                            app:cornerRadius="15dp" />
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btnTabInfo"
                             android:layout_width="0dp"
@@ -278,14 +249,7 @@
                             android:layout_weight="1"
                             android:text="Thông tin"
                             android:textAllCaps="false"
-                            android:textColor="#1E1A23"
-                            android:textSize="13sp"
-                            android:textStyle="bold"
-                            app:backgroundTint="#FFFFFF"
-                            app:cornerRadius="22dp"
-                            app:strokeColor="#1E1A23"
-                            app:strokeWidth="1dp" />
-
+                            app:cornerRadius="15dp" />
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btnTabNews"
                             android:layout_width="0dp"
@@ -293,47 +257,34 @@
                             android:layout_weight="1"
                             android:text="Tin tức"
                             android:textAllCaps="false"
-                            android:textColor="#1E1A23"
-                            android:textSize="13sp"
-                            android:textStyle="bold"
-                            app:backgroundTint="#FFFFFF"
-                            app:cornerRadius="15dp"
-                            app:strokeColor="#1E1A23"
-                            app:strokeWidth="1dp" />
+                            app:cornerRadius="15dp" />
                     </com.google.android.material.button.MaterialButtonToggleGroup>
 
+                    <!-- Section 1: Schedule -->
                     <LinearLayout
                         android:id="@+id/layoutScheduleSection"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="18dp"
                         android:orientation="vertical">
-
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:orientation="horizontal">
-
                             <com.google.android.material.textfield.TextInputLayout
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_marginEnd="8dp"
                                 android:layout_weight="1"
-                                android:hint="Chọn tỉnh/thành"
+                                android:hint="Tỉnh/Thành"
                                 app:boxBackgroundMode="outline"
                                 app:endIconMode="dropdown_menu">
-
                                 <com.google.android.material.textfield.MaterialAutoCompleteTextView
                                     android:id="@+id/actvCity"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
-                                    android:gravity="center"
-                                    android:inputType="none"
-                                    android:textAlignment="center"
-                                    android:textColor="#111111"
-                                    android:textSize="14sp" />
+                                    android:inputType="none" />
                             </com.google.android.material.textfield.TextInputLayout>
-
                             <com.google.android.material.textfield.TextInputLayout
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
@@ -342,32 +293,24 @@
                                 android:hint="Chọn rạp"
                                 app:boxBackgroundMode="outline"
                                 app:endIconMode="dropdown_menu">
-
                                 <com.google.android.material.textfield.MaterialAutoCompleteTextView
                                     android:id="@+id/actvCinema"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
-                                    android:gravity="center"
-                                    android:inputType="none"
-                                    android:textAlignment="center"
-                                    android:textColor="#111111"
-                                    android:textSize="14sp" />
+                                    android:inputType="none" />
                             </com.google.android.material.textfield.TextInputLayout>
                         </LinearLayout>
-
                         <HorizontalScrollView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="14dp"
                             android:scrollbars="none">
-
                             <LinearLayout
                                 android:id="@+id/layoutDateChips"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:orientation="horizontal" />
                         </HorizontalScrollView>
-
                         <LinearLayout
                             android:id="@+id/layoutCinemaGroups"
                             android:layout_width="match_parent"
@@ -410,6 +353,7 @@
                         </LinearLayout>
                     </LinearLayout>
 
+                    <!-- Section 2: Info -->
                     <LinearLayout
                         android:id="@+id/layoutInfoSection"
                         android:layout_width="match_parent"
@@ -417,58 +361,25 @@
                         android:layout_marginTop="18dp"
                         android:orientation="vertical"
                         android:visibility="gone">
-
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:gravity="center"
                             android:text="Nội dung phim"
-                            android:textAlignment="center"
                             android:textColor="#111111"
                             android:textSize="16sp"
                             android:textStyle="bold" />
-
                         <TextView
                             android:id="@+id/tvSynopsis"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="10dp"
-                            android:gravity="center"
                             android:lineSpacingExtra="4dp"
-                            android:text="Phần mô tả phim sẽ được load từ Firestore."
-                            android:textAlignment="center"
-                            android:textColor="#555555"
-                            android:textSize="14sp" />
-
-                        <View
-                            android:layout_width="match_parent"
-                            android:layout_height="1dp"
-                            android:layout_marginTop="16dp"
-                            android:background="#EEEEEE" />
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="16dp"
-                            android:gravity="center"
-                            android:text="Thông tin thêm"
-                            android:textAlignment="center"
-                            android:textColor="#111111"
-                            android:textSize="16sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="10dp"
-                            android:gravity="center"
-                            android:lineSpacingExtra="4dp"
-                            android:text="• Đạo diễn: Đang cập nhật\n• Diễn viên: Đang cập nhật\n• Quốc gia: Đang cập nhật"
-                            android:textAlignment="center"
+                            android:text="Mô tả phim..."
                             android:textColor="#555555"
                             android:textSize="14sp" />
                     </LinearLayout>
 
+                    <!-- Section 3: News & Reviews -->
                     <LinearLayout
                         android:id="@+id/layoutNewsSection"
                         android:layout_width="match_parent"
@@ -480,71 +391,78 @@
                         <com.google.android.material.card.MaterialCardView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="12dp"
-                            app:cardBackgroundColor="#FFFFFF"
+                            android:layout_marginBottom="16dp"
                             app:cardCornerRadius="16dp"
-                            app:cardElevation="0dp"
                             app:strokeColor="#E6E6E6"
                             app:strokeWidth="1dp">
-
                             <LinearLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:orientation="vertical"
                                 android:padding="16dp">
-
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="Tin nổi bật"
-                                    android:textColor="#111111"
-                                    android:textSize="16sp"
                                     android:textStyle="bold" />
-
                                 <TextView
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:layout_marginTop="8dp"
-                                    android:lineSpacingExtra="4dp"
-                                    android:text="Sẽ hiển thị tin tức, hậu trường hoặc bài viết liên quan đến phim."
-                                    android:textColor="#555555"
-                                    android:textSize="14sp" />
+                                    android:text="Thông tin hậu trường và tin tức về phim."
+                                    android:textColor="#555555" />
                             </LinearLayout>
                         </com.google.android.material.card.MaterialCardView>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="12dp"
+                            android:text="Bình luận từ khán giả"
+                            android:textColor="#111111"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
 
                         <com.google.android.material.card.MaterialCardView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            app:cardBackgroundColor="#FFFFFF"
-                            app:cardCornerRadius="16dp"
-                            app:cardElevation="0dp"
-                            app:strokeColor="#E6E6E6"
+                            android:layout_marginBottom="16dp"
+                            app:cardCornerRadius="12dp"
+                            app:strokeColor="#EEEEEE"
                             app:strokeWidth="1dp">
-
                             <LinearLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:orientation="vertical"
-                                android:padding="16dp">
+                                android:padding="12dp">
 
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Bài viết khác"
-                                    android:textColor="#111111"
-                                    android:textSize="16sp"
-                                    android:textStyle="bold" />
-
-                                <TextView
+                                <EditText
+                                    android:id="@+id/etCommentInput"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
-                                    android:layout_marginTop="8dp"
-                                    android:lineSpacingExtra="4dp"
-                                    android:text="Khu vực này sẽ dùng cho các nội dung quảng bá, review hoặc thông báo mới."
-                                    android:textColor="#555555"
-                                    android:textSize="14sp" />
+                                    android:hint="Chia sẻ cảm nghĩ của bạn về phim..."
+                                    android:background="@null"
+                                    android:textSize="14sp"
+                                    android:minLines="2"
+                                    android:inputType="textMultiLine|textCapSentences"/>
+                                <Button
+                                    android:id="@+id/btnPostComment"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="36dp"
+                                    android:layout_gravity="end"
+                                    android:backgroundTint="#1E1A23"
+                                    android:text="Gửi"
+                                    android:textSize="12sp"
+                                    app:cornerRadius="18dp"/>
                             </LinearLayout>
                         </com.google.android.material.card.MaterialCardView>
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/rvReviews"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:nestedScrollingEnabled="false"
+                            tools:listitem="@layout/item_review"/>
                     </LinearLayout>
 
                     <com.google.android.material.button.MaterialButton
@@ -554,8 +472,6 @@
                         android:layout_marginTop="22dp"
                         android:text="Đặt vé ngay"
                         android:textAllCaps="false"
-                        android:textColor="#FFFFFF"
-                        android:textSize="15sp"
                         android:textStyle="bold"
                         android:visibility="gone"
                         app:backgroundTint="#1E1A23"

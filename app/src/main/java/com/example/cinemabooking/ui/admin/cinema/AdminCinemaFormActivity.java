@@ -243,6 +243,7 @@ public class AdminCinemaFormActivity extends BaseActivity {
             cinemaRepository.updateCinema(cinema, new ResultCallback<Cinema>() {
                 @Override
                 public void onSuccess(Cinema data) {
+                    com.example.cinemabooking.ui.admin.log.AdminAuditLogger.log("UPDATE_CINEMA", "CINEMA", data.cinemaId, "Đã cập nhật thông tin rạp: " + data.name);
                     showToast("Đã cập nhật rạp");
                     finish();
                 }
@@ -257,6 +258,7 @@ public class AdminCinemaFormActivity extends BaseActivity {
             cinemaRepository.createCinema(cinema, new ResultCallback<Cinema>() {
                 @Override
                 public void onSuccess(Cinema data) {
+                    com.example.cinemabooking.ui.admin.log.AdminAuditLogger.log("CREATE_CINEMA", "CINEMA", data.cinemaId, "Đã thêm rạp chiếu mới: " + data.name);
                     showToast("Đã thêm rạp");
                     finish();
                 }

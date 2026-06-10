@@ -161,10 +161,14 @@ public class BookingRepositoryImpl implements BookingRepository {
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     List<Booking> bookings = new ArrayList<>();
                     for (DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
-                        Booking booking = doc.toObject(Booking.class);
-                        if (booking != null) {
-                            booking.bookingId = doc.getId();
-                            bookings.add(booking);
+                        try {
+                            Booking booking = doc.toObject(Booking.class);
+                            if (booking != null) {
+                                booking.bookingId = doc.getId();
+                                bookings.add(booking);
+                            }
+                        } catch (Exception e) {
+                            android.util.Log.e("BookingRepositoryImpl", "Lỗi phân tích tài liệu đặt vé: " + doc.getId(), e);
                         }
                     }
                     if (callback != null) callback.onSuccess(bookings);

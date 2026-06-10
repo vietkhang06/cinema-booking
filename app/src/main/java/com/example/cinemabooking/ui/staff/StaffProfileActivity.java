@@ -108,6 +108,14 @@ public class StaffProfileActivity extends AuthActivity {
 
         if ("admin".equalsIgnoreCase(user.role)) {
             tvRoleBadge.setText("Quản trị viên");
+            View adminBottomNav = findViewById(R.id.adminBottomNav);
+            if (adminBottomNav != null) {
+                adminBottomNav.setVisibility(View.VISIBLE);
+                com.example.cinemabooking.ui.admin.AdminBottomNavHelper.setupAdminBottomNavigation(this, 4);
+            }
+            if (backBtn != null) {
+                backBtn.setVisibility(View.GONE);
+            }
         } else if ("staff".equalsIgnoreCase(user.role)) {
             tvRoleBadge.setText("Nhân viên");
         } else {

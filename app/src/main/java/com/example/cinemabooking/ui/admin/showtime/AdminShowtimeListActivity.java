@@ -251,6 +251,11 @@ public class AdminShowtimeListActivity extends AppCompatActivity implements Admi
         showtimeRepository.softDeleteShowtime(showtime.showtimeId, new ResultCallback<Void>() {
             @Override
             public void onSuccess(Void result) {
+                Movie movie = movieMap.get(showtime.movieId);
+                String movieTitle = movie != null ? movie.title : "ID: " + showtime.movieId;
+                com.example.cinemabooking.ui.admin.log.AdminAuditLogger.log(
+                        "DELETE_SHOWTIME", "SHOWTIME", showtime.showtimeId, "Đã xóa suất chiếu của phim: " + movieTitle
+                );
                 showToast("Đã xóa suất chiếu thành công");
                 loadShowtimes();
             }

@@ -139,13 +139,25 @@
             android:name=".ui.admin.promotion.AdminPromotionListActivity"
             android:exported="false" />
         <activity
+            android:name=".ui.admin.promotion.AdminPromotionAddEditActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.admin.report.AdminReportActivity"
             android:exported="false" />
         <activity
             android:name=".ui.admin.log.AdminAuditLogActivity"
             android:exported="false" />
         <activity
+            android:name=".ui.admin.notification.AdminSendNotificationActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.admin.notification.AdminSelectUserActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.customer.profile.EditProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.customer.notification.NotificationActivity"
             android:exported="false" />
     </application>
 
