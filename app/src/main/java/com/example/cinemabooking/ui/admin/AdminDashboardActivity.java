@@ -286,7 +286,7 @@ public class AdminDashboardActivity extends AppCompatActivity {
 
     private List<AdminFeatureItem> createOperationFeatures() {
         List<AdminFeatureItem> items = new ArrayList<>();
-        items.add(new AdminFeatureItem("Người dùng", "Quản lý customer/staff/admin", R.drawable.user_solid_full, AdminUserManagementActivity.class));
+        items.add(new AdminFeatureItem("Khách hàng", "Quản lý customer", R.drawable.user_solid_full, AdminUserManagementActivity.class));
         items.add(new AdminFeatureItem("Khuyến mãi", "Quản lý promotion", R.drawable.tag_solid_full, AdminPromotionListActivity.class));
         items.add(new AdminFeatureItem("Báo cáo", "Thống kê doanh thu", R.drawable.chart_line_solid_full, AdminReportActivity.class));
         items.add(new AdminFeatureItem("Nhật ký", "Audit log hệ thống", R.drawable.clipboard_solid_full, AdminAuditLogActivity.class));

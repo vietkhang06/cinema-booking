@@ -45,56 +45,99 @@
             android:textStyle="bold" />
     </LinearLayout>
 
-    <!-- Visual Description Card -->
-    <com.google.android.material.card.MaterialCardView
+    <!-- Filters (Horizontal scroll chip group) -->
+    <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="24dp"
-        app:cardBackgroundColor="#FFFFFF"
-        app:strokeColor="#ECE8F0"
-        app:strokeWidth="1.5dp"
-        app:cardElevation="2dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
+        android:layout_marginBottom="12dp"
+        android:scrollbars="none">
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chipGroupPromoFilters"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="24dp"
-            android:gravity="center">
+            android:singleLine="true"
+            app:chipSpacing="8dp"
+            app:singleSelection="true"
+            app:selectionRequired="true">
 
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="64dp"
-                android:layout_height="64dp"
-                app:cardCornerRadius="32dp"
-                app:cardBackgroundColor="#F6F4F8"
-                app:strokeWidth="0dp"
-                app:cardElevation="0dp">
-                <ImageView
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:layout_gravity="center"
-                    android:src="@drawable/tag_solid_full"
-                    app:tint="#1E1A23" />
-            </com.google.android.material.card.MaterialCardView>
-
-            <TextView
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipPromoAll"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="Danh sách chương trình"
-                android:textColor="#1E1A23"
-                android:textSize="18sp"
-                android:textStyle="bold" />
+                android:text="Tất cả"
+                android:checked="true" />
 
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipPromoActive"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Đang chạy" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipPromoScheduled"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sắp diễn ra" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipPromoExpired"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Hết hạn / Tắt" />
+
+        </com.google.android.material.chip.ChipGroup>
+    </HorizontalScrollView>
+
+    <!-- RecyclerView and FAB in FrameLayout -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvPromotions"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingBottom="80dp" />
+
+        <LinearLayout
+            android:id="@+id/layoutPromoEmptyState"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:visibility="gone">
+            <ImageView
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:src="@drawable/tag_solid_full"
+                app:tint="#D0C9D6" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Chức năng quản lý các chương trình ưu đãi, mã giảm giá và chiến dịch marketing của rạp."
+                android:text="Chưa có chương trình khuyến mãi nào"
                 android:textColor="#7A757F"
-                android:textSize="14sp"
-                android:gravity="center" />
+                android:textSize="14sp" />
         </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
 
+        <!-- Floating Action Button for adding promotion -->
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabAddPromotion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="16dp"
+            android:src="@android:drawable/ic_input_add"
+            app:backgroundTint="#7B39F0"
+            app:tint="#FFFFFF"
+            android:contentDescription="Thêm khuyến mãi" />
+
+    </FrameLayout>
 </LinearLayout>

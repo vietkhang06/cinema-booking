@@ -287,7 +287,7 @@ public class AuthenticationService {
         user.phone = phone;
         user.role = UserRoles.CUSTOMER;
         user.status = "active";
-        user.memberLevel = "basic";
+        user.memberLevel = "standard";
         user.createdAt = System.currentTimeMillis();
         user.updatedAt = System.currentTimeMillis();
         user.deleted = false;
