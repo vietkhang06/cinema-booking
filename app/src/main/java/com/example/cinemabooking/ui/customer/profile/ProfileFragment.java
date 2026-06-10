@@ -40,7 +40,7 @@ public class ProfileFragment extends Fragment {
     ImageView profileAvatar, badgeImage;
     MaterialCardView editProfileBtn, viewTransactionBtn, viewNotificationBtn;
     MaterialCardView logOutBtn;
-    TextView tvLogoutBtnLabel;
+    TextView tvLogoutBtnLabel, notificationBadge;
     LinearLayout btnMemberCard;
     ImageView btnSettings;
     AchievementProgressBar achievementBar;
@@ -49,6 +49,8 @@ public class ProfileFragment extends Fragment {
     LinearLayout menuHotline, menuEmail, menuCompanyInfo,
             menuTerms, menuPaymentPolicy, menuPrivacyPolicy, menuFaq;
     LinearLayout btnDoiQua, btnMyRewards, btnTinhNangMoi;
+
+    private com.google.firebase.firestore.ListenerRegistration notificationListener;
 
     // ── Services ──────────────────────────────────────────────────────────────
     AuthenticationService authService;
@@ -84,6 +86,50 @@ public class ProfileFragment extends Fragment {
         updateAuthButton();
         loadUserProfile();
         loadUserSpendingMilestone();
+        listenToNotifications();
+    }
+
+    private void listenToNotifications() {
+        com.google.firebase.auth.FirebaseUser user = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) return;
+
+        com.example.cinemabooking.domain.repository.NotificationRepository repo = new com.example.cinemabooking.data.repository.NotificationRepositoryImpl();
+        notificationListener = repo.listenToUserNotifications(user.getUid(), new ResultCallback<List<com.example.cinemabooking.domain.model.Notification>>() {
+            @Override
+            public void onSuccess(List<com.example.cinemabooking.domain.model.Notification> result) {
+                if (!isAdded()) return;
+                int unreadCount = 0;
+                if (result != null) {
+                    for (com.example.cinemabooking.domain.model.Notification notif : result) {
+                        if (!notif.isRead) {
+                            unreadCount++;
+                        }
+                    }
+                }
+
+                if (notificationBadge != null) {
+                    if (unreadCount > 0) {
+                        notificationBadge.setText(unreadCount > 99 ? "99+" : String.valueOf(unreadCount));
+                        notificationBadge.setVisibility(View.VISIBLE);
+                    } else {
+                        notificationBadge.setVisibility(View.GONE);
+                    }
+                }
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                // Do nothing
+            }
+        });
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (notificationListener != null) {
+            notificationListener.remove();
+        }
     }
 
     // ── Load data ─────────────────────────────────────────────────────────────
@@ -205,6 +251,7 @@ public class ProfileFragment extends Fragment {
         editProfileBtn      = view.findViewById(R.id.profile_edit_btn);
         viewTransactionBtn  = view.findViewById(R.id.profile_transaction_btn);
         viewNotificationBtn = view.findViewById(R.id.profile_notification_btn);
+        notificationBadge   = view.findViewById(R.id.profile_notification_badge);
         logOutBtn           = view.findViewById(R.id.profile_logout_btn);
         tvLogoutBtnLabel    = view.findViewById(R.id.tvLogoutBtnLabel);
         btnMemberCard       = view.findViewById(R.id.btnMemberCard);
@@ -261,9 +308,15 @@ public class ProfileFragment extends Fragment {
         viewTransactionBtn.setOnClickListener(v ->
                 AppNavigator.goToTransactionHistory(requireActivity()));
 
-        // Thông báo (tạm thời toast)
-        viewNotificationBtn.setOnClickListener(v ->
-                Toast.makeText(getContext(), "Chưa có thông báo mới", Toast.LENGTH_SHORT).show());
+        // Thông báo
+        viewNotificationBtn.setOnClickListener(v -> {
+            boolean isLoggedIn = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() != null;
+            if (isLoggedIn) {
+                startActivity(new Intent(getContext(), com.example.cinemabooking.ui.customer.notification.NotificationActivity.class));
+            } else {
+                AppNavigator.goToLoginForBooking(requireActivity());
+            }
+        });
 
         // Mã thành viên
         if (btnMemberCard != null)

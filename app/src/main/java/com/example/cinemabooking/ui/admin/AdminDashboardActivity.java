@@ -42,6 +42,7 @@ import com.example.cinemabooking.ui.admin.report.AdminReportActivity;
 import com.example.cinemabooking.ui.admin.room.AdminRoomListActivity;
 import com.example.cinemabooking.ui.admin.showtime.AdminShowtimeListActivity;
 import com.example.cinemabooking.ui.admin.user.AdminUserManagementActivity;
+import com.example.cinemabooking.ui.admin.notification.AdminSendNotificationActivity;
 import com.example.cinemabooking.ui.admin.widget.AdminHorizontalBarChartView;
 import com.example.cinemabooking.ui.admin.widget.AdminLineChartView;
 
@@ -290,6 +291,7 @@ public class AdminDashboardActivity extends AppCompatActivity {
         items.add(new AdminFeatureItem("Khuyến mãi", "Quản lý promotion", R.drawable.tag_solid_full, AdminPromotionListActivity.class));
         items.add(new AdminFeatureItem("Báo cáo", "Thống kê doanh thu", R.drawable.chart_line_solid_full, AdminReportActivity.class));
         items.add(new AdminFeatureItem("Nhật ký", "Audit log hệ thống", R.drawable.clipboard_solid_full, AdminAuditLogActivity.class));
+        items.add(new AdminFeatureItem("Thông báo", "Gửi thông báo", R.drawable.ic_notification, AdminSendNotificationActivity.class));
         return items;
     }
 
