@@ -95,14 +95,12 @@ public class LoginActivity extends BaseActivity {
                 authService.handleFacebookAccessToken(result.getAccessToken(), new AuthCallback() {
                     @Override
                     public void onSuccess(User user) {
-                        if (fromBooking) finish();
-                        else
-                        {
-                            Log.e(
-                                    "ROLE_DEBUG",
-                                    "EMAIL=" + user.getEmail()
-                                            + " ROLE=" + user.getRole()
-                            );
+                        if ("admin".equals(user.role) || "staff".equals(user.role)) {
+                            AppNavigator.goToHomeByRole(LoginActivity.this, user.role);
+                        } else if (fromBooking) {
+                            finish();
+                        } else {
+                            Log.e("ROLE_DEBUG", "EMAIL=" + user.getEmail() + " ROLE=" + user.getRole());
                             AppNavigator.goToHomeByRole(LoginActivity.this, user.role);
                         }
                     }
@@ -201,7 +199,9 @@ public class LoginActivity extends BaseActivity {
                             sessionManager.clearRememberedPassword();
                         }
 
-                        if (fromBooking) {
+                        if ("admin".equals(user.role) || "staff".equals(user.role)) {
+                            AppNavigator.goToHomeByRole(LoginActivity.this, user.role);
+                        } else if (fromBooking) {
                             finish();
                         } else {
                             AppNavigator.goToHomeByRole(LoginActivity.this, user.role);
@@ -390,13 +390,13 @@ public class LoginActivity extends BaseActivity {
                                                 + user.role);
                             }
 
-                            if (fromBooking)
+                            if ("admin".equals(user.role) || "staff".equals(user.role)) {
+                                AppNavigator.goToHomeByRole(LoginActivity.this, user.role);
+                            } else if (fromBooking) {
                                 finish();
-                            else
-                                AppNavigator.goToHomeByRole(
-                                        LoginActivity.this,
-                                        user.role
-                                );
+                            } else {
+                                AppNavigator.goToHomeByRole(LoginActivity.this, user.role);
+                            }
                         }
 
                         @Override

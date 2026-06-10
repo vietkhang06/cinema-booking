@@ -76,20 +76,10 @@ public class BookingTimerManager {
         isRunning = false;
         endTimeMillis = 0;
 
-        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         prefs.edit()
                 .remove(KEY_END_TIME)
                 .remove(KEY_IS_RUNNING)
                 .apply();
-
-        // Notify listeners on main thread
-        mainHandler.post(() -> {
-            synchronized (BookingTimerManager.this) {
-                for (TimerListener listener : new ArrayList<>(listeners)) {
-                    listener.onFinish();
-                }
-            }
-        });
     }
 
     public synchronized boolean isTimerActive(Context context) {

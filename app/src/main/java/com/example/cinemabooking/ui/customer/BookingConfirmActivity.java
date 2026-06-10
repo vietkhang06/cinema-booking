@@ -280,7 +280,7 @@ public class BookingConfirmActivity extends AppCompatActivity {
 
                     @Override
                     public void onError(String message) {
-                        // Fail silently
+                        Toast.makeText(BookingConfirmActivity.this, "Không thể tải thông tin thành viên. Ưu đãi thẻ có thể không được áp dụng.", Toast.LENGTH_LONG).show();
                     }
                 }
         );
@@ -476,7 +476,7 @@ public class BookingConfirmActivity extends AppCompatActivity {
             @Override
             public void onFailure(retrofit2.Call<ApiResponse<BookingDTO>> call, Throwable t) {
                 if (btnConfirm != null) btnConfirm.setEnabled(true);
-                Toast.makeText(BookingConfirmActivity.this, "Lỗi kết nối mạng: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                Toast.makeText(BookingConfirmActivity.this, "Kết nối mạng không ổn định. Vui lòng kiểm tra lại Wifi/4G.", Toast.LENGTH_LONG).show();
             }
         });
     }

@@ -374,6 +374,40 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="18dp"
                             android:orientation="vertical" />
+
+                        <!-- Empty State khi không có suất chiếu -->
+                        <LinearLayout
+                            android:id="@+id/layoutEmptySchedule"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="32dp"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:visibility="gone">
+
+                            <ImageView
+                                android:layout_width="80dp"
+                                android:layout_height="80dp"
+                                android:src="@drawable/couch_solid_full"
+                                app:tint="#CCCCCC" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="12dp"
+                                android:text="Rất tiếc, chưa có suất chiếu nào"
+                                android:textColor="#888888"
+                                android:textSize="15sp"
+                                android:textStyle="bold" />
+                            
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:text="Vui lòng chọn ngày hoặc rạp khác"
+                                android:textColor="#AAAAAA"
+                                android:textSize="13sp" />
+                        </LinearLayout>
                     </LinearLayout>
 
                     <LinearLayout

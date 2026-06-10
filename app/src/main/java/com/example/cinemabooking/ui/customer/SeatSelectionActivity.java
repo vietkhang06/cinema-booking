@@ -44,6 +44,7 @@ public class SeatSelectionActivity extends AppCompatActivity {
 
     private TextView tvMovieTitle, tvTotalPrice, tvSeatCount, tvShowtimeDate;
     private MaterialButton btnContinue;
+    private android.widget.FrameLayout layoutLoading;
 
     private String showtimeId, movieTitle, movieId, posterUrl, cinemaName;
     private double basePrice = 85000;
@@ -78,6 +79,7 @@ public class SeatSelectionActivity extends AppCompatActivity {
         llSelectedSeatChips = findViewById(R.id.llSelectedSeatChips);
         scrollSelectedSeats = findViewById(R.id.scrollSelectedSeats);
         dividerBottom = findViewById(R.id.dividerBottom);
+        layoutLoading = findViewById(R.id.layoutLoading);
 
         ImageButton btnBack = findViewById(R.id.btnBack);
 
@@ -143,7 +145,7 @@ public class SeatSelectionActivity extends AppCompatActivity {
             }
 
             btnContinue.setEnabled(false);
-            Toast.makeText(this, "Đang kiểm tra trạng thái ghế...", Toast.LENGTH_SHORT).show();
+            if (layoutLoading != null) layoutLoading.setVisibility(android.view.View.VISIBLE);
 
             List<String> selectedSeatIds = new ArrayList<>();
             for (SeatDTO s : selected) {
@@ -161,6 +163,7 @@ public class SeatSelectionActivity extends AppCompatActivity {
                 @Override
                 public void onResponse(retrofit2.Call<com.example.cinemabooking.data.dto.ApiResponse<Void>> call, retrofit2.Response<com.example.cinemabooking.data.dto.ApiResponse<Void>> response) {
                     btnContinue.setEnabled(true);
+                    if (layoutLoading != null) layoutLoading.setVisibility(android.view.View.GONE);
                     if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                         goToBookingConfirm(selected);
                     } else {
@@ -178,15 +181,15 @@ public class SeatSelectionActivity extends AppCompatActivity {
                         }
 
                         if (response.code() == 404) {
-                            errMsg = "Lỗi kết nối (404 Not Found): Endpoint không tồn tại trên server.";
+                            errMsg = "Không thể kết nối đến hệ thống đặt vé. Vui lòng thử lại sau.";
                         } else if (response.code() == 409) {
                             if (errMsg.equals("Ghế đã có người khác chọn hoặc hết hạn khóa ghế. Vui lòng chọn ghế khác!")) {
-                                errMsg = "Xung đột (409 Conflict): Ghế đã có người giữ hoặc đã được đặt!";
+                                errMsg = "Rất tiếc, ghế bạn chọn đã có người giữ. Vui lòng chọn ghế khác!";
                             }
                         } else if (response.code() == 401 || response.code() == 403) {
-                            errMsg = "Lỗi xác thực (401/403): Vui lòng đăng nhập lại!";
+                            errMsg = "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.";
                         } else if (response.code() >= 500) {
-                            errMsg = "Lỗi máy chủ (500 Internal Server Error): Vui lòng thử lại sau.";
+                            errMsg = "Hệ thống đang bận. Vui lòng thử lại sau.";
                         }
                         Toast.makeText(SeatSelectionActivity.this, errMsg, Toast.LENGTH_LONG).show();
                         loadSeats(); // Refresh seat map
@@ -196,7 +199,8 @@ public class SeatSelectionActivity extends AppCompatActivity {
                 @Override
                 public void onFailure(retrofit2.Call<com.example.cinemabooking.data.dto.ApiResponse<Void>> call, Throwable t) {
                     btnContinue.setEnabled(true);
-                    Toast.makeText(SeatSelectionActivity.this, "Lỗi kết nối mạng: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                    if (layoutLoading != null) layoutLoading.setVisibility(android.view.View.GONE);
+                    Toast.makeText(SeatSelectionActivity.this, "Kết nối mạng không ổn định. Vui lòng kiểm tra lại Wifi/4G.", Toast.LENGTH_LONG).show();
                 }
             });
         });

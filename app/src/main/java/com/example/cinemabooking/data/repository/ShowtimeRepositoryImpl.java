@@ -397,6 +397,18 @@ public class ShowtimeRepositoryImpl implements ShowtimeRepository {
                                 voucher.isUsed = false;
                                 voucher.createdAt = currentTime;
                                 batch.set(voucherRef, voucher);
+
+                                DocumentReference voucherNotifRef = firestore.collection(FirestoreCollections.NOTIFICATIONS).document();
+                                com.example.cinemabooking.domain.model.Notification voucherNotif = new com.example.cinemabooking.domain.model.Notification();
+                                voucherNotif.notificationId = voucherNotifRef.getId();
+                                voucherNotif.userId = userId;
+                                voucherNotif.title = "Nhận Voucher Giảm Giá";
+                                voucherNotif.message = "Bạn được tặng 1 voucher giảm giá 10% do sự cố hủy suất chiếu. Xin lỗi vì sự bất tiện này!";
+                                voucherNotif.type = com.example.cinemabooking.domain.model.NotificationType.VOUCHER_RECEIVED.name();
+                                voucherNotif.isRead = false;
+                                voucherNotif.createdAt = currentTime + 1;
+                                voucherNotif.updatedAt = currentTime + 1;
+                                batch.set(voucherNotifRef, voucherNotif);
                             }
                         }
 
