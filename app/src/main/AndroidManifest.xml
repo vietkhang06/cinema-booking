@@ -139,6 +139,9 @@
             android:name=".ui.admin.promotion.AdminPromotionListActivity"
             android:exported="false" />
         <activity
+            android:name=".ui.admin.promotion.AdminPromotionAddEditActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.admin.report.AdminReportActivity"
             android:exported="false" />
         <activity
