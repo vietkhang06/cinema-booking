@@ -57,6 +57,12 @@ public class AdminRoomListActivity extends BaseActivity {
         }
     }
 
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
+        loadRooms();
+    }
     private void initViews() {
         actvCinemaChooser = findViewById(R.id.actvCinemaChooser);
         btnAddRoom = findViewById(R.id.btnAddRoom);
@@ -200,7 +206,7 @@ public class AdminRoomListActivity extends BaseActivity {
             tvTitle.setText("Thêm phòng chiếu mới");
             actvLayout.setText("2D", false);
             edtRows.setText("6");
-            edtCols.setText("12");
+            edtCols.setText("6");
             actvStatus.setText("active", false);
         }
 
@@ -226,10 +232,13 @@ public class AdminRoomListActivity extends BaseActivity {
             }
 
             int rows = 6;
-            int cols = 12;
+            int cols = 6;
             try {
                 rows = Integer.parseInt(rowsStr);
-                if (rows <= 0) throw new NumberFormatException();
+                if (rows < 6 || rows > 10) {
+                    edtRows.setError("Số hàng phải từ 6 đến 10");
+                    return;
+                }
             } catch (NumberFormatException e) {
                 edtRows.setError("Số hàng không hợp lệ");
                 return;
@@ -237,11 +246,15 @@ public class AdminRoomListActivity extends BaseActivity {
 
             try {
                 cols = Integer.parseInt(colsStr);
-                if (cols <= 0) throw new NumberFormatException();
+                if (cols < 6 || cols > 10) {
+                    edtCols.setError("Số cột phải từ 6 đến 10");
+                    return;
+                }
             } catch (NumberFormatException e) {
                 edtCols.setError("Số cột không hợp lệ");
                 return;
             }
+
 
             Room r = isEdit ? roomToEdit : new Room();
             r.cinemaId = selectedCinema.cinemaId;

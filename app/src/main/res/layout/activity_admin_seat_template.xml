@@ -214,17 +214,27 @@
                 android:layout_height="0dp"
                 android:layout_weight="1"
                 android:scrollbars="none"
+                android:fillViewport="true"
                 android:layout_marginTop="4dp">
 
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rvSeatRows"
+
+                <FrameLayout
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp"
-                    android:paddingBottom="16dp"
-                    tools:listitem="@layout/item_admin_seat_plan_row" />
+                    android:layout_height="match_parent">
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rvSeatRows"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center_horizontal"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:paddingBottom="16dp"
+                        tools:listitem="@layout/item_admin_seat_plan_row" />
+
+                </FrameLayout>
             </HorizontalScrollView>
+
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 

@@ -148,18 +148,27 @@
         android:layout_height="0dp"
         android:layout_marginTop="8dp"
         android:scrollbars="none"
+        android:fillViewport="true"
         app:layout_constraintBottom_toTopOf="@id/bottomLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/legendLayout">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvSeatMap"
+        <FrameLayout
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp" />
+            android:layout_height="match_parent">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvSeatMap"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_horizontal"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp" />
+
+        </FrameLayout>
     </HorizontalScrollView>
+
 
     <!-- Bottom bar -->
     <LinearLayout
