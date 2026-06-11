@@ -203,6 +203,7 @@ public class CinemaDetailActivity extends BaseActivity {
                 longitude = cinema.longitude;
 
                 bindCinemaInfo();
+                loadCinemaImage();
 
                 scrollCinemaDetail.setVisibility(View.VISIBLE);
                 layoutError.setVisibility(View.GONE);
@@ -236,11 +237,25 @@ public class CinemaDetailActivity extends BaseActivity {
     }
 
     private void loadCinemaImage() {
+        String logoUrl = "https://play-lh.googleusercontent.com/nxo4BC4BQ5hXuNi-UCdPM5kC0uZH1lq7bglINlWNUA_v8yMfHHOtTjhLTvo5NDjVeqx-";
+        String backdropUrl = "https://thelandmark81.com.vn/wp-content/uploads/2025/10/rap-chieu-phim-vincom-thu-duc-cgv-la-diem-hen-ly-tuong-cho-nhung-nguoi-yeu-thich-phim-dien-anh.jpg";
+        
+        if (cinemaName != null) {
+            String nameLower = cinemaName.toLowerCase();
+            if (nameLower.contains("quận 1") || nameLower.contains("quan 1")) {
+                backdropUrl = "https://i1.wp.com/kenhhomestay.com/wp-content/uploads/2019/12/cgv-binh-duong-2.png";
+            } else if (nameLower.contains("quận 2") || nameLower.contains("quan 2")) {
+                backdropUrl = "https://lh7-us.googleusercontent.com/WdQhGK0lo8BkP7xAHPaRG-d0W1qVxgIyEyJ5J3hJGqkmiCXTmaVpXqcGgG3UCIP_4QoGoHnLEQPMHlww126sVxMZQ0NPUn0Hi2rY5GeY0tht6wuIbuY9NDpH3fDJeuwPcFNAZpAo8I94Q0-QWJvbE84";
+            }
+        }
+
         Glide.with(this)
-                .load(R.drawable.ic_cinemax_logo)
+                .load(backdropUrl)
+                .error(R.drawable.ic_cinemax_logo)
                 .into(imgHeroBackdrop);
         Glide.with(this)
-                .load(R.drawable.ic_cinemax_logo)
+                .load(logoUrl)
+                .error(R.drawable.ic_cinemax_logo)
                 .into(imgCinemaLogo);
     }
 
@@ -642,7 +657,8 @@ public class CinemaDetailActivity extends BaseActivity {
         }
 
         return "active".equalsIgnoreCase(status)
-                || "available".equalsIgnoreCase(status);
+                || "available".equalsIgnoreCase(status)
+                || "scheduled".equalsIgnoreCase(status);
     }
 
     private String buildLocationText() {
