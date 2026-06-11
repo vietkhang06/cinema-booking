@@ -168,7 +168,26 @@ public class TicketDetailActivity extends AppCompatActivity {
         tvTitle.setText(itemName != null ? itemName : "Sản phẩm CineShop");
         tvCinema.setText("CineShop - Nhận tại quầy rạp");
 
-        tvBookingCode.setText("Order ID: #" + orderId);
+        // Handle QR state for CineShop orders
+        Long checkInAt = doc.getLong("checkInAt");
+        boolean isUsed = checkInAt != null && checkInAt > 0;
+        boolean isCancelled = "cancelled".equalsIgnoreCase(status) || "failed".equalsIgnoreCase(status);
+        boolean isInvalid = isUsed || isCancelled;
+
+        if (isInvalid) {
+            String reason = "HẾT HIỆU LỰC";
+            if (isUsed) reason = "ĐÃ NHẬN HÀNG";
+            else if (isCancelled) reason = "ĐÃ HỦY ĐƠN";
+
+            tvBookingCode.setText("Order ID: #" + orderId + "\n(" + reason + ")");
+            tvBookingCode.setTextColor(0xFFC62828);
+            imgQr.setAlpha(0.1f);
+        } else {
+            tvBookingCode.setText("Order ID: #" + orderId);
+            tvBookingCode.setTextColor(0xFF000000);
+            imgQr.setAlpha(1.0f);
+        }
+
         tvTotal.setText(String.format("%,.0fđ", totalPrice != null ? totalPrice : 0.0).replace(',', '.'));
 
         // Generate QR Code containing CineShop details
@@ -214,7 +233,29 @@ public class TicketDetailActivity extends AppCompatActivity {
             tvSeats.setText("Chưa xác định");
         }
 
-        tvBookingCode.setText("Booking ID: #" + booking.bookingId);
+        // Handle QR state for Movie tickets
+        long now = System.currentTimeMillis();
+        boolean isExpired = booking.showtimeStartAtSnapshot > 0 && now > booking.showtimeStartAtSnapshot;
+        boolean isUsed = booking.checkInAt > 0;
+        String status = booking.bookingStatus != null ? booking.bookingStatus.toLowerCase() : "unknown";
+        boolean isCancelled = "cancelled".equals(status) || "failed".equals(status);
+        boolean isInvalid = isExpired || isUsed || isCancelled;
+
+        if (isInvalid) {
+            String reason = "HẾT HIỆU LỰC";
+            if (isUsed) reason = "ĐÃ SỬ DỤNG";
+            else if (isCancelled) reason = "ĐÃ HỦY VÉ";
+            else if (isExpired) reason = "ĐÃ HẾT HẠN";
+
+            tvBookingCode.setText("Booking ID: #" + booking.bookingId + "\n(" + reason + ")");
+            tvBookingCode.setTextColor(0xFFC62828);
+            imgQr.setAlpha(0.1f);
+        } else {
+            tvBookingCode.setText("Booking ID: #" + booking.bookingId);
+            tvBookingCode.setTextColor(0xFF000000);
+            imgQr.setAlpha(1.0f);
+        }
+
         tvTotal.setText(String.format("%,.0fđ", booking.total).replace(',', '.'));
 
         // Generate QR Code: bookingId | userId | showtimeId | timestamp

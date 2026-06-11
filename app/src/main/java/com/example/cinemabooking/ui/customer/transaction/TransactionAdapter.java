@@ -5,6 +5,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -78,7 +79,15 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
 
         public void bind(Booking booking) {
             tvTitle.setText(booking.movieTitleSnapshot);
-            tvCinema.setText(booking.cinemaNameSnapshot);
+            
+            // Display Cinema, Room and Seats information
+            if (booking.showtimeId != null) {
+                String room = booking.roomNameSnapshot != null ? booking.roomNameSnapshot : "Chưa xác định";
+                String seats = booking.seatCodes != null ? android.text.TextUtils.join(", ", booking.seatCodes) : "Chưa xác định";
+                tvCinema.setText(booking.cinemaNameSnapshot + " - " + room + "\nGhế: " + seats);
+            } else {
+                tvCinema.setText(booking.cinemaNameSnapshot + " - " + booking.roomNameSnapshot);
+            }
             
             if (booking.showtimeStartAtSnapshot > 0) {
                 tvShowtime.setText(dateFormat.format(new Date(booking.showtimeStartAtSnapshot)));
@@ -90,15 +99,23 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
 
             tvPrice.setText(String.format("%,.0fđ", booking.total).replace(',', '.'));
 
-            // Expiration Logic: 4 hours past showtime start
             long now = System.currentTimeMillis();
-            long fourHoursInMillis = 4 * 60 * 60 * 1000;
-            boolean isExpired = (booking.showtimeStartAtSnapshot > 0) && (now > (booking.showtimeStartAtSnapshot + fourHoursInMillis));
+            boolean isExpired = (booking.showtimeStartAtSnapshot > 0) && (now > booking.showtimeStartAtSnapshot);
+            boolean isUsed = booking.checkInAt > 0;
+            String status = booking.bookingStatus != null ? booking.bookingStatus.toLowerCase() : "unknown";
+            boolean isCancelled = "cancelled".equals(status) || "failed".equals(status);
 
             // Status Badge Logic
-            String status = booking.bookingStatus != null ? booking.bookingStatus.toLowerCase() : "unknown";
-            if (isExpired && ("confirmed".equals(status) || "success".equals(status))) {
-                tvStatus.setText("Đã hết suất");
+            if (isCancelled) {
+                tvStatus.setText("Đã hủy");
+                tvStatus.setTextColor(0xFFC62828);
+                cardStatus.setCardBackgroundColor(0xFFFFEBEE);
+            } else if (isUsed) {
+                tvStatus.setText("ĐÃ DÙNG");
+                tvStatus.setTextColor(0xFF0288D1);
+                cardStatus.setCardBackgroundColor(0xFFE1F5FE);
+            } else if (isExpired && ("confirmed".equals(status) || "success".equals(status))) {
+                tvStatus.setText("Hết hạn");
                 tvStatus.setTextColor(0xFF757575);
                 cardStatus.setCardBackgroundColor(0xFFEEEEEE);
             } else {
@@ -114,12 +131,6 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
                         tvStatus.setTextColor(0xFFE8640C);
                         cardStatus.setCardBackgroundColor(0xFFFFF3E0);
                         break;
-                    case "cancelled":
-                    case "failed":
-                        tvStatus.setText("Đã hủy");
-                        tvStatus.setTextColor(0xFFC62828);
-                        cardStatus.setCardBackgroundColor(0xFFFFEBEE);
-                        break;
                     default:
                         tvStatus.setText("Khác");
                         tvStatus.setTextColor(0xFF757575);
@@ -128,10 +139,13 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
                 }
             }
 
-            // Expiration UI handling
-            if (isExpired) {
+            // Expiration and Invalidity UI handling
+            boolean isInvalid = isExpired || isUsed || isCancelled;
+            if (isInvalid) {
                 itemView.setAlpha(0.5f);
-                itemView.setOnClickListener(null); // Disable click
+                itemView.setOnClickListener(v -> {
+                    Toast.makeText(v.getContext(), "Vé này đã dùng, đã hết hạn hoặc đã bị hủy và không thể dùng mã QR nữa!", Toast.LENGTH_SHORT).show();
+                });
             } else {
                 itemView.setAlpha(1.0f);
                 itemView.setOnClickListener(v -> {
