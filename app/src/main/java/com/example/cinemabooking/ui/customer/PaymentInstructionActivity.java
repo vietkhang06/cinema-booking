@@ -293,6 +293,7 @@ public class PaymentInstructionActivity extends AppCompatActivity {
 
             Intent intent = new Intent(this, TicketDetailActivity.class);
             intent.putExtra(TicketDetailActivity.EXTRA_BOOKING_ID, bookingId);
+            intent.putExtra("EXTRA_FROM_BOOKING_SUCCESS", true);
             startActivity(intent);
             finish();
 

@@ -141,8 +141,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:contentDescription="@null"
-                                android:padding="12dp"
-                                android:scaleType="centerInside"
+                                android:scaleType="fitCenter"
                                 tools:src="@drawable/ic_cinemax_logo" />
                         </com.google.android.material.card.MaterialCardView>
 

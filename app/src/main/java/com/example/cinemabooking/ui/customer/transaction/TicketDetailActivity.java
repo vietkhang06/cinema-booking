@@ -71,7 +71,14 @@ public class TicketDetailActivity extends AppCompatActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
-        toolbar.setNavigationOnClickListener(v -> finish());
+        toolbar.setNavigationOnClickListener(v -> {
+            if (getIntent().getBooleanExtra("EXTRA_FROM_BOOKING_SUCCESS", false)) {
+                android.content.Intent intent = new android.content.Intent(TicketDetailActivity.this, com.example.cinemabooking.ui.customer.home.HomeActivity.class);
+                intent.setFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK | android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+            }
+            finish();
+        });
 
         imgPoster = findViewById(R.id.img_poster);
         imgQr = findViewById(R.id.img_qr);
@@ -266,5 +273,14 @@ public class TicketDetailActivity extends AppCompatActivity {
         } catch (Exception e) {
             Toast.makeText(this, "Lỗi khi lưu vé: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
+    }
+    @Override
+    public void onBackPressed() {
+        if (getIntent().getBooleanExtra("EXTRA_FROM_BOOKING_SUCCESS", false)) {
+            android.content.Intent intent = new android.content.Intent(TicketDetailActivity.this, com.example.cinemabooking.ui.customer.home.HomeActivity.class);
+            intent.setFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK | android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+        }
+        super.onBackPressed();
     }
 }
