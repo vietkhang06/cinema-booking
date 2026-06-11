@@ -20,6 +20,16 @@
             app:navigationIcon="@drawable/abc_ic_ab_back_material"
             app:title="Lịch sử đặt vé"
             app:titleTextColor="@color/black" />
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tab_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:tabMode="fixed"
+            app:tabGravity="fill"
+            app:tabSelectedTextColor="#FF5A5F"
+            app:tabTextColor="#757575"
+            app:tabIndicatorColor="#FF5A5F" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.recyclerview.widget.RecyclerView
