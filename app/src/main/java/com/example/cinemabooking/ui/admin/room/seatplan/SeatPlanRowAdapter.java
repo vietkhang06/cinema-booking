@@ -40,6 +40,17 @@ public class SeatPlanRowAdapter extends RecyclerView.Adapter<SeatPlanRowAdapter.
         SeatPlanRow row = rows.get(position);
         holder.tvRowName.setText(row.rowName);
 
+        // Tính toán chiều rộng pixel thực tế: 46dp mỗi ghế (40dp width + 6dp margin)
+        int cellCount = row.cells.size();
+        float density = holder.itemView.getContext().getResources().getDisplayMetrics().density;
+        int cellWidthPx = Math.round(46 * density);
+        int totalWidthPx = cellWidthPx * cellCount;
+
+        // Áp đặt chiều rộng chính xác cho danh sách ghế của hàng này
+        android.view.ViewGroup.LayoutParams params = holder.rvCells.getLayoutParams();
+        params.width = totalWidthPx;
+        holder.rvCells.setLayoutParams(params);
+
         SeatPlanCellAdapter cellAdapter = new SeatPlanCellAdapter(
                 row.cells,
                 seatPosition -> listener.onSeatCellClicked(position, seatPosition)
@@ -47,6 +58,7 @@ public class SeatPlanRowAdapter extends RecyclerView.Adapter<SeatPlanRowAdapter.
 
         holder.rvCells.setAdapter(cellAdapter);
     }
+
 
     @Override
     public int getItemCount() {
@@ -63,7 +75,6 @@ public class SeatPlanRowAdapter extends RecyclerView.Adapter<SeatPlanRowAdapter.
             rvCells = itemView.findViewById(R.id.rvSeatCells);
             rvCells.setLayoutManager(new LinearLayoutManager(itemView.getContext(), RecyclerView.HORIZONTAL, false));
             rvCells.setNestedScrollingEnabled(false);
-            rvCells.setHasFixedSize(true);
         }
     }
 }

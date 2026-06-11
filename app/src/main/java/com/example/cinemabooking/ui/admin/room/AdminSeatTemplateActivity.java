@@ -1,6 +1,7 @@
 package com.example.cinemabooking.ui.admin.room;
 
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -25,13 +26,14 @@ import java.util.Locale;
 public class AdminSeatTemplateActivity extends AppCompatActivity {
 
     private static final int DEFAULT_ROWS = 6;
-    private static final int DEFAULT_COLUMNS = 12;
+    private static final int DEFAULT_COLUMNS = 6;
 
     private String roomId;
     private SeatRepository seatRepository;
 
     private final List<SeatPlanRow> seatRows = new ArrayList<>();
-
+    private int initialRows = DEFAULT_ROWS;
+    private int initialCols = DEFAULT_COLUMNS;
     private SeatPlanRowAdapter rowAdapter;
     private int selectedPaintType = SeatPlanCell.TYPE_NORMAL;
     private TextView tvCurrentMode;
@@ -50,7 +52,7 @@ public class AdminSeatTemplateActivity extends AppCompatActivity {
         etRows = findViewById(R.id.etSeatRows);
         etColumns = findViewById(R.id.etSeatColumns);
 
-        android.widget.ImageButton ibBack = findViewById(R.id.ibBack);
+       View ibBack = findViewById(R.id.ibBack);
         if (ibBack != null) {
             ibBack.setOnClickListener(v -> finish());
         }
@@ -70,7 +72,6 @@ public class AdminSeatTemplateActivity extends AppCompatActivity {
         Button btnSave = findViewById(R.id.btnSaveSeatPlan);
 
         rvSeatRows.setLayoutManager(new LinearLayoutManager(this));
-        rvSeatRows.setHasFixedSize(true);
 
         rowAdapter = new SeatPlanRowAdapter(seatRows, (rowPosition, seatPosition) -> {
             SeatPlanCell cell = seatRows.get(rowPosition).cells.get(seatPosition);
@@ -97,6 +98,12 @@ public class AdminSeatTemplateActivity extends AppCompatActivity {
 
         int rows = getIntent().getIntExtra("extra_rows", DEFAULT_ROWS);
         int cols = getIntent().getIntExtra("extra_cols", DEFAULT_COLUMNS);
+        initialRows = rows; // <-- Lưu lại hàng ban đầu
+        initialCols = cols; // <-- Lưu lại cột ban đầu
+
+        if (etRows != null) etRows.setText(String.valueOf(rows));
+        if (etColumns != null) etColumns.setText(String.valueOf(cols));
+
         if (etRows != null) etRows.setText(String.valueOf(rows));
         if (etColumns != null) etColumns.setText(String.valueOf(cols));
 
@@ -106,7 +113,6 @@ public class AdminSeatTemplateActivity extends AppCompatActivity {
             generateTemplate(rows, cols);
         }
     }
-
     private void setPaintMode(int type) {
         selectedPaintType = type;
         tvCurrentMode.setText("Chế độ hiện tại: " + modeName(type));
@@ -116,21 +122,25 @@ public class AdminSeatTemplateActivity extends AppCompatActivity {
         int rows = parsePositiveInt(etRows.getText().toString(), DEFAULT_ROWS);
         int cols = parsePositiveInt(etColumns.getText().toString(), DEFAULT_COLUMNS);
 
-        if (rows < 1) rows = DEFAULT_ROWS;
-        if (cols < 1) cols = DEFAULT_COLUMNS;
-
-        if (rows > 26) rows = 26;
-        if (cols > 20) cols = 20;
+        if (rows < 6 || rows > 10) {
+            etRows.setError("Số hàng phải từ 6 đến 10");
+            return;
+        }
+        if (cols < 6 || cols > 10) {
+            etColumns.setError("Số cột phải từ 6 đến 10");
+            return;
+        }
 
         generateTemplate(rows, cols);
         Toast.makeText(this, "Đã tạo sơ đồ ghế " + rows + " x " + cols, Toast.LENGTH_SHORT).show();
     }
 
+
     private void resetTemplate() {
-        etRows.setText(String.valueOf(DEFAULT_ROWS));
-        etColumns.setText(String.valueOf(DEFAULT_COLUMNS));
+        etRows.setText(String.valueOf(initialRows));
+        etColumns.setText(String.valueOf(initialCols));
         setPaintMode(SeatPlanCell.TYPE_NORMAL);
-        generateTemplate(DEFAULT_ROWS, DEFAULT_COLUMNS);
+        generateTemplate(initialRows, initialCols);
         Toast.makeText(this, "Đã reset sơ đồ ghế", Toast.LENGTH_SHORT).show();
     }
 
@@ -164,31 +174,72 @@ public class AdminSeatTemplateActivity extends AppCompatActivity {
     private void loadSeatTemplates() {
         if (roomId == null) return;
 
-        seatRepository.getSeatTemplatesByRoomId(roomId, new com.example.cinemabooking.domain.common.ResultCallback<List<SeatTemplate>>() {
-            @Override
-            public void onSuccess(List<SeatTemplate> templates) {
-                if (isFinishing() || isDestroyed()) return;
+        // 1. Tải thông tin phòng chiếu trực tiếp từ Firestore để lấy kích thước mới nhất
+        com.google.firebase.firestore.FirebaseFirestore.getInstance().collection("rooms").document(roomId)
+                .get()
+                .addOnSuccessListener(roomDoc -> {
+                    if (isFinishing() || isDestroyed()) return;
 
-                if (templates != null && !templates.isEmpty()) {
-                    populateFromTemplates(templates);
-                } else {
-                    int rows = getIntent().getIntExtra("extra_rows", DEFAULT_ROWS);
-                    int cols = getIntent().getIntExtra("extra_cols", DEFAULT_COLUMNS);
-                    generateTemplate(rows, cols);
-                }
-            }
+                    int dbRows = DEFAULT_ROWS;
+                    int dbCols = DEFAULT_COLUMNS;
+                    if (roomDoc.exists()) {
+                        Long r = roomDoc.getLong("seatRows");
+                        Long c = roomDoc.getLong("seatCols");
+                        if (r != null) dbRows = r.intValue();
+                        if (c != null) dbCols = c.intValue();
+                    }
 
-            @Override
-            public void onError(String message) {
-                if (isFinishing() || isDestroyed()) return;
-                Toast.makeText(AdminSeatTemplateActivity.this, "Lỗi tải sơ đồ ghế: " + message, Toast.LENGTH_SHORT).show();
+                    final int finalRows = dbRows;
+                    final int finalCols = dbCols;
 
-                int rows = getIntent().getIntExtra("extra_rows", DEFAULT_ROWS);
-                int cols = getIntent().getIntExtra("extra_cols", DEFAULT_COLUMNS);
-                generateTemplate(rows, cols);
-            }
-        });
+                    // Cập nhật lại các EditText trên giao diện đúng với kích thước thật trong DB
+                    if (etRows != null) etRows.setText(String.valueOf(finalRows));
+                    if (etColumns != null) etColumns.setText(String.valueOf(finalCols));
+
+                    // 2. Tiến hành tải danh sách ghế mẫu
+                    seatRepository.getSeatTemplatesByRoomId(roomId, new com.example.cinemabooking.domain.common.ResultCallback<List<SeatTemplate>>() {
+                        @Override
+                        public void onSuccess(List<SeatTemplate> templates) {
+                            if (isFinishing() || isDestroyed()) return;
+
+                            if (templates != null && !templates.isEmpty()) {
+                                int maxRow = 0;
+                                int maxCol = 0;
+                                for (SeatTemplate t : templates) {
+                                    if (t.rowName == null) continue;
+                                    int rIdx = t.rowName.charAt(0) - 'A' + 1;
+                                    if (rIdx > maxRow) maxRow = rIdx;
+                                    if (t.columnNo > maxCol) maxCol = t.columnNo;
+                                }
+
+                                // So sánh kích thước ghế thực tế với kích thước phòng thật trong DB
+                                if (maxRow == finalRows && maxCol == finalCols) {
+                                    populateFromTemplates(templates);
+                                    return;
+                                }
+                            }
+
+                            // Tạo sơ đồ mới nếu chưa có hoặc có sự khác biệt về kích thước
+                            generateTemplate(finalRows, finalCols);
+                        }
+
+                        @Override
+                        public void onError(String message) {
+                            if (isFinishing() || isDestroyed()) return;
+                            Toast.makeText(AdminSeatTemplateActivity.this, "Lỗi tải sơ đồ ghế: " + message, Toast.LENGTH_SHORT).show();
+                            generateTemplate(finalRows, finalCols);
+                        }
+                    });
+                })
+                .addOnFailureListener(e -> {
+                    // Nếu lỗi tải Room, dùng tạm dữ liệu cũ từ Intent
+                    int intentRows = getIntent().getIntExtra("extra_rows", DEFAULT_ROWS);
+                    int intentCols = getIntent().getIntExtra("extra_cols", DEFAULT_COLUMNS);
+                    generateTemplate(intentRows, intentCols);
+                });
     }
+
+
 
     private void populateFromTemplates(List<SeatTemplate> templates) {
         seatRows.clear();
@@ -247,48 +298,87 @@ public class AdminSeatTemplateActivity extends AppCompatActivity {
             return;
         }
 
-        List<SeatTemplate> templates = new ArrayList<>();
-        for (SeatPlanRow row : seatRows) {
-            for (int i = 0; i < row.cells.size(); i++) {
-                SeatPlanCell cell = row.cells.get(i);
-                SeatTemplate t = new SeatTemplate();
-                t.roomId = roomId;
-                t.seatCode = cell.seatCode;
-                t.rowName = row.rowName;
-                t.columnNo = i + 1;
+        // 1. Truy vấn toàn bộ ghế cũ của phòng này trong Firestore để xóa trước
+        com.google.firebase.firestore.FirebaseFirestore.getInstance().collection("seat_templates")
+                .whereEqualTo("roomId", roomId)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    com.google.firebase.firestore.WriteBatch batch = com.google.firebase.firestore.FirebaseFirestore.getInstance().batch();
 
-                if (cell.type == SeatPlanCell.TYPE_LOCKED) {
-                    t.seatType = "STANDARD";
-                    t.isEnabled = false;
-                } else {
-                    t.isEnabled = true;
-                    if (cell.type == SeatPlanCell.TYPE_VIP) {
-                        t.seatType = "VIP";
-                    } else if (cell.type == SeatPlanCell.TYPE_COUPLE) {
-                        t.seatType = "COUPLE";
-                    } else {
-                        t.seatType = "STANDARD";
+                    // Thêm lệnh xóa tất cả ghế cũ vào Batch
+                    for (com.google.firebase.firestore.DocumentSnapshot doc : querySnapshot.getDocuments()) {
+                        batch.delete(doc.getReference());
                     }
-                }
 
-                t.seatId = roomId + "_" + t.seatCode;
-                templates.add(t);
-            }
-        }
+                    // 2. Tạo danh sách các ghế mới từ sơ đồ đang chỉnh sửa trên giao diện
+                    List<SeatTemplate> templates = new ArrayList<>();
+                    for (SeatPlanRow row : seatRows) {
+                        for (int i = 0; i < row.cells.size(); i++) {
+                            SeatPlanCell cell = row.cells.get(i);
+                            SeatTemplate t = new SeatTemplate();
+                            t.roomId = roomId;
+                            t.seatCode = cell.seatCode;
+                            t.rowName = row.rowName;
+                            t.columnNo = i + 1;
 
-        seatRepository.createSeatTemplates(roomId, templates, new com.example.cinemabooking.domain.common.ResultCallback<Void>() {
-            @Override
-            public void onSuccess(Void data) {
-                Toast.makeText(AdminSeatTemplateActivity.this, "Đã lưu sơ đồ ghế thành công", Toast.LENGTH_SHORT).show();
-                finish();
-            }
+                            if (cell.type == SeatPlanCell.TYPE_LOCKED) {
+                                t.seatType = "STANDARD";
+                                t.isEnabled = false;
+                            } else {
+                                t.isEnabled = true;
+                                if (cell.type == SeatPlanCell.TYPE_VIP) {
+                                    t.seatType = "VIP";
+                                } else if (cell.type == SeatPlanCell.TYPE_COUPLE) {
+                                    t.seatType = "COUPLE";
+                                } else {
+                                    t.seatType = "STANDARD";
+                                }
+                            }
 
-            @Override
-            public void onError(String message) {
-                Toast.makeText(AdminSeatTemplateActivity.this, "Lỗi khi lưu sơ đồ ghế: " + message, Toast.LENGTH_SHORT).show();
-            }
-        });
+                            t.seatId = roomId + "_" + t.seatCode;
+                            templates.add(t);
+                        }
+                    }
+
+                    // 3. Thêm các ghế mới vào Batch
+                    for (SeatTemplate template : templates) {
+                        com.example.cinemabooking.data.dto.SeatTemplateDTO dto = com.example.cinemabooking.data.mapper.SeatTemplateMapper.toDTO(template);
+                        String docId = roomId + "_" + template.seatCode;
+                        batch.set(com.google.firebase.firestore.FirebaseFirestore.getInstance().collection("seat_templates").document(docId), dto);
+                    }
+
+                    // 4. CẬP NHẬT LẠI KÍCH THƯỚC PHÒNG CHIẾU TRÊN FIRESTORE
+                    int currentRows = seatRows.size();
+                    int currentCols = currentRows > 0 ? seatRows.get(0).cells.size() : 0;
+                    int currentTotalSeats = currentRows * currentCols;
+
+                    com.google.firebase.firestore.DocumentReference roomRef = com.google.firebase.firestore.FirebaseFirestore.getInstance()
+                            .collection("rooms")
+                            .document(roomId);
+
+                    batch.update(roomRef,
+                            "seatRows", currentRows,
+                            "seatCols", currentCols,
+                            "totalSeats", currentTotalSeats,
+                            "updatedAt", System.currentTimeMillis()
+                    );
+
+
+                    // 5. Thực thi commit toàn bộ Batch (Xóa hết ghế cũ + Lưu ghế mới)
+                    batch.commit()
+                            .addOnSuccessListener(aVoid -> {
+                                Toast.makeText(AdminSeatTemplateActivity.this, "Đã lưu sơ đồ ghế thành công", Toast.LENGTH_SHORT).show();
+                                finish();
+                            })
+                            .addOnFailureListener(e -> {
+                                Toast.makeText(AdminSeatTemplateActivity.this, "Lỗi khi lưu sơ đồ ghế: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            });
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Lỗi kiểm tra sơ đồ cũ: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
     }
+
 
     private void updateSummary() {
         int normal = 0;
