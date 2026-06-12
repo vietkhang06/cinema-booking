@@ -68,6 +68,11 @@ public class AdminMovieDetailActivity extends BaseActivity {
 
         btnEdit = findViewById(R.id.btnEdit);
         btnDelete = findViewById(R.id.btnDelete);
+
+        android.view.View btnBack = findViewById(R.id.btnAdminBack);
+        if (btnBack != null) {
+            btnBack.setOnClickListener(v -> finish());
+        }
     }
 
     private void bindActions() {

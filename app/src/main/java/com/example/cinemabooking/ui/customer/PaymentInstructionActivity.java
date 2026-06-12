@@ -110,16 +110,25 @@ public class PaymentInstructionActivity extends AppCompatActivity {
         tvAmount.setText(String.format(Locale.getDefault(), "%,.0f đ", amount));
         tvPaymentCode.setText(paymentCode);
 
+        TextView tvBankName = findViewById(R.id.tvBankName);
+        TextView tvAccountName = findViewById(R.id.tvAccountName);
+
         if ("momo".equals(paymentMethod)) {
             btnOpenApp.setText("Mở ứng dụng MoMo");
             if (layoutTestButtons != null) {
                 layoutTestButtons.setVisibility(View.VISIBLE);
             }
+            if (tvBankName != null) tvBankName.setText("Ví điện tử MOMO");
+            if (tvAccountName != null) tvAccountName.setText("Đoàn Việt Khang");
+            if (tvAccountNumber != null) tvAccountNumber.setText("0762654245");
         } else {
             btnOpenApp.setText("Mở ứng dụng Ngân hàng");
             if (layoutTestButtons != null) {
                 layoutTestButtons.setVisibility(View.GONE);
             }
+            if (tvBankName != null) tvBankName.setText("MB BANK");
+            if (tvAccountName != null) tvAccountName.setText("PHAM NGOC GIA KHANG");
+            if (tvAccountNumber != null) tvAccountNumber.setText("0869612460");
         }
     }
 
@@ -157,12 +166,10 @@ public class PaymentInstructionActivity extends AppCompatActivity {
     }
 
     private void loadQrCode() {
-        String encodedAccountName = Uri.encode("CONG TY CP CINEMA VIETNAM");
-        String qrUrl =
-                "https://img.vietqr.io/image/VCB-1036894913-compact.png"
-                        + "?amount=" + amount
-                        + "&addInfo=" + paymentCode
-                        + "&accountName=DOAN%20VIET%20KHANG";
+        String encodedAccountName = Uri.encode("PHAM NGOC GIA KHANG");
+        String qrUrl = String.format(Locale.US,
+                "https://img.vietqr.io/image/MB-0869612460-compact.png?amount=%.0f&addInfo=%s&accountName=%s",
+                amount, paymentCode, encodedAccountName);
 
         pbQrLoading.setVisibility(View.VISIBLE);
 

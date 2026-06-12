@@ -265,26 +265,45 @@ public class BookingService {
     }
 
     public void releaseBookingSeats(String bookingId) throws ExecutionException, InterruptedException {
-        BookingDTO booking = getBookingById(bookingId);
-        if (booking == null) return;
+        DocumentReference bookingRef = firestore.collection(COLLECTION).document(bookingId);
 
-        List<String> seatIds = booking.getSeatIds();
-        if (seatIds == null || seatIds.isEmpty()) return;
+        firestore.runTransaction(transaction -> {
+            DocumentSnapshot bookingSnap = transaction.get(bookingRef).get();
+            if (!bookingSnap.exists()) return null;
+            BookingDTO booking = bookingSnap.toObject(BookingDTO.class);
+            if (booking == null) return null;
 
-        WriteBatch batch = firestore.batch();
-        for (String seatId : seatIds) {
-            logger.info("[PAYMENT_FAILED] Booking {} failed/cancelled. Releasing seat {}", bookingId, seatId);
-            batch.update(firestore.collection("seats").document(seatId),
-                    "status", "available",
-                    "heldBy", null,
-                    "heldUntil", 0L
-            );
-        }
+            List<String> seatIds = booking.getSeatIds();
+            if (seatIds == null || seatIds.isEmpty()) return null;
 
-        DocumentReference showtimeRef = firestore.collection("showtimes").document(booking.getShowtimeId());
-        batch.update(showtimeRef, "bookedSeatsCount", FieldValue.increment(-seatIds.size()));
+            for (String seatId : seatIds) {
+                DocumentReference seatRef = firestore.collection("seats").document(seatId);
+                DocumentSnapshot seatSnap = transaction.get(seatRef).get();
+                if (seatSnap.exists()) {
+                    String status = seatSnap.getString("status");
+                    String heldBy = seatSnap.getString("heldBy");
+                    String bookedBy = seatSnap.getString("bookedBy");
 
-        batch.commit().get();
+                    boolean isHeldBySelf = "held".equalsIgnoreCase(status) && booking.getUserId().equals(heldBy);
+                    boolean isBookedBySelf = "booked".equalsIgnoreCase(status) && booking.getUserId().equals(bookedBy);
+
+                    if (isHeldBySelf || isBookedBySelf) {
+                        logger.info("[RELEASE_SEAT] Booking {} failed/cancelled. Releasing seat {} (previously {})", bookingId, seatId, status);
+                        transaction.update(seatRef,
+                                "status", "available",
+                                "heldBy", null,
+                                "heldUntil", 0L,
+                                "bookedBy", null,
+                                "bookedAt", null
+                        );
+                    }
+                }
+            }
+
+            DocumentReference showtimeRef = firestore.collection("showtimes").document(booking.getShowtimeId());
+            transaction.update(showtimeRef, "bookedSeatsCount", FieldValue.increment(-seatIds.size()));
+            return null;
+        }).get();
     }
 
     public List<BookingDTO> searchBookings(String query) throws ExecutionException, InterruptedException {

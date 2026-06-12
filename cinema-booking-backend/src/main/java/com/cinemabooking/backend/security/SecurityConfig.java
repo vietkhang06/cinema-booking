@@ -7,6 +7,7 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -31,10 +32,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
-                                "/v3/api-docs/**"
-                        ).permitAll()
-
-                        .requestMatchers(
+                                "/v3/api-docs/**",
                                 "/api/ping",
                                 "/api/v1/health",
                                 "/api/v1/version"
@@ -43,15 +41,14 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET,
                                 "/api/v1/movies",
                                 "/api/v1/movies/**",
-
                                 "/api/v1/banners",
                                 "/api/v1/banners/**",
-
                                 "/api/v1/cinemas",
                                 "/api/v1/cinemas/**",
-
                                 "/api/v1/showtimes",
                                 "/api/v1/showtimes/**",
+                                "/api/v1/seats/showtime/**"
+                        ).permitAll()
 
                                 "/api/v1/seats/showtime/**"
                         ).permitAll()

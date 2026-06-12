@@ -20,6 +20,10 @@ public class FirebaseTokenFilter extends OncePerRequestFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(FirebaseTokenFilter.class);
 
+    private static final java.util.concurrent.ConcurrentHashMap<String, String> roleCache = new java.util.concurrent.ConcurrentHashMap<>();
+    private static final java.util.concurrent.ConcurrentHashMap<String, Long> cacheTime = new java.util.concurrent.ConcurrentHashMap<>();
+    private static final long CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes cache TTL
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
@@ -49,9 +53,40 @@ public class FirebaseTokenFilter extends OncePerRequestFilter {
             
             logger.debug("Token verified successfully: UID={}, Email={}", uid, email);
 
+            // Fetch and cache user role from Firestore
+            String role = roleCache.get(uid);
+            Long expiry = cacheTime.get(uid);
+            long now = System.currentTimeMillis();
+            if (role == null || expiry == null || expiry < now) {
+                try {
+                    com.google.cloud.firestore.DocumentSnapshot userDoc = 
+                            com.google.firebase.cloud.FirestoreClient.getFirestore()
+                                    .collection("users")
+                                    .document(uid)
+                                    .get()
+                                    .get();
+                    if (userDoc.exists()) {
+                        role = userDoc.getString("role");
+                        if (role == null) role = "customer";
+                    } else {
+                        role = "customer";
+                    }
+                } catch (Exception ex) {
+                    logger.warn("Failed to fetch user role from Firestore for UID={}, default to 'customer': {}", uid, ex.getMessage());
+                    role = "customer";
+                }
+                roleCache.put(uid, role);
+                cacheTime.put(uid, now + CACHE_TTL_MS);
+            }
+
+            java.util.List<org.springframework.security.core.GrantedAuthority> authorities = 
+                    java.util.Collections.singletonList(
+                            new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_" + role.toUpperCase())
+                    );
+
             // Set authentication in SecurityContext
             UsernamePasswordAuthenticationToken auth =
-                    new UsernamePasswordAuthenticationToken(uid, decodedToken, Collections.emptyList());
+                    new UsernamePasswordAuthenticationToken(uid, decodedToken, authorities);
 
             SecurityContextHolder.getContext().setAuthentication(auth);
 

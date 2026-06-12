@@ -24,3 +24,9 @@ captures/
 
 # Logs
 *.log
+# VS Code settings
+.vscode/
+
+# Firebase private credentials
+firebase-service-account.json
+
