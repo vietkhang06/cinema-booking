@@ -454,6 +454,7 @@ public class BookingConfirmActivity extends AppCompatActivity {
                         intent.putExtra(PaymentInstructionActivity.EXTRA_PAYMENT_CODE, booking.paymentCode);
                         intent.putExtra(PaymentInstructionActivity.EXTRA_AMOUNT, booking.total);
                         intent.putExtra(PaymentInstructionActivity.EXTRA_PAYMENT_METHOD, paymentMethod);
+                        intent.putExtra("createdAt", booking.createdAt);
                         startActivity(intent);
                         finish();
                     } else {
