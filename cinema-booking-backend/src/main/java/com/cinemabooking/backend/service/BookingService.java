@@ -54,53 +54,95 @@ public class BookingService {
     }
 
     public void confirmBookingSeats(String bookingId) throws ExecutionException, InterruptedException {
-        BookingDTO booking = getBookingById(bookingId);
-        if (booking == null) {
-            logger.error("[PAYMENT_FAILED] Booking not found for ID: {}", bookingId);
-            throw new RuntimeException("Booking not found");
-        }
+        DocumentReference bookingRef = firestore.collection(COLLECTION).document(bookingId);
 
-        List<String> seatIds = booking.getSeatIds();
-        if (seatIds == null || seatIds.isEmpty()) {
-            logger.warn("Booking {} has no seat IDs associated", bookingId);
-            return;
-        }
+        firestore.runTransaction(transaction -> {
+            DocumentSnapshot bookingSnap = transaction.get(bookingRef).get();
+            if (!bookingSnap.exists()) {
+                logger.error("[PAYMENT_FAILED] Booking not found for ID: {}", bookingId);
+                throw new RuntimeException("Booking not found");
+            }
+            BookingDTO booking = bookingSnap.toObject(BookingDTO.class);
+            if (booking == null) {
+                throw new RuntimeException("Booking serialization error");
+            }
 
-        long now = System.currentTimeMillis();
-        WriteBatch batch = firestore.batch();
-        for (String seatId : seatIds) {
-            logger.info("[PAYMENT_SUCCESS] Booking {} confirmed. Marking seat {} as booked by {}", bookingId, seatId, booking.getUserId());
-            batch.update(firestore.collection("seats").document(seatId),
-                    "status", "booked",
-                    "bookedBy", booking.getUserId(),
-                    "bookedAt", now
-            );
-        }
-        batch.commit().get();
+            List<String> seatIds = booking.getSeatIds();
+            if (seatIds == null || seatIds.isEmpty()) {
+                logger.warn("Booking {} has no seat IDs associated", bookingId);
+                return null;
+            }
+
+            long now = System.currentTimeMillis();
+            for (String seatId : seatIds) {
+                DocumentReference seatRef = firestore.collection("seats").document(seatId);
+                DocumentSnapshot seatSnap = transaction.get(seatRef).get();
+                if (!seatSnap.exists()) {
+                    throw new RuntimeException("Seat " + seatId + " not found");
+                }
+                String status = seatSnap.getString("status");
+                String heldBy = seatSnap.getString("heldBy");
+
+                if ("booked".equalsIgnoreCase(status)) {
+                    throw new RuntimeException("Ghế " + seatSnap.getString("seatCode") + " đã được đặt trước bởi người khác!");
+                }
+
+                if (!"available".equalsIgnoreCase(status) && !booking.getUserId().equals(heldBy)) {
+                    throw new RuntimeException("Ghế " + seatSnap.getString("seatCode") + " đang được giữ bởi người khác!");
+                }
+
+                logger.info("[PAYMENT_SUCCESS] Booking {} confirmed. Marking seat {} as booked by {}", bookingId, seatId, booking.getUserId());
+                transaction.update(seatRef,
+                        "status", "booked",
+                        "bookedBy", booking.getUserId(),
+                        "bookedAt", now
+                );
+            }
+            return null;
+        }).get();
     }
 
 
     public void releaseBookingSeats(String bookingId) throws ExecutionException, InterruptedException {
-        BookingDTO booking = getBookingById(bookingId);
-        if (booking == null) return;
+        DocumentReference bookingRef = firestore.collection(COLLECTION).document(bookingId);
 
-        List<String> seatIds = booking.getSeatIds();
-        if (seatIds == null || seatIds.isEmpty()) return;
+        firestore.runTransaction(transaction -> {
+            DocumentSnapshot bookingSnap = transaction.get(bookingRef).get();
+            if (!bookingSnap.exists()) return null;
+            BookingDTO booking = bookingSnap.toObject(BookingDTO.class);
+            if (booking == null) return null;
 
-        WriteBatch batch = firestore.batch();
-        for (String seatId : seatIds) {
-            logger.info("[PAYMENT_FAILED] Booking {} failed/cancelled. Releasing seat {}", bookingId, seatId);
-            batch.update(firestore.collection("seats").document(seatId),
-                    "status", "available",
-                    "heldBy", null,
-                    "heldUntil", 0L
-            );
-        }
+            List<String> seatIds = booking.getSeatIds();
+            if (seatIds == null || seatIds.isEmpty()) return null;
 
-        DocumentReference showtimeRef = firestore.collection("showtimes").document(booking.getShowtimeId());
-        batch.update(showtimeRef, "bookedSeatsCount", FieldValue.increment(-seatIds.size()));
+            for (String seatId : seatIds) {
+                DocumentReference seatRef = firestore.collection("seats").document(seatId);
+                DocumentSnapshot seatSnap = transaction.get(seatRef).get();
+                if (seatSnap.exists()) {
+                    String status = seatSnap.getString("status");
+                    String heldBy = seatSnap.getString("heldBy");
+                    String bookedBy = seatSnap.getString("bookedBy");
 
-        batch.commit().get();
+                    boolean isHeldBySelf = "held".equalsIgnoreCase(status) && booking.getUserId().equals(heldBy);
+                    boolean isBookedBySelf = "booked".equalsIgnoreCase(status) && booking.getUserId().equals(bookedBy);
+
+                    if (isHeldBySelf || isBookedBySelf) {
+                        logger.info("[RELEASE_SEAT] Booking {} failed/cancelled. Releasing seat {} (previously {})", bookingId, seatId, status);
+                        transaction.update(seatRef,
+                                "status", "available",
+                                "heldBy", null,
+                                "heldUntil", 0L,
+                                "bookedBy", null,
+                                "bookedAt", null
+                        );
+                    }
+                }
+            }
+
+            DocumentReference showtimeRef = firestore.collection("showtimes").document(booking.getShowtimeId());
+            transaction.update(showtimeRef, "bookedSeatsCount", FieldValue.increment(-seatIds.size()));
+            return null;
+        }).get();
     }
 
 

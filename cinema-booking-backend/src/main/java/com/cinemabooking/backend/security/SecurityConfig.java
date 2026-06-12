@@ -6,6 +6,7 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -30,29 +31,44 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
-                                "/v3/api-docs/**"
-                        ).permitAll()
-
-                        .requestMatchers(
+                                "/v3/api-docs/**",
                                 "/api/ping",
-
-                                "/api/v1/movies",
-                                "/api/v1/movies/**",
-
-                                "/api/v1/banners",
-                                "/api/v1/banners/**",
-
-                                "/api/v1/cinemas",
-                                "/api/v1/cinemas/**",
-
-                                "/api/v1/showtimes",
-                                "/api/v1/showtimes/**",
-
-                                "/api/v1/seats/showtime/**",
-
                                 "/api/v1/health",
                                 "/api/v1/version"
                         ).permitAll()
+
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/v1/movies",
+                                "/api/v1/movies/**",
+                                "/api/v1/banners",
+                                "/api/v1/banners/**",
+                                "/api/v1/cinemas",
+                                "/api/v1/cinemas/**",
+                                "/api/v1/showtimes",
+                                "/api/v1/showtimes/**",
+                                "/api/v1/seats/showtime/**"
+                        ).permitAll()
+
+                        .requestMatchers(HttpMethod.POST,
+                                "/api/v1/movies/**",
+                                "/api/v1/banners/**",
+                                "/api/v1/cinemas/**",
+                                "/api/v1/showtimes/**"
+                        ).hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF")
+
+                        .requestMatchers(HttpMethod.PUT,
+                                "/api/v1/movies/**",
+                                "/api/v1/banners/**",
+                                "/api/v1/cinemas/**",
+                                "/api/v1/showtimes/**"
+                        ).hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF")
+
+                        .requestMatchers(HttpMethod.DELETE,
+                                "/api/v1/movies/**",
+                                "/api/v1/banners/**",
+                                "/api/v1/cinemas/**",
+                                "/api/v1/showtimes/**"
+                        ).hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF")
 
                         .requestMatchers(
                                 "/api/v1/profile",

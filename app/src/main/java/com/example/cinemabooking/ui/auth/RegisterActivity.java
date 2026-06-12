@@ -38,8 +38,8 @@ import java.util.Arrays;
 
 public class RegisterActivity extends BaseActivity {
 
-    private TextInputLayout tilEmail, tilPassword, tilConfirmPassword, tilPhone;
-    private TextInputEditText edtEmail, edtPassword, edtConfirmPassword, edtPhone;
+    private TextInputLayout tilEmail, tilPassword, tilConfirmPassword, tilPhone, tilFullName;
+    private TextInputEditText edtEmail, edtPassword, edtConfirmPassword, edtPhone, edtFullName;
 
     private MaterialButton btnRegister;
     private TextView tvBack;
@@ -72,11 +72,13 @@ public class RegisterActivity extends BaseActivity {
         tilPassword = findViewById(R.id.tilPassword);
         tilConfirmPassword = findViewById(R.id.tilConfirmPassword);
         tilPhone = findViewById(R.id.tilPhone);
+        tilFullName = findViewById(R.id.tilFullName);
 
         edtEmail = findViewById(R.id.edtEmail);
         edtPassword = findViewById(R.id.edtPassword);
         edtConfirmPassword = findViewById(R.id.edtConfirmPassword);
         edtPhone = findViewById(R.id.edtPhone);
+        edtFullName = findViewById(R.id.edtFullName);
 
         btnRegister = findViewById(R.id.btnRegister);
         tvBack = findViewById(R.id.tvBack);
@@ -126,10 +128,16 @@ public class RegisterActivity extends BaseActivity {
     private void attemptRegister() {
         clearErrors();
 
+        String fullName = getText(edtFullName);
         String email = getText(edtEmail);
         String password = getText(edtPassword);
         String confirmPassword = getText(edtConfirmPassword);
         String phone = getText(edtPhone);
+
+        if (TextUtils.isEmpty(fullName)) {
+            tilFullName.setError("Vui lòng nhập họ và tên");
+            return;
+        }
 
         if (TextUtils.isEmpty(email)) {
             tilEmail.setError("Vui lòng nhập email");
@@ -163,7 +171,7 @@ public class RegisterActivity extends BaseActivity {
 
         btnRegister.setEnabled(false);
 
-        authService.signUpWithEmailAndPassword(email, password, phone, new AuthCallback() {
+        authService.signUpWithEmailAndPassword(email, password, phone, fullName, new AuthCallback() {
             @Override
             public void onSuccess(User data) {
                 showToast("Đăng ký thành công! Vui lòng đăng nhập.");
@@ -231,6 +239,9 @@ public class RegisterActivity extends BaseActivity {
     }
 
     private void clearErrors() {
+        if (tilFullName != null) {
+            tilFullName.setError(null);
+        }
         tilEmail.setError(null);
         tilPassword.setError(null);
         tilConfirmPassword.setError(null);

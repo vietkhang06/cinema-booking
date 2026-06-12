@@ -21,10 +21,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -196,9 +193,12 @@ public class BookingController {
         if (booking == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy vé đặt.");
         }
-//        if (!userId.equals(booking.getUserId())) {
-//            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bạn không có quyền xác nhận vé này.");
-//        }
+        if (!userId.equals(booking.getUserId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bạn không có quyền xác nhận vé này.");
+        }
+        if (!"PENDING".equalsIgnoreCase(booking.getBookingStatus())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Vé đặt này đã được xử lý hoặc đã hết hạn (trạng thái: " + booking.getBookingStatus() + ").");
+        }
         bookingService.updatePaymentStatus(bookingId, "SUCCESS", "CONFIRMED");
         bookingService.confirmBookingSeats(bookingId);
 
@@ -241,6 +241,9 @@ public class BookingController {
         if (!userId.equals(booking.getUserId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bạn không có quyền hủy vé này.");
         }
+        if (!"PENDING".equalsIgnoreCase(booking.getBookingStatus())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Vé đặt này đã được xử lý hoặc đã hết hạn (trạng thái: " + booking.getBookingStatus() + ").");
+        }
         bookingService.updatePaymentStatus(bookingId, "FAILED", "CANCELLED");
         bookingService.releaseBookingSeats(bookingId);
 
@@ -281,40 +284,86 @@ public class BookingController {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bạn không có quyền tìm kiếm vé.");
         }
 
-        List<String> userIds = new ArrayList<>();
-        List<com.google.cloud.firestore.QueryDocumentSnapshot> users = firestore.collection("users")
-                .get().get().getDocuments();
-        for (com.google.cloud.firestore.QueryDocumentSnapshot doc : users) {
-            String name = doc.getString("name");
-            String email = doc.getString("email");
-            String phone = doc.getString("phone");
-            if ((name != null && name.toLowerCase().contains(query.toLowerCase())) ||
-                    (email != null && email.toLowerCase().contains(query.toLowerCase())) ||
-                    (phone != null && phone.contains(query))) {
-                userIds.add(doc.getId());
+        List<BookingDTO> results = new ArrayList<>();
+        
+        java.util.function.Consumer<BookingDTO> enrichBooking = (booking) -> {
+            try {
+                ShowtimeDTO showTime = showtimeService.getShowtimeById(booking.getShowtimeId());
+                booking.setShowtime(showTime);
+            } catch (Exception ignored) {}
+            try {
+                UserDTO user = userService.getUserById(booking.getUserId());
+                booking.setUser(user);
+            } catch (Exception ignored) {}
+        };
+
+        // 1. Search by bookingId directly (document lookup)
+        DocumentSnapshot directBookingDoc = firestore.collection("bookings").document(query).get().get();
+        if (directBookingDoc.exists()) {
+            BookingDTO booking = directBookingDoc.toObject(BookingDTO.class);
+            if (booking != null) {
+                booking.setBookingId(directBookingDoc.getId());
+                enrichBooking.accept(booking);
+                results.add(booking);
             }
         }
 
-        List<BookingDTO> results = new ArrayList<>();
-        List<com.google.cloud.firestore.QueryDocumentSnapshot> bookings = firestore.collection("bookings")
-                .get().get().getDocuments();
-        for (com.google.cloud.firestore.QueryDocumentSnapshot doc : bookings) {
-            BookingDTO booking = doc.toObject(BookingDTO.class);
-            if (booking != null) {
-                booking.setBookingId(doc.getId());
-                boolean matchesUser = userIds.contains(booking.getUserId());
-                boolean matchesBookingId = booking.getBookingId().equalsIgnoreCase(query) || booking.getBookingId().toLowerCase().contains(query.toLowerCase());
-                boolean matchesPaymentCode = booking.getPaymentCode() != null && booking.getPaymentCode().equalsIgnoreCase(query);
-                if (matchesUser || matchesBookingId || matchesPaymentCode) {
-                    try {
-                        ShowtimeDTO showTime = showtimeService.getShowtimeById(booking.getShowtimeId());
-                        booking.setShowtime(showTime);
-                    } catch (Exception ignored) {}
-                    try {
-                        UserDTO user = userService.getUserById(booking.getUserId());
-                        booking.setUser(user);
-                    } catch (Exception ignored) {}
+        // 2. Search by paymentCode
+        if (results.isEmpty()) {
+            List<com.google.cloud.firestore.QueryDocumentSnapshot> paymentCodeBookings = firestore.collection("bookings")
+                    .whereEqualTo("paymentCode", query.toUpperCase())
+                    .get().get().getDocuments();
+            for (com.google.cloud.firestore.QueryDocumentSnapshot doc : paymentCodeBookings) {
+                BookingDTO booking = doc.toObject(BookingDTO.class);
+                if (booking != null) {
+                    booking.setBookingId(doc.getId());
+                    enrichBooking.accept(booking);
                     results.add(booking);
+                }
+            }
+        }
+
+        // 3. Search by user phone, email, or name prefix
+        if (results.isEmpty()) {
+            Set<String> uids = new HashSet<>();
+            
+            List<com.google.cloud.firestore.QueryDocumentSnapshot> phoneUsers = firestore.collection("users")
+                    .whereEqualTo("phone", query)
+                    .get().get().getDocuments();
+            for (com.google.cloud.firestore.QueryDocumentSnapshot doc : phoneUsers) {
+                uids.add(doc.getId());
+            }
+
+            List<com.google.cloud.firestore.QueryDocumentSnapshot> emailUsers = firestore.collection("users")
+                    .whereEqualTo("email", query.toLowerCase())
+                    .get().get().getDocuments();
+            for (com.google.cloud.firestore.QueryDocumentSnapshot doc : emailUsers) {
+                uids.add(doc.getId());
+            }
+
+            if (query.length() >= 2) {
+                List<com.google.cloud.firestore.QueryDocumentSnapshot> nameUsers = firestore.collection("users")
+                        .orderBy("name")
+                        .startAt(query)
+                        .endAt(query + "\uf8ff")
+                        .limit(10)
+                        .get().get().getDocuments();
+                for (com.google.cloud.firestore.QueryDocumentSnapshot doc : nameUsers) {
+                    uids.add(doc.getId());
+                }
+            }
+
+            for (String uid : uids) {
+                List<com.google.cloud.firestore.QueryDocumentSnapshot> userBookings = firestore.collection("bookings")
+                        .whereEqualTo("userId", uid)
+                        .get().get().getDocuments();
+                for (com.google.cloud.firestore.QueryDocumentSnapshot doc : userBookings) {
+                    BookingDTO booking = doc.toObject(BookingDTO.class);
+                    if (booking != null) {
+                        booking.setBookingId(doc.getId());
+                        enrichBooking.accept(booking);
+                        results.add(booking);
+                    }
                 }
             }
         }

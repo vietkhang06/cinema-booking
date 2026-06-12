@@ -85,20 +85,36 @@ public class MovieService {
     }
 
     public List<MovieDTO> getMoviesByStatus(String status, int page, int size) throws ExecutionException, InterruptedException {
-        logger.info("Fetching movies by status: {}", status);
-        List<MovieDTO> allMovies = getAllMovies(0, 1000); // Fetch all for filtering
-        
-        List<MovieDTO> filtered = allMovies.stream()
-                .filter(m -> status.equalsIgnoreCase(m.getStatus()))
-                .collect(Collectors.toList());
+        logger.info("Fetching movies by status: {} - page: {}, size: {}", status, page, size);
+        try {
+            ApiFuture<QuerySnapshot> future = firestore.collection(COLLECTION)
+                    .whereEqualTo("status", status)
+                    .get();
 
-        logger.info("Movies with status {}: {}", status, filtered.size());
+            List<QueryDocumentSnapshot> documents = future.get().getDocuments();
+            logger.info("Retrieved {} documents from Firestore by status: {}", documents.size(), status);
 
-        int start = page * size;
-        if (start >= filtered.size()) return new ArrayList<>();
-        int end = Math.min(start + size, filtered.size());
-        
-        return filtered.subList(start, end);
+            List<MovieDTO> filteredMovies = documents.stream()
+                    .map(this::mapToDTO)
+                    .filter(m -> !Boolean.TRUE.equals(m.getDeleted()))
+                    .filter(m -> !Boolean.FALSE.equals(m.getIsActive()))
+                    .sorted((m1, m2) -> {
+                        long t1 = m1.getUpdatedAt() != null ? m1.getUpdatedAt() : 0L;
+                        long t2 = m2.getUpdatedAt() != null ? m2.getUpdatedAt() : 0L;
+                        return Long.compare(t2, t1);
+                    })
+                    .collect(Collectors.toList());
+
+            int start = page * size;
+            if (start >= filteredMovies.size()) {
+                return new ArrayList<>();
+            }
+            int end = Math.min(start + size, filteredMovies.size());
+            return filteredMovies.subList(start, end);
+        } catch (Exception e) {
+            logger.error("Error in getMoviesByStatus: {}", e.getMessage(), e);
+            throw e;
+        }
     }
 
     public List<MovieDTO> searchMovies(String keyword) throws ExecutionException, InterruptedException {

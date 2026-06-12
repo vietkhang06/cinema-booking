@@ -102,6 +102,11 @@ public class AdminMovieFormActivity extends BaseActivity {
         actvStatus = findViewById(R.id.actvStatus);
 
         btnSave = findViewById(R.id.btnSave);
+
+        android.view.View btnBack = findViewById(R.id.btnAdminBack);
+        if (btnBack != null) {
+            btnBack.setOnClickListener(v -> finish());
+        }
     }
 
     private void setupDropdowns() {
