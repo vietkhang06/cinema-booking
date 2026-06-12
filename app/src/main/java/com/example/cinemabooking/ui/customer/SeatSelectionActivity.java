@@ -66,7 +66,7 @@ public class SeatSelectionActivity extends AppCompatActivity {
         showtimeStart = getIntent().getLongExtra(EXTRA_SHOWTIME_START, 0);
 
         initViews();
-        loadSeats();
+        checkPendingBooking();
     }
 
     private void initViews() {
@@ -206,6 +206,43 @@ public class SeatSelectionActivity extends AppCompatActivity {
         });
 
 
+    }
+
+    private void checkPendingBooking() {
+        if (showtimeId == null) {
+            loadSeats();
+            return;
+        }
+
+        com.example.cinemabooking.data.remote.api.BookingApiService bookingApi =
+                com.example.cinemabooking.data.remote.api.RetrofitClient.getInstance()
+                        .create(com.example.cinemabooking.data.remote.api.BookingApiService.class);
+
+        bookingApi.getPendingBooking(showtimeId).enqueue(new retrofit2.Callback<com.example.cinemabooking.data.dto.ApiResponse<com.example.cinemabooking.data.dto.BookingDTO>>() {
+            @Override
+            public void onResponse(retrofit2.Call<com.example.cinemabooking.data.dto.ApiResponse<com.example.cinemabooking.data.dto.BookingDTO>> call, retrofit2.Response<com.example.cinemabooking.data.dto.ApiResponse<com.example.cinemabooking.data.dto.BookingDTO>> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess() && response.body().getData() != null) {
+                    com.example.cinemabooking.data.dto.BookingDTO pendingBooking = response.body().getData();
+                    Toast.makeText(SeatSelectionActivity.this, "Bạn có giao dịch đặt vé chưa hoàn tất. Đang chuyển hướng...", Toast.LENGTH_LONG).show();
+
+                    Intent intent = new Intent(SeatSelectionActivity.this, PaymentInstructionActivity.class);
+                    intent.putExtra(PaymentInstructionActivity.EXTRA_BOOKING_ID, pendingBooking.bookingId);
+                    intent.putExtra(PaymentInstructionActivity.EXTRA_PAYMENT_CODE, pendingBooking.paymentCode);
+                    intent.putExtra(PaymentInstructionActivity.EXTRA_AMOUNT, pendingBooking.total);
+                    intent.putExtra(PaymentInstructionActivity.EXTRA_PAYMENT_METHOD, pendingBooking.paymentMethod);
+                    intent.putExtra("createdAt", pendingBooking.createdAt);
+                    startActivity(intent);
+                    finish();
+                } else {
+                    loadSeats();
+                }
+            }
+
+            @Override
+            public void onFailure(retrofit2.Call<com.example.cinemabooking.data.dto.ApiResponse<com.example.cinemabooking.data.dto.BookingDTO>> call, Throwable t) {
+                loadSeats();
+            }
+        });
     }
 
     private void loadSeats() {

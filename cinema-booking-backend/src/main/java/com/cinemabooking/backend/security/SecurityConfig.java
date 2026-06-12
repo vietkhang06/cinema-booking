@@ -2,6 +2,7 @@ package com.cinemabooking.backend.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -35,7 +36,11 @@ public class SecurityConfig {
 
                         .requestMatchers(
                                 "/api/ping",
+                                "/api/v1/health",
+                                "/api/v1/version"
+                        ).permitAll()
 
+                        .requestMatchers(HttpMethod.GET,
                                 "/api/v1/movies",
                                 "/api/v1/movies/**",
 
@@ -48,10 +53,7 @@ public class SecurityConfig {
                                 "/api/v1/showtimes",
                                 "/api/v1/showtimes/**",
 
-                                "/api/v1/seats/showtime/**",
-
-                                "/api/v1/health",
-                                "/api/v1/version"
+                                "/api/v1/seats/showtime/**"
                         ).permitAll()
 
                         .requestMatchers(
