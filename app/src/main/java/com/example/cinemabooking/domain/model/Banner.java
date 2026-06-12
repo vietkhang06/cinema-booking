@@ -4,9 +4,9 @@ public class Banner {
 
     public String bannerId;
     public String imageUrl;
-    public boolean isActive;
-    public long createdAt;
-    public long updatedAt;
+    public Boolean isActive;
+    public Long createdAt;
+    public Long updatedAt;
 
     public Banner() {
     }

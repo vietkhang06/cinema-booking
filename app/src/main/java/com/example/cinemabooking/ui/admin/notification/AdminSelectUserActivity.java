@@ -169,7 +169,8 @@ public class AdminSelectUserActivity extends AppCompatActivity {
                 fullCustomerList.clear();
                 if (users != null) {
                     for (User u : users) {
-                        if (!u.deleted && "customer".equalsIgnoreCase(u.role)) {
+                        boolean isDeleted = (u.deleted != null) && u.deleted;
+            if (!isDeleted && "customer".equalsIgnoreCase(u.role)) {
                             fullCustomerList.add(u);
                         }
                     }
@@ -317,7 +318,7 @@ public class AdminSelectUserActivity extends AppCompatActivity {
             }
 
             // Points
-            holder.tvPoints.setText(u.points + " điểm");
+            holder.tvPoints.setText(((u.points != null) ? u.points : 0) + " điểm");
 
             // Checkbox state
             holder.cbSelect.setOnCheckedChangeListener(null);

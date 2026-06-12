@@ -142,7 +142,7 @@ public class StaffCheckSeat extends AuthActivity {
                             if (seat != null) {
                                 seat.seatId = doc.getId();
                                 newSeats.add(seat);
-                                if (seat.columnNo > maxCol) {
+                                if (seat.columnNo != null && seat.columnNo > maxCol) {
                                     maxCol = seat.columnNo;
                                 }
                             }
@@ -153,7 +153,7 @@ public class StaffCheckSeat extends AuthActivity {
                             if (s1.rowName == null || s2.rowName == null) return 0;
                             int r = s1.rowName.compareTo(s2.rowName);
                             if (r != 0) return r;
-                            return Integer.compare(s1.columnNo, s2.columnNo);
+                            return Integer.compare(s1.columnNo != null ? s1.columnNo : 0, s2.columnNo != null ? s2.columnNo : 0);
                         });
 
                         // Cập nhật span count động để khớp với số cột thực tế
@@ -171,7 +171,7 @@ public class StaffCheckSeat extends AuthActivity {
     private void handleSeatClick(SeatDTO seat) {
         long now = System.currentTimeMillis();
         boolean isBooked = "booked".equalsIgnoreCase(seat.status);
-        boolean isHeld = "held".equalsIgnoreCase(seat.status) && (seat.heldUntil > now);
+        boolean isHeld = "held".equalsIgnoreCase(seat.status) && (seat.heldUntil != null && seat.heldUntil > now);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Thông tin ghế " + seat.seatCode);

@@ -10,8 +10,8 @@ public class AdminPayment {
     public String status;
     public String transactionId;
     public String payUrl;
-    public long createdAt;
-    public long updatedAt;
+    public Long createdAt;
+    public Long updatedAt;
 
     public AdminPayment() {
         // Default constructor required for Firestore toObject()

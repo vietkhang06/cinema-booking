@@ -8,7 +8,7 @@ public class ChatMessage {
     public String content;
     public String type;
     public String imgUrl;
-    public long sentAt;
+    public Long sentAt;
 
     public ChatMessage() {
     }

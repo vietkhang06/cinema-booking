@@ -5,13 +5,13 @@ public class Room {
     public String cinemaId;
     public String name;
     public String layoutType;
-    public int seatRows;
-    public int seatCols;
-    public int totalSeats;
+    public Integer seatRows;
+    public Integer seatCols;
+    public Integer totalSeats;
     public String status;
-    public long createdAt;
-    public long updatedAt;
-    public boolean deleted;
+    public Long createdAt;
+    public Long updatedAt;
+    public Boolean deleted;
 
     public Room() {
     }

@@ -9,11 +9,11 @@ public class UserDTO {
     public String role;
     public String status;
     public String memberLevel;
-    public int points;
+    public Integer points;
     public String fcmToken;
-    public long createdAt;
-    public long updatedAt;
-    public boolean deleted;
+    public Long createdAt;
+    public Long updatedAt;
+    public Boolean deleted;
 
     public UserDTO() {
     }

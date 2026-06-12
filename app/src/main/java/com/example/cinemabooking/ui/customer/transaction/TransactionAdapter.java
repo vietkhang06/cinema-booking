@@ -89,9 +89,9 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
                 tvCinema.setText(booking.cinemaNameSnapshot + " - " + booking.roomNameSnapshot);
             }
             
-            if (booking.showtimeStartAtSnapshot > 0) {
+            if (booking.showtimeStartAtSnapshot != null && booking.showtimeStartAtSnapshot > 0) {
                 tvShowtime.setText(dateFormat.format(new Date(booking.showtimeStartAtSnapshot)));
-            } else if (booking.createdAt > 0) {
+            } else if (booking.createdAt != null && booking.createdAt > 0) {
                 tvShowtime.setText(dateFormat.format(new Date(booking.createdAt)));
             } else {
                 tvShowtime.setText("Chưa xác định");
@@ -100,8 +100,8 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
             tvPrice.setText(String.format("%,.0fđ", booking.total).replace(',', '.'));
 
             long now = System.currentTimeMillis();
-            boolean isExpired = (booking.showtimeStartAtSnapshot > 0) && (now > booking.showtimeStartAtSnapshot);
-            boolean isUsed = booking.checkInAt > 0;
+            boolean isExpired = (booking.showtimeStartAtSnapshot != null && booking.showtimeStartAtSnapshot > 0) && (now > booking.showtimeStartAtSnapshot);
+            boolean isUsed = booking.checkInAt != null && booking.checkInAt > 0;
             String status = booking.bookingStatus != null ? booking.bookingStatus.toLowerCase() : "unknown";
             boolean isCancelled = "cancelled".equals(status) || "failed".equals(status);
 

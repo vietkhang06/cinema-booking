@@ -312,7 +312,7 @@ public class BookingConfirmActivity extends AppCompatActivity {
 
     private void updateStarsUI() {
         if (currentUser == null) return;
-        int points = currentUser.points;
+        int points = (currentUser.points != null) ? currentUser.points : 0;
         if (tvStarsLabel != null) {
             tvStarsLabel.setText(String.format(Locale.getDefault(), "Áp dụng điểm Stars (%d Stars có sẵn)", points));
         }

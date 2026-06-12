@@ -7,10 +7,10 @@ public class CineShopItemDTO {
     public String imageUrl;
     public double price;
     public String categoryId;
-    public int stock;
+    public Integer stock;
     public String status;
-    public int sortOrder;
-    public boolean isActive;
+    public Integer sortOrder;
+    public Boolean isActive;
 
     public CineShopItemDTO() {
     }

@@ -136,7 +136,9 @@ public class StaffSearchBookingActivity extends AuthActivity {
             holder.tvBookingId.setText("Mã vé: " + dto.bookingId);
             holder.tvCinemaRoom.setText(dto.cinemaNameSnapshot + " - " + dto.roomNameSnapshot);
 
-            String formattedTime = dateFormat.format(new Date(dto.showtimeStartAtSnapshot));
+            String formattedTime = dto.showtimeStartAtSnapshot != null 
+                    ? dateFormat.format(new Date(dto.showtimeStartAtSnapshot)) 
+                    : "Chưa xác định";
             holder.tvShowtime.setText("Suất chiếu: " + formattedTime);
 
             String seats = dto.seatCodes != null ? String.join(", ", dto.seatCodes) : "";

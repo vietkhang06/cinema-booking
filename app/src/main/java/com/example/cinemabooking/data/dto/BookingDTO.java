@@ -13,7 +13,7 @@ public class BookingDTO {
     public String movieImageUrlSnapshot;
     public String cinemaNameSnapshot;
     public String roomNameSnapshot;
-    public long showtimeStartAtSnapshot;
+    public Long showtimeStartAtSnapshot;
     public List<String> seatCodes;
     public List<String> seatIds;
     public String snackOrderId;
@@ -24,12 +24,12 @@ public class BookingDTO {
     public String paymentStatus;
     public String bookingStatus;
     public String paymentCode;
-    public long paymentAt;
+    public Long paymentAt;
     public String qrCodeValue;
-    public long checkInAt;
-    public long createdAt;
-    public long updatedAt;
-    public boolean deleted;
+    public Long checkInAt;
+    public Long createdAt;
+    public Long updatedAt;
+    public Boolean deleted;
 
     public BookingDTO() {
     }

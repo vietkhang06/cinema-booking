@@ -17,8 +17,8 @@ public class Conversation {
     public String assignedStaffId;
     public Boolean hadStaff;
 
-    public long createdAt;
-    public long updatedAt;
+    public Long createdAt;
+    public Long updatedAt;
 
     public Conversation(){ }
 

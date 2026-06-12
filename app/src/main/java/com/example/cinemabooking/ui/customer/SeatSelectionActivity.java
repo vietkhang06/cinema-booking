@@ -106,7 +106,7 @@ public class SeatSelectionActivity extends AppCompatActivity {
 
             boolean isBooked = "booked".equalsIgnoreCase(seat.status);
             boolean isHeldByOther = "held".equalsIgnoreCase(seat.status)
-                    && (seat.heldUntil > now)
+                    && (seat.heldUntil != null && seat.heldUntil > now)
                     && !currentUserId.equals(seat.heldBy);
             boolean isLocked = "LOCKED".equalsIgnoreCase(seat.status)
                     || "LOCKED".equalsIgnoreCase(seat.seatType);
@@ -315,10 +315,10 @@ public class SeatSelectionActivity extends AppCompatActivity {
                                 seat.seatId = doc.getId();
 
                                 boolean isAvailable = "available".equalsIgnoreCase(seat.status)
-                                        || ("held".equalsIgnoreCase(seat.status) && seat.heldUntil < now);
+                                        || ("held".equalsIgnoreCase(seat.status) && seat.heldUntil != null && seat.heldUntil < now);
 
                                 boolean isHeldByMe = "held".equalsIgnoreCase(seat.status)
-                                        && (seat.heldUntil >= now)
+                                        && (seat.heldUntil != null && seat.heldUntil >= now)
                                         && currentUserId.equals(seat.heldBy);
 
                                 // Check if this seat was selected by me previously
@@ -335,7 +335,7 @@ public class SeatSelectionActivity extends AppCompatActivity {
                                     seat.isSelected = false;
                                 }
                                 newSeats.add(seat);
-                                if (seat.columnNo > maxCol) {
+                                if (seat.columnNo != null && seat.columnNo > maxCol) {
                                     maxCol = seat.columnNo;
                                 }
                             }
@@ -351,7 +351,7 @@ public class SeatSelectionActivity extends AppCompatActivity {
                         newSeats.sort((a, b) -> {
                             if (a.rowName == null || b.rowName == null) return 0;
                             int r = a.rowName.compareTo(b.rowName);
-                            return r != 0 ? r : Integer.compare(a.columnNo, b.columnNo);
+                            return r != 0 ? r : Integer.compare(a.columnNo != null ? a.columnNo : 0, b.columnNo != null ? b.columnNo : 0);
                         });
 
                         // 4. Update the seatList and UI

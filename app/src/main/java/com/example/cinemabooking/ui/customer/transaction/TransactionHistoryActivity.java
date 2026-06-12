@@ -127,7 +127,7 @@ public class TransactionHistoryActivity extends AppCompatActivity {
                                 Long qtyObj = doc.getLong("quantity");
                                 int qty = qtyObj != null ? qtyObj.intValue() : 1;
                                 orderBooking.roomNameSnapshot = "Số lượng: " + qty;
-                                orderBooking.showtimeStartAtSnapshot = 0;
+                                orderBooking.showtimeStartAtSnapshot = 0L;
                                 
                                 Double priceObj = doc.getDouble("totalPrice");
                                 double price = priceObj != null ? priceObj : 0.0;
@@ -182,7 +182,7 @@ public class TransactionHistoryActivity extends AppCompatActivity {
                                 Long qtyObj = doc.getLong("quantity");
                                 int qty = qtyObj != null ? qtyObj.intValue() : 1;
                                 orderBooking.roomNameSnapshot = "Số lượng: " + qty;
-                                orderBooking.showtimeStartAtSnapshot = 0;
+                                orderBooking.showtimeStartAtSnapshot = 0L;
                                 
                                 Double priceObj = doc.getDouble("totalPrice");
                                 double price = priceObj != null ? priceObj : 0.0;
@@ -220,7 +220,7 @@ public class TransactionHistoryActivity extends AppCompatActivity {
         for (Booking booking : allTransactions) {
             String status = booking.bookingStatus != null ? booking.bookingStatus.toLowerCase() : "unknown";
             boolean isPaid = "confirmed".equals(status) || "success".equals(status);
-            boolean isUsed = booking.checkInAt > 0;
+            boolean isUsed = booking.checkInAt != null && booking.checkInAt > 0;
 
             if (tabPosition == 0) {
                 // Tab "Đã thanh toán": đã thanh toán thành công và chưa check-in/quét
