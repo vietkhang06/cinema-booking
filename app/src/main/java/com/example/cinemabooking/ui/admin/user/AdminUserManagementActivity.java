@@ -123,7 +123,8 @@ public class AdminUserManagementActivity extends AppCompatActivity {
                 if (users != null) {
                     for (User u : users) {
                         // Filter for only active (non-deleted) customers
-                        if (!u.deleted && "customer".equalsIgnoreCase(u.role)) {
+                        boolean isDeleted = (u.deleted != null) && u.deleted;
+            if (!isDeleted && "customer".equalsIgnoreCase(u.role)) {
                             fullCustomerList.add(u);
                         }
                     }
@@ -229,10 +230,10 @@ public class AdminUserManagementActivity extends AppCompatActivity {
         
         String levelUpper = user.memberLevel != null ? user.memberLevel.toUpperCase(Locale.getDefault()) : "STANDARD";
         tvLevel.setText(levelUpper);
-        tvPoints.setText(user.points + " điểm");
+        tvPoints.setText(((user.points != null) ? user.points : 0) + " điểm");
 
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-        tvJoined.setText(user.createdAt > 0 ? sdf.format(new Date(user.createdAt)) : "Chưa rõ");
+        tvJoined.setText((user.createdAt != null && user.createdAt > 0) ? sdf.format(new Date(user.createdAt)) : "Chưa rõ");
 
         boolean isLocked = "locked".equalsIgnoreCase(user.status);
         if (isLocked) {
@@ -373,7 +374,7 @@ public class AdminUserManagementActivity extends AppCompatActivity {
         Button btnSubtract = dialog.findViewById(R.id.btnPointsSubtract);
         Button btnCancel = dialog.findViewById(R.id.btnCancelPoints);
 
-        tvCurrentPoints.setText("Điểm hiện tại: " + user.points);
+        tvCurrentPoints.setText("Điểm hiện tại: " + ((user.points != null) ? user.points : 0));
 
         btnCancel.setOnClickListener(v -> dialog.dismiss());
 
@@ -404,7 +405,8 @@ public class AdminUserManagementActivity extends AppCompatActivity {
         }
 
         int diff = isAdd ? amountVal : -amountVal;
-        int finalPoints = user.points + diff;
+        int currentPoints = (user.points != null) ? user.points : 0;
+        int finalPoints = currentPoints + diff;
         if (finalPoints < 0) {
             etAmount.setError("Khách hàng không đủ điểm để trừ");
             return;
@@ -629,7 +631,7 @@ public class AdminUserManagementActivity extends AppCompatActivity {
             }
 
             // Points
-            holder.tvPoints.setText(u.points + " điểm");
+            holder.tvPoints.setText(((u.points != null) ? u.points : 0) + " điểm");
 
             // Status light indicator
             boolean isActive = !"locked".equalsIgnoreCase(u.status);

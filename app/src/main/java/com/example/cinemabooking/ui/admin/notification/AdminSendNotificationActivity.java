@@ -95,7 +95,8 @@ public class AdminSendNotificationActivity extends AppCompatActivity {
                 allUsers.clear();
                 if (users != null) {
                     for (User u : users) {
-                        if (!u.deleted && "customer".equalsIgnoreCase(u.role)) {
+                        boolean isDeleted = (u.deleted != null) && u.deleted;
+            if (!isDeleted && "customer".equalsIgnoreCase(u.role)) {
                             allUsers.add(u);
                         }
                     }
@@ -323,7 +324,7 @@ public class AdminSendNotificationActivity extends AppCompatActivity {
             }
 
             // Points
-            holder.tvPoints.setText(u.points + " điểm");
+            holder.tvPoints.setText(((u.points != null) ? u.points : 0) + " điểm");
 
             // Hide the checkbox as we only want to display user info
             holder.cbSelect.setVisibility(View.GONE);
