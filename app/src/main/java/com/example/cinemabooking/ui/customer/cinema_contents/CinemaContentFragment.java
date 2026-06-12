@@ -22,7 +22,10 @@ import com.example.cinemabooking.domain.model.Cinema_DienAnh.CinemaContentType;
 import com.example.cinemabooking.ui.customer.cinema_contents.adapter.CinemaFeedAdapter;
 import com.example.cinemabooking.ui.customer.cinema_contents.mapper.CinemaFeedMapper;
 import com.example.cinemabooking.ui.customer.cinema_contents.model.CinemaFeedItem;
+import com.example.cinemabooking.core.navigation.AppNavigator;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.android.material.button.MaterialButton;
+import android.widget.LinearLayout;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +40,8 @@ public class CinemaContentFragment extends Fragment implements CinemaFeedAdapter
     private ImageButton btnSearch;
     private MaterialButton btnComment, btnNews, btnPerson;
     private RecyclerView rvFeed;
+    private LinearLayout layoutLoginRequired;
+    private MaterialButton btnLoginRequired;
 
     private CinemaFeedAdapter adapter;
     private final List<CinemaContent> allContents = new ArrayList<>();
@@ -54,7 +59,27 @@ public class CinemaContentFragment extends Fragment implements CinemaFeedAdapter
         initViews(view);
         setupRecyclerView();
         bindActions();
-        loadData();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        checkLoginState();
+    }
+
+    private void checkLoginState() {
+        boolean isLoggedIn = FirebaseAuth.getInstance().getCurrentUser() != null;
+        if (isLoggedIn) {
+            if (layoutLoginRequired != null) layoutLoginRequired.setVisibility(View.GONE);
+            rvFeed.setVisibility(View.VISIBLE);
+            if (allContents.isEmpty()) {
+                loadData();
+            }
+        } else {
+            if (layoutLoginRequired != null) layoutLoginRequired.setVisibility(View.VISIBLE);
+            rvFeed.setVisibility(View.GONE);
+            tvEmpty.setVisibility(View.GONE);
+        }
     }
 
     private void initViews(View view) {
@@ -66,6 +91,16 @@ public class CinemaContentFragment extends Fragment implements CinemaFeedAdapter
         btnNews = view.findViewById(R.id.btnNews);
         btnPerson = view.findViewById(R.id.btnPerson);
         rvFeed = view.findViewById(R.id.rvFeed);
+        layoutLoginRequired = view.findViewById(R.id.layoutLoginRequired);
+        btnLoginRequired = view.findViewById(R.id.btnLoginRequired);
+        
+        if (btnLoginRequired != null) {
+            btnLoginRequired.setOnClickListener(v -> {
+                if (getActivity() != null) {
+                    AppNavigator.goToLoginForBooking(getActivity());
+                }
+            });
+        }
     }
 
     private void setupRecyclerView() {
@@ -147,7 +182,11 @@ public class CinemaContentFragment extends Fragment implements CinemaFeedAdapter
 
         if (feedItems.isEmpty()) {
             tvEmpty.setText("Chưa có nội dung phù hợp");
-            tvEmpty.setVisibility(View.VISIBLE);
+            if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+                tvEmpty.setVisibility(View.VISIBLE);
+            } else {
+                tvEmpty.setVisibility(View.GONE);
+            }
         } else {
             tvEmpty.setVisibility(View.GONE);
         }

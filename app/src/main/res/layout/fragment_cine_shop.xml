@@ -185,4 +185,44 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
+    <!-- ========== LOGIN REQUIRED STATE ========== -->
+    <LinearLayout
+        android:id="@+id/layoutLoginRequired"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageView
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:src="@drawable/login_icon"
+            app:tint="#888888"
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Yêu cầu đăng nhập để xem thông tin sản phẩm"
+            android:textColor="#555555"
+            android:textSize="16sp"
+            android:gravity="center"
+            android:layout_marginBottom="24dp"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnLoginRequired"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Đăng nhập"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            app:cornerRadius="12dp"
+            app:backgroundTint="#E8640C" />
+    </LinearLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

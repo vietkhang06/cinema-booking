@@ -165,6 +165,12 @@
         <activity
             android:name=".ui.customer.notification.NotificationActivity"
             android:exported="false" />
+        <activity
+            android:name=".ui.customer.cinema_contents.CinemaContentDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.customer.cinema_contents.CinemaSearchActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

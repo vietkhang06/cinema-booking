@@ -24,6 +24,8 @@ import com.example.cinemabooking.domain.model.Snack;
 import com.example.cinemabooking.ui.customer.adapter.CineShopAdapter;
 import com.example.cinemabooking.ui.customer.adapter.CineShopBannerAdapter;
 import com.example.cinemabooking.ui.customer.cine_shop.CineCartActivity;
+import com.example.cinemabooking.core.navigation.AppNavigator;
+import com.google.firebase.auth.FirebaseAuth;
 
 //Zikenic was here
 import com.example.cinemabooking.data.dto.CineShopBannerDTO;
@@ -58,6 +60,9 @@ public class CineShopFragment extends Fragment {
     private ImageView btnCart;
     private android.widget.ProgressBar loadingProgress;
     private TextView tvEmptyState;
+    private LinearLayout layoutLoginRequired;
+    private com.google.android.material.button.MaterialButton btnLoginRequired;
+    private androidx.core.widget.NestedScrollView scrollContent;
 
     // ── Adapters ─────────────────────────────────────────────────────────────
     private CineShopAdapter productAdapter;
@@ -96,7 +101,6 @@ public class CineShopFragment extends Fragment {
         setupBanner();
         setupTabs();
         setupRecyclerView();
-        loadCineShopItems();
 
         return view;
     }
@@ -104,7 +108,28 @@ public class CineShopFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        startBannerAutoScroll();
+        checkLoginState();
+    }
+
+    private void checkLoginState() {
+        boolean isLoggedIn = FirebaseAuth.getInstance().getCurrentUser() != null;
+        if (isLoggedIn) {
+            layoutLoginRequired.setVisibility(View.GONE);
+            scrollContent.setVisibility(View.VISIBLE);
+            
+            // Load data if empty
+            if (bannerAdapter != null && bannerAdapter.getItemCount() == 0) {
+                fetchBannersFromDatabase();
+            }
+            if (allProducts.isEmpty()) {
+                loadCineShopItems();
+            }
+            startBannerAutoScroll();
+        } else {
+            layoutLoginRequired.setVisibility(View.VISIBLE);
+            scrollContent.setVisibility(View.GONE);
+            stopBannerAutoScroll();
+        }
     }
 
     @Override
@@ -124,9 +149,23 @@ public class CineShopFragment extends Fragment {
         btnCart      = view.findViewById(R.id.btnCart);
         loadingProgress = view.findViewById(R.id.loadingProgress);
         tvEmptyState    = view.findViewById(R.id.tvEmptyState);
+        layoutLoginRequired = view.findViewById(R.id.layoutLoginRequired);
+        btnLoginRequired = view.findViewById(R.id.btnLoginRequired);
+        scrollContent   = view.findViewById(R.id.scrollContent);
 
-        btnCart.setOnClickListener(v ->
-                startActivity(new Intent(requireContext(), CineCartActivity.class)));
+        btnCart.setOnClickListener(v -> {
+            if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+                startActivity(new Intent(requireContext(), CineCartActivity.class));
+            } else {
+                AppNavigator.goToLoginForBooking(requireActivity());
+            }
+        });
+
+        if (btnLoginRequired != null) {
+            btnLoginRequired.setOnClickListener(v -> 
+                    AppNavigator.goToLoginForBooking(requireActivity())
+            );
+        }
     }
 
     // ── Banner ───────────────────────────────────────────────────────────────
@@ -141,9 +180,6 @@ public class CineShopFragment extends Fragment {
                 updateDots(position);
             }
         });
-
-        // Call API to fetch banners
-        fetchBannersFromDatabase();
     }
 
     private void fetchBannersFromDatabase() {
