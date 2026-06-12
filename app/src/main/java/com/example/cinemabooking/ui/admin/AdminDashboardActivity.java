@@ -156,7 +156,7 @@ public class AdminDashboardActivity extends AppCompatActivity {
                 if (showtimes != null) {
                     int count = 0;
                     for (Showtime s : showtimes) {
-                        if (!s.deleted) count++;
+                        if (s.deleted == null || !s.deleted) count++;
                     }
                     tvShowtimesCount.setText(String.valueOf(count));
                     Log.d(TAG, "Fetched " + count + " active showtimes successfully.");
@@ -183,12 +183,16 @@ public class AdminDashboardActivity extends AppCompatActivity {
                     float[] dayCounts = new float[7];
 
                     for (User u : users) {
-                        if (!u.deleted) {
+                        boolean isDeleted = (u.deleted != null) && u.deleted;
+                        if (!isDeleted) {
                             count++;
-                            long diff = now - u.createdAt;
-                            int daysAgo = (int) (diff / oneDay);
-                            if (daysAgo >= 0 && daysAgo < 7) {
-                                dayCounts[6 - daysAgo]++;
+                            long createdAt = (u.createdAt != null) ? u.createdAt : 0L;
+                            if (createdAt > 0) {
+                                long diff = now - createdAt;
+                                int daysAgo = (int) (diff / oneDay);
+                                if (daysAgo >= 0 && daysAgo < 7) {
+                                    dayCounts[6 - daysAgo]++;
+                                }
                             }
                         }
                     }
@@ -228,7 +232,7 @@ public class AdminDashboardActivity extends AppCompatActivity {
                     Map<String, Integer> movieSales = new HashMap<>();
 
                     for (Booking b : bookings) {
-                        if (!b.deleted) {
+                        if (b.deleted == null || !b.deleted) {
                             activeBookings++;
                             // Sum paid/confirmed bookings for revenue
                             if ("confirmed".equalsIgnoreCase(b.bookingStatus) || "paid".equalsIgnoreCase(b.paymentStatus) || "completed".equalsIgnoreCase(b.paymentStatus)) {

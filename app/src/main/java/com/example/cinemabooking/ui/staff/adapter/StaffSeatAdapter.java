@@ -109,7 +109,7 @@ public class StaffSeatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
             long now = System.currentTimeMillis();
             boolean isBooked = "booked".equalsIgnoreCase(seat.status);
-            boolean isHeld = "held".equalsIgnoreCase(seat.status) && (seat.heldUntil > now);
+            boolean isHeld = "held".equalsIgnoreCase(seat.status) && (seat.heldUntil != null && seat.heldUntil > now);
 
             if (isBooked) {
                 // BOOKED: slate/gray

@@ -219,7 +219,7 @@ public class TicketDetailActivity extends AppCompatActivity {
         tvTitle.setText(booking.movieTitleSnapshot);
         tvCinema.setText(booking.cinemaNameSnapshot);
         
-        if (booking.showtimeStartAtSnapshot > 0) {
+        if (booking.showtimeStartAtSnapshot != null && booking.showtimeStartAtSnapshot > 0) {
             Date date = new Date(booking.showtimeStartAtSnapshot);
             tvDate.setText(dateFormat.format(date));
             tvTime.setText(timeFormat.format(date));
@@ -235,8 +235,8 @@ public class TicketDetailActivity extends AppCompatActivity {
 
         // Handle QR state for Movie tickets
         long now = System.currentTimeMillis();
-        boolean isExpired = booking.showtimeStartAtSnapshot > 0 && now > booking.showtimeStartAtSnapshot;
-        boolean isUsed = booking.checkInAt > 0;
+        boolean isExpired = booking.showtimeStartAtSnapshot != null && booking.showtimeStartAtSnapshot > 0 && now > booking.showtimeStartAtSnapshot;
+        boolean isUsed = booking.checkInAt != null && booking.checkInAt > 0;
         String status = booking.bookingStatus != null ? booking.bookingStatus.toLowerCase() : "unknown";
         boolean isCancelled = "cancelled".equals(status) || "failed".equals(status);
         boolean isInvalid = isExpired || isUsed || isCancelled;

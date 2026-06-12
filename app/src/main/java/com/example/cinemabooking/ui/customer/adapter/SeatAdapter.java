@@ -113,11 +113,11 @@ public class SeatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     : "";
             
             boolean isHeldByMe = "held".equalsIgnoreCase(seat.status) 
-                    && (seat.heldUntil > now) 
+                    && (seat.heldUntil != null && seat.heldUntil > now) 
                     && currentUserId.equals(seat.heldBy);
             
             boolean isHeldByOther = "held".equalsIgnoreCase(seat.status) 
-                    && (seat.heldUntil > now) 
+                    && (seat.heldUntil != null && seat.heldUntil > now) 
                     && !currentUserId.equals(seat.heldBy);
 
             boolean isLocked = "LOCKED".equalsIgnoreCase(seat.status)

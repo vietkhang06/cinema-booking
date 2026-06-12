@@ -198,7 +198,7 @@ public class StaffInvoiceActivity extends AuthActivity {
             checkinButton.setVisibility(View.VISIBLE);
             Glide.with(this).load(R.drawable.ic_confirm).into(paymentStatusImg);
 
-            if (detail.booking.checkInAt > 0) {
+            if (detail.booking.checkInAt != null && detail.booking.checkInAt > 0) {
                 checkinButton.setEnabled(false);
                 checkinButton.setText("Đã Check-in");
                 checkinStatusTV.setText("Đã Check-in lúc: " + sdf.format(new Date(detail.booking.checkInAt)));
