@@ -14,110 +14,107 @@ import java.util.List;
 public class SeatReleaseScheduler {
 
     private static final Logger logger = LoggerFactory.getLogger(SeatReleaseScheduler.class);
-    private static final String COLLECTION = "seats";
+    private static final String SEAT_COLLECTION = "seats";
 
     @Autowired
     private Firestore firestore;
 
     @Scheduled(fixedRate = 60000) // Runs every 60 seconds
-    public void releaseExpiredSeats() {
-        logger.info("Scanning for expired seat holds...");
+    public void releaseExpiredSeatsAndBookings() {
+        logger.info("Scanning for expired seat holds and bookings...");
         long now = System.currentTimeMillis();
 
         try {
-            List<QueryDocumentSnapshot> heldSeats = firestore.collection(COLLECTION)
+            // Tác vụ 1: Quét giải phóng các ghế held hết hạn
+            ApiFuture<QuerySnapshot> futureSeats = firestore.collection(SEAT_COLLECTION)
                     .whereEqualTo("status", "held")
-                    .get().get().getDocuments();
+                    .get();
+
+            List<QueryDocumentSnapshot> heldSeats = futureSeats.get().getDocuments();
+            WriteBatch seatBatch = firestore.batch();
+            int count = 0;
 
             for (DocumentSnapshot doc : heldSeats) {
                 Long heldUntilVal = doc.getLong("heldUntil");
                 long heldUntil = heldUntilVal != null ? heldUntilVal : 0L;
 
                 if (heldUntil > 0 && heldUntil < now) {
-                    String seatId = doc.getId();
-                    String heldBy = doc.getString("heldBy");
-                    logger.info("[BOOKING_EXPIRED] Seat hold expired for seatId={}. heldUntil={}, now={}. Processing cancellation...",
-                            seatId, heldUntil, now);
-
-                    // Find PENDING bookings that contain this seat
-                    List<QueryDocumentSnapshot> pendingBookings = firestore.collection("bookings")
-                            .whereEqualTo("bookingStatus", "PENDING")
-                            .whereArrayContains("seatIds", seatId)
-                            .get().get().getDocuments();
-
-                    if (!pendingBookings.isEmpty()) {
-                        for (QueryDocumentSnapshot bookingDoc : pendingBookings) {
-                            String bookingId = bookingDoc.getId();
-                            String bookingUserId = bookingDoc.getString("userId");
-
-                            if (bookingUserId != null && bookingUserId.equals(heldBy)) {
-                                logger.info("[SCHEDULER_CANCEL] Cancelling expired booking {} for user {}", bookingId, bookingUserId);
-                                cancelBookingAndReleaseSeats(bookingDoc, now);
-                            }
-                        }
-                    } else {
-                        firestore.collection(COLLECTION).document(seatId)
-                                .update("status", "available", "heldBy", null, "heldUntil", 0L)
-                                .get();
-                        logger.info("[SEAT_RELEASE] Seat {} hold expired with no active booking. Released.", seatId);
-                    }
+                    logger.info("[SEAT_RELEASE] Seat hold expired for seatId={}. Releasing seat...", doc.getId());
+                    seatBatch.update(doc.getReference(),
+                            "status", "available",
+                            "heldBy", null,
+                            "heldUntil", 0L
+                    );
+                    count++;
                 }
             }
-        } catch (Exception e) {
-            logger.error("Error during scanning/releasing expired seats: {}", e.getMessage(), e);
-        }
-    }
 
-    @SuppressWarnings("unchecked")
-    private void cancelBookingAndReleaseSeats(DocumentSnapshot bookingDoc, long now) {
-        String bookingId = bookingDoc.getId();
-        String showtimeId = bookingDoc.getString("showtimeId");
-        List<String> seatIds = (List<String>) bookingDoc.get("seatIds");
+            if (count > 0) {
+                seatBatch.commit().get();
+                logger.info("[SEAT_RELEASE] Batch released {} expired held seats", count);
+            }
 
-        try {
-            firestore.runTransaction(transaction -> {
-                transaction.update(bookingDoc.getReference(),
-                        "bookingStatus", "CANCELLED",
-                        "paymentStatus", "FAILED",
-                        "updatedAt", now
-                );
+            // Tác vụ 2: Quét hủy các Booking PENDING quá hạn (7.5 phút)
+            ApiFuture<QuerySnapshot> futureBookings = firestore.collection("bookings")
+                    .whereEqualTo("bookingStatus", "PENDING")
+                    .get();
 
-                if (seatIds != null) {
-                    for (String sId : seatIds) {
-                        DocumentReference seatRef = firestore.collection(COLLECTION).document(sId);
-                        transaction.update(seatRef,
-                                "status", "available",
-                                "heldBy", null,
-                                "heldUntil", 0L,
-                                "bookedBy", null,
-                                "bookedAt", null
-                        );
-                    }
-                    if (showtimeId != null) {
-                        DocumentReference showtimeRef = firestore.collection("showtimes").document(showtimeId);
-                        transaction.update(showtimeRef, "bookedSeatsCount", FieldValue.increment(-seatIds.size()));
-                    }
-                }
+            List<QueryDocumentSnapshot> pendingBookings = futureBookings.get().getDocuments();
+            for (DocumentSnapshot bookingDoc : pendingBookings) {
+                Long createdAtVal = bookingDoc.getLong("createdAt");
+                long createdAt = createdAtVal != null ? createdAtVal : 0L;
 
-                try {
-                    List<QueryDocumentSnapshot> payments = firestore.collection("payments")
+                if (createdAt > 0 && (createdAt + 450000) < now) { // 7.5 phút
+                    String bookingId = bookingDoc.getId();
+                    logger.info("[BOOKING_TIMEOUT] Booking {} has expired. Cancelling dynamically...", bookingId);
+
+                    WriteBatch batch = firestore.batch();
+
+                    // 1. Hủy booking
+                    batch.update(bookingDoc.getReference(),
+                            "bookingStatus", "CANCELLED",
+                            "paymentStatus", "FAILED",
+                            "updatedAt", now
+                    );
+
+                    // 2. Tìm và hủy payment
+                    List<QueryDocumentSnapshot> paymentDocs = firestore.collection("payments")
                             .whereEqualTo("bookingId", bookingId)
                             .get().get().getDocuments();
-                    for (QueryDocumentSnapshot paymentDoc : payments) {
-                        transaction.update(paymentDoc.getReference(),
+                    for (DocumentSnapshot paymentDoc : paymentDocs) {
+                        batch.update(paymentDoc.getReference(),
                                 "status", "FAILED",
                                 "updatedAt", now
                         );
                     }
-                } catch (Exception ex) {
-                    logger.error("Failed to cancel payments in transaction for booking: {}", bookingId, ex);
-                }
 
-                return null;
-            }).get();
-            logger.info("[SCHEDULER_CANCEL_SUCCESS] Successfully cancelled booking {} and released seats {}", bookingId, seatIds);
+                    // 3. Giải phóng ghế của booking này
+                    List<String> seatIds = (List<String>) bookingDoc.get("seatIds");
+                    if (seatIds != null) {
+                        for (String seatId : seatIds) {
+                            batch.update(firestore.collection("seats").document(seatId),
+                                    "status", "available",
+                                    "heldBy", null,
+                                    "heldUntil", 0L
+                            );
+                        }
+                    }
+
+                    // 4. Giảm bookedSeatsCount của suất chiếu
+                    String showtimeId = bookingDoc.getString("showtimeId");
+                    if (showtimeId != null && seatIds != null) {
+                        batch.update(firestore.collection("showtimes").document(showtimeId),
+                                "bookedSeatsCount", FieldValue.increment(-seatIds.size())
+                        );
+                    }
+
+                    batch.commit().get();
+                    logger.info("[BOOKING_TIMEOUT_COMPLETE] Booking {}, seats and payments updated dynamically", bookingId);
+                }
+            }
+
         } catch (Exception e) {
-            logger.error("Failed to cancel booking {} and release seats: {}", bookingId, e.getMessage(), e);
+            logger.error("Error during scanning/releasing expired seats and bookings: {}", e.getMessage(), e);
         }
     }
 }

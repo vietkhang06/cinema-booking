@@ -85,16 +85,14 @@ public class MovieService {
     }
 
     public List<MovieDTO> getMoviesByStatus(String status, int page, int size) throws ExecutionException, InterruptedException {
-        logger.info("Fetching movies by status: {} - page: {}, size: {}", status, page, size);
+        logger.info("Fetching movies by status: {}", status);
         try {
             ApiFuture<QuerySnapshot> future = firestore.collection(COLLECTION)
                     .whereEqualTo("status", status)
                     .get();
 
             List<QueryDocumentSnapshot> documents = future.get().getDocuments();
-            logger.info("Retrieved {} documents from Firestore by status: {}", documents.size(), status);
-
-            List<MovieDTO> filteredMovies = documents.stream()
+            List<MovieDTO> filtered = documents.stream()
                     .map(this::mapToDTO)
                     .filter(m -> !Boolean.TRUE.equals(m.getDeleted()))
                     .filter(m -> !Boolean.FALSE.equals(m.getIsActive()))
@@ -105,12 +103,13 @@ public class MovieService {
                     })
                     .collect(Collectors.toList());
 
+            logger.info("Movies with status {} after lenient filtering: {}", status, filtered.size());
+
             int start = page * size;
-            if (start >= filteredMovies.size()) {
-                return new ArrayList<>();
-            }
-            int end = Math.min(start + size, filteredMovies.size());
-            return filteredMovies.subList(start, end);
+            if (start >= filtered.size()) return new ArrayList<>();
+            int end = Math.min(start + size, filtered.size());
+            
+            return filtered.subList(start, end);
         } catch (Exception e) {
             logger.error("Error in getMoviesByStatus: {}", e.getMessage(), e);
             throw e;
@@ -119,12 +118,28 @@ public class MovieService {
 
     public List<MovieDTO> searchMovies(String keyword) throws ExecutionException, InterruptedException {
         logger.info("Searching movies with keyword: {}", keyword);
-        List<MovieDTO> allMovies = getAllMovies(0, 1000);
-        
-        String lowerKeyword = keyword.toLowerCase();
-        return allMovies.stream()
-                .filter(m -> m.getTitle() != null && m.getTitle().toLowerCase().contains(lowerKeyword))
-                .collect(Collectors.toList());
+        try {
+            ApiFuture<QuerySnapshot> future = firestore.collection(COLLECTION)
+                    .whereEqualTo("deleted", false)
+                    .get();
+
+            List<QueryDocumentSnapshot> documents = future.get().getDocuments();
+            String lowerKeyword = keyword.toLowerCase();
+            
+            return documents.stream()
+                    .map(this::mapToDTO)
+                    .filter(m -> !Boolean.FALSE.equals(m.getIsActive()))
+                    .filter(m -> m.getTitle() != null && m.getTitle().toLowerCase().contains(lowerKeyword))
+                    .sorted((m1, m2) -> {
+                        long t1 = m1.getUpdatedAt() != null ? m1.getUpdatedAt() : 0L;
+                        long t2 = m2.getUpdatedAt() != null ? m2.getUpdatedAt() : 0L;
+                        return Long.compare(t2, t1);
+                    })
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            logger.error("Error in searchMovies: {}", e.getMessage(), e);
+            throw e;
+        }
     }
 
     private boolean isVisible(DocumentSnapshot doc) {

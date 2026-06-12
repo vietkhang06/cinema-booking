@@ -44,6 +44,10 @@ public class AdminSendNotificationActivity extends AppCompatActivity {
     private TextView tvRecipientCount;
     private RecyclerView rvRecipients;
 
+    private CheckBox cbAttachVoucher;
+    private View layoutVoucherDiscount;
+    private EditText edtVoucherDiscount;
+
     private ArrayList<String> selectedUids = new ArrayList<>();
     private List<User> allUsers = new ArrayList<>();
     private List<User> selectedUsers = new ArrayList<>();
@@ -68,6 +72,14 @@ public class AdminSendNotificationActivity extends AppCompatActivity {
         edtNotifMessage = findViewById(R.id.edtNotifMessage);
         tvRecipientCount = findViewById(R.id.tvRecipientCount);
         rvRecipients = findViewById(R.id.rvRecipients);
+
+        cbAttachVoucher = findViewById(R.id.cbAttachVoucher);
+        layoutVoucherDiscount = findViewById(R.id.layoutVoucherDiscount);
+        edtVoucherDiscount = findViewById(R.id.edtVoucherDiscount);
+
+        cbAttachVoucher.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            layoutVoucherDiscount.setVisibility(isChecked ? View.VISIBLE : View.GONE);
+        });
 
         rvRecipients.setLayoutManager(new LinearLayoutManager(this));
         adapter = new SelectedRecipientAdapter(selectedUsers);
@@ -101,7 +113,7 @@ public class AdminSendNotificationActivity extends AppCompatActivity {
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
 
         findViewById(R.id.btnAddRecipients).setOnClickListener(v -> {
-            Intent intent = new Intent(this, AdminSelectUserActivity.class);
+            Intent intent = new Intent(AdminSendNotificationActivity.this, com.example.cinemabooking.ui.admin.notification.AdminSelectUserActivity.class);
             intent.putStringArrayListExtra("SELECTED_UIDS", selectedUids);
             startActivityForResult(intent, REQUEST_SELECT_USERS);
         });
@@ -120,7 +132,26 @@ public class AdminSendNotificationActivity extends AppCompatActivity {
                 return;
             }
 
-            showConfirmDialog(title, message);
+            double discountValue = 0;
+            if (cbAttachVoucher != null && cbAttachVoucher.isChecked()) {
+                String discountStr = edtVoucherDiscount.getText().toString().trim();
+                if (discountStr.isEmpty()) {
+                    Toast.makeText(this, "Vui lòng nhập % giảm giá cho voucher", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                try {
+                    discountValue = Double.parseDouble(discountStr);
+                    if (discountValue <= 0 || discountValue > 100) {
+                        Toast.makeText(this, "Mức giảm giá không hợp lệ (1-100%)", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                } catch (NumberFormatException e) {
+                    Toast.makeText(this, "Mức giảm giá không hợp lệ", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+            }
+
+            showConfirmDialog(title, message, discountValue);
         });
     }
 
@@ -151,16 +182,21 @@ public class AdminSendNotificationActivity extends AppCompatActivity {
         tvRecipientCount.setText("Đã chọn: " + selectedUids.size() + " khách hàng");
     }
 
-    private void showConfirmDialog(String title, String message) {
+    private void showConfirmDialog(String title, String message, double discountValue) {
+        String msg = "Bạn có chắc chắn muốn gửi thông báo này cho " + selectedUids.size() + " khách hàng?";
+        if (discountValue > 0) {
+            msg += "\n\nKèm theo Voucher giảm giá " + discountValue + "%!";
+        }
+
         new AlertDialog.Builder(this)
                 .setTitle("Xác nhận gửi thông báo")
-                .setMessage("Bạn có chắc chắn muốn gửi thông báo này cho " + selectedUids.size() + " khách hàng?")
-                .setPositiveButton("GỬI", (dialog, which) -> sendNotificationToFirestore(title, message))
+                .setMessage(msg)
+                .setPositiveButton("GỬI", (dialog, which) -> sendNotificationToFirestore(title, message, discountValue))
                 .setNegativeButton("Hủy", null)
                 .show();
     }
 
-    private void sendNotificationToFirestore(String title, String message) {
+    private void sendNotificationToFirestore(String title, String message, double discountValue) {
         ProgressDialog progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Đang gửi thông báo...");
         progressDialog.setCancelable(false);
@@ -184,7 +220,7 @@ public class AdminSendNotificationActivity extends AppCompatActivity {
             notif.userId = uid;
             notif.title = title;
             notif.message = message;
-            notif.type = "ADMIN_MESSAGE";
+            notif.type = discountValue > 0 ? "VOUCHER_RECEIVED" : "ADMIN_MESSAGE";
             notif.isRead = false;
             notif.createdAt = timestamp;
             notif.updatedAt = timestamp;
@@ -192,10 +228,24 @@ public class AdminSendNotificationActivity extends AppCompatActivity {
             batches.get(batchIndex).set(notifRef, notif);
             count++;
 
-            // Split into multiple batches if > 400
-            if (count % 400 == 0) {
+            if (discountValue > 0) {
+                DocumentReference voucherRef = db.collection("vouchers").document();
+                com.example.cinemabooking.domain.model.Voucher voucher = new com.example.cinemabooking.domain.model.Voucher();
+                voucher.voucherId = voucherRef.getId();
+                voucher.userId = uid;
+                voucher.voucherType = "ADMIN_GIFT";
+                voucher.discountValue = discountValue;
+                voucher.isUsed = false;
+                voucher.createdAt = timestamp;
+                batches.get(batchIndex).set(voucherRef, voucher);
+                count++;
+            }
+
+            // Split into multiple batches if >= 400
+            if (count >= 400) {
                 batches.add(db.batch());
                 batchIndex++;
+                count = 0;
             }
         }
 
@@ -225,7 +275,7 @@ public class AdminSendNotificationActivity extends AppCompatActivity {
     }
 
     // Inner Adapter for Recipient List
-    private class SelectedRecipientAdapter extends RecyclerView.Adapter<SelectedRecipientAdapter.ViewHolder> {
+    public class SelectedRecipientAdapter extends RecyclerView.Adapter<SelectedRecipientAdapter.ViewHolder> {
         private final List<User> items;
 
         public SelectedRecipientAdapter(List<User> items) {
@@ -284,7 +334,7 @@ public class AdminSendNotificationActivity extends AppCompatActivity {
             return items.size();
         }
 
-        class ViewHolder extends RecyclerView.ViewHolder {
+        public class ViewHolder extends RecyclerView.ViewHolder {
             TextView tvName, tvContact, tvLevel, tvPoints;
             CheckBox cbSelect;
             ImageView imgAvatar;

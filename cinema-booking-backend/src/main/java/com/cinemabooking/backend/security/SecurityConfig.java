@@ -2,6 +2,7 @@ package com.cinemabooking.backend.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -49,26 +50,8 @@ public class SecurityConfig {
                                 "/api/v1/seats/showtime/**"
                         ).permitAll()
 
-                        .requestMatchers(HttpMethod.POST,
-                                "/api/v1/movies/**",
-                                "/api/v1/banners/**",
-                                "/api/v1/cinemas/**",
-                                "/api/v1/showtimes/**"
-                        ).hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF")
-
-                        .requestMatchers(HttpMethod.PUT,
-                                "/api/v1/movies/**",
-                                "/api/v1/banners/**",
-                                "/api/v1/cinemas/**",
-                                "/api/v1/showtimes/**"
-                        ).hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF")
-
-                        .requestMatchers(HttpMethod.DELETE,
-                                "/api/v1/movies/**",
-                                "/api/v1/banners/**",
-                                "/api/v1/cinemas/**",
-                                "/api/v1/showtimes/**"
-                        ).hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF")
+                                "/api/v1/seats/showtime/**"
+                        ).permitAll()
 
                         .requestMatchers(
                                 "/api/v1/profile",

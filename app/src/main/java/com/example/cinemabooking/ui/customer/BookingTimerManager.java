@@ -56,6 +56,25 @@ public class BookingTimerManager {
         startInternalTimer();
     }
 
+    public synchronized void startTimerWithEndTime(Context context, long targetEndTimeMillis) {
+        if (targetEndTimeMillis <= System.currentTimeMillis()) {
+            stopTimer(context);
+            notifyFinished();
+            return;
+        }
+
+        endTimeMillis = targetEndTimeMillis;
+        isRunning = true;
+
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        prefs.edit()
+                .putLong(KEY_END_TIME, endTimeMillis)
+                .putBoolean(KEY_IS_RUNNING, true)
+                .apply();
+
+        startInternalTimer();
+    }
+
     public synchronized void restoreTimer(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         endTimeMillis = prefs.getLong(KEY_END_TIME, 0);

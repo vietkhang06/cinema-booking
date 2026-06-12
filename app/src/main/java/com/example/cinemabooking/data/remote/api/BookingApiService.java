@@ -35,4 +35,7 @@ public interface BookingApiService {
 
     @retrofit2.http.PUT("bookings/payment/{id}/failed")
     Call<ApiResponse<Void>> cancelBooking(@retrofit2.http.Path("id") String bookingId);
+
+    @retrofit2.http.GET("bookings/pending")
+    Call<ApiResponse<BookingDTO>> getPendingBooking(@retrofit2.http.Query("showtimeId") String showtimeId);
 }
