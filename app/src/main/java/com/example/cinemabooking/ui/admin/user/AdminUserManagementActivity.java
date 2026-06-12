@@ -581,7 +581,7 @@ public class AdminUserManagementActivity extends AppCompatActivity {
     }
 
     // RecyclerView Adapter
-    private class CustomerAdapter extends RecyclerView.Adapter<CustomerAdapter.ViewHolder> {
+    public class CustomerAdapter extends RecyclerView.Adapter<CustomerAdapter.ViewHolder> {
         private final List<User> items;
 
         public CustomerAdapter(List<User> items) {
@@ -634,7 +634,7 @@ public class AdminUserManagementActivity extends AppCompatActivity {
             // Status light indicator
             boolean isActive = !"locked".equalsIgnoreCase(u.status);
             if (isActive) {
-                holder.viewStatus.setBackgroundResource(R.drawable.dot_active);
+                holder.viewStatus.setBackgroundResource(com.example.cinemabooking.R.drawable.dot_active);
             } else {
                 holder.viewStatus.setBackground(new ColorDrawable(Color.RED));
                 // Make red dot round using custom programmatic rounded background
@@ -650,7 +650,7 @@ public class AdminUserManagementActivity extends AppCompatActivity {
             return items.size();
         }
 
-        class ViewHolder extends RecyclerView.ViewHolder {
+        public class ViewHolder extends RecyclerView.ViewHolder {
             TextView tvName, tvContact, tvLevel, tvPoints;
             View viewStatus;
             ImageView imgAvatar;

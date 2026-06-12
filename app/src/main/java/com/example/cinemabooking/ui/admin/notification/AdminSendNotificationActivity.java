@@ -113,7 +113,7 @@ public class AdminSendNotificationActivity extends AppCompatActivity {
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
 
         findViewById(R.id.btnAddRecipients).setOnClickListener(v -> {
-            Intent intent = new Intent(this, AdminSelectUserActivity.class);
+            Intent intent = new Intent(AdminSendNotificationActivity.this, com.example.cinemabooking.ui.admin.notification.AdminSelectUserActivity.class);
             intent.putStringArrayListExtra("SELECTED_UIDS", selectedUids);
             startActivityForResult(intent, REQUEST_SELECT_USERS);
         });
@@ -275,7 +275,7 @@ public class AdminSendNotificationActivity extends AppCompatActivity {
     }
 
     // Inner Adapter for Recipient List
-    private class SelectedRecipientAdapter extends RecyclerView.Adapter<SelectedRecipientAdapter.ViewHolder> {
+    public class SelectedRecipientAdapter extends RecyclerView.Adapter<SelectedRecipientAdapter.ViewHolder> {
         private final List<User> items;
 
         public SelectedRecipientAdapter(List<User> items) {
@@ -334,7 +334,7 @@ public class AdminSendNotificationActivity extends AppCompatActivity {
             return items.size();
         }
 
-        class ViewHolder extends RecyclerView.ViewHolder {
+        public class ViewHolder extends RecyclerView.ViewHolder {
             TextView tvName, tvContact, tvLevel, tvPoints;
             CheckBox cbSelect;
             ImageView imgAvatar;
