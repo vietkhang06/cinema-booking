@@ -7,9 +7,9 @@ public class Notification {
     public String message;
     public String type;
     public String refId;
-    public boolean isRead;
-    public long createdAt;
-    public long updatedAt;
+    public Boolean isRead;
+    public Long createdAt;
+    public Long updatedAt;
 
     public Notification() {
     }

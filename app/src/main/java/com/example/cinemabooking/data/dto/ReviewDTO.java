@@ -6,12 +6,12 @@ public class ReviewDTO {
     public String movieId;
     public String bookingId;
     public String movieTitleSnapshot;
-    public int rating;
+    public Integer rating;
     public String content;
     public String status;
-    public long createdAt;
-    public long updatedAt;
-    public boolean deleted;
+    public Long createdAt;
+    public Long updatedAt;
+    public Boolean deleted;
 
     public ReviewDTO() {
     }

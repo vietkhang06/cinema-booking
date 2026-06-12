@@ -10,8 +10,8 @@ public class AuditLog {
     public String note;
     public String adminId;
     public String showtimeId;
-    public int bookingCount;
-    public long createdAt;
+    public Integer bookingCount;
+    public Long createdAt;
 
     public AuditLog() {
     }

@@ -8,8 +8,8 @@ public class ChatMessageDTO {
     public String content;
     public String type;
     public String imageUrl;
-    public boolean isRead;
-    public long sentAt;
+    public Boolean isRead;
+    public Long sentAt;
 
     public ChatMessageDTO() {
     }

@@ -12,9 +12,9 @@ public class SnackOrderDTO {
     public double total;
     public String status;
     public String note;
-    public long createdAt;
-    public long updatedAt;
-    public boolean deleted;
+    public Long createdAt;
+    public Long updatedAt;
+    public Boolean deleted;
 
     public SnackOrderDTO() {
     }

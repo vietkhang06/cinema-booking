@@ -7,11 +7,11 @@ public class Snack {
     public String description;
     public double price;
     public String imageUrl;
-    public boolean isAvailable;
+    public Boolean isAvailable;
     public String status;
-    public long createdAt;
-    public long updatedAt;
-    public boolean deleted;
+    public Long createdAt;
+    public Long updatedAt;
+    public Boolean deleted;
 
     public Snack() {
     }

@@ -5,13 +5,13 @@ public class Seat {
     public String showtimeId;
     public String seatCode;
     public String rowName;
-    public int columnNo;
+    public Integer columnNo;
     public String seatType;
     public String status;
     public String heldBy;
-    public long heldUntil;
+    public Long heldUntil;
     public String bookedBy;
-    public long bookedAt;
+    public Long bookedAt;
     public double priceOverride;
 
     public Seat() {
