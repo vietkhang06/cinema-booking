@@ -19,7 +19,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.*;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 @RestController
@@ -111,11 +111,11 @@ public class BookingController {
         }
 
         return ResponseEntity.ok(
-            ApiResponse.<BookingDTO>builder()
-                    .success(true)
-                    .message("Booking fetched successfully")
-                    .data(bookingDTO)
-                    .build()
+                ApiResponse.<BookingDTO>builder()
+                        .success(true)
+                        .message("Booking fetched successfully")
+                        .data(bookingDTO)
+                        .build()
         );
     }
 
@@ -155,9 +155,9 @@ public class BookingController {
 
         return ResponseEntity.ok(
                 ApiResponse.<BookingDTO>builder()
-                    .success(true)
-                    .message("Payment confirmed and seats booked successfully")
-                    .build()
+                        .success(true)
+                        .message("Payment confirmed and seats booked successfully")
+                        .build()
         );
     }
 
@@ -175,9 +175,6 @@ public class BookingController {
         }
         if (!userId.equals(booking.getUserId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bạn không có quyền hủy vé này.");
-        }
-        if (!"PENDING".equalsIgnoreCase(booking.getBookingStatus())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Vé đặt này đã được xử lý hoặc đã hết hạn (trạng thái: " + booking.getBookingStatus() + ").");
         }
         bookingService.updatePaymentStatus(bookingId, "FAILED", "CANCELLED");
         bookingService.releaseBookingSeats(bookingId);
@@ -200,9 +197,9 @@ public class BookingController {
 
         return ResponseEntity.ok(
                 ApiResponse.<BookingDTO>builder()
-                    .success(true)
-                    .message("Booking cancelled and seats released successfully")
-                    .build()
+                        .success(true)
+                        .message("Booking cancelled and seats released successfully")
+                        .build()
         );
     }
 
@@ -220,51 +217,6 @@ public class BookingController {
         }
 
         List<BookingDTO> results = bookingService.searchBookings(query);
-
-        // 3. Search by user phone, email, or name prefix
-        if (results.isEmpty()) {
-            Set<String> uids = new HashSet<>();
-            
-            List<com.google.cloud.firestore.QueryDocumentSnapshot> phoneUsers = firestore.collection("users")
-                    .whereEqualTo("phone", query)
-                    .get().get().getDocuments();
-            for (com.google.cloud.firestore.QueryDocumentSnapshot doc : phoneUsers) {
-                uids.add(doc.getId());
-            }
-
-            List<com.google.cloud.firestore.QueryDocumentSnapshot> emailUsers = firestore.collection("users")
-                    .whereEqualTo("email", query.toLowerCase())
-                    .get().get().getDocuments();
-            for (com.google.cloud.firestore.QueryDocumentSnapshot doc : emailUsers) {
-                uids.add(doc.getId());
-            }
-
-            if (query.length() >= 2) {
-                List<com.google.cloud.firestore.QueryDocumentSnapshot> nameUsers = firestore.collection("users")
-                        .orderBy("name")
-                        .startAt(query)
-                        .endAt(query + "\uf8ff")
-                        .limit(10)
-                        .get().get().getDocuments();
-                for (com.google.cloud.firestore.QueryDocumentSnapshot doc : nameUsers) {
-                    uids.add(doc.getId());
-                }
-            }
-
-            for (String uid : uids) {
-                List<com.google.cloud.firestore.QueryDocumentSnapshot> userBookings = firestore.collection("bookings")
-                        .whereEqualTo("userId", uid)
-                        .get().get().getDocuments();
-                for (com.google.cloud.firestore.QueryDocumentSnapshot doc : userBookings) {
-                    BookingDTO booking = doc.toObject(BookingDTO.class);
-                    if (booking != null) {
-                        booking.setBookingId(doc.getId());
-                        enrichBooking.accept(booking);
-                        results.add(booking);
-                    }
-                }
-            }
-        }
 
         return ResponseEntity.ok(
                 ApiResponse.<List<BookingDTO>>builder()
