@@ -2,18 +2,15 @@ package com.cinemabooking.backend.controller;
 
 import com.cinemabooking.backend.dto.ApiResponse;
 import com.cinemabooking.backend.dto.ShowtimeDTO;
+import com.cinemabooking.backend.dto.UserDTO;
 import com.cinemabooking.backend.service.ShowtimeService;
+import com.cinemabooking.backend.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -27,6 +24,9 @@ public class ShowtimeController {
 
     @Autowired
     private ShowtimeService showtimeService;
+
+    @Autowired
+    private UserService userService;
 
     @GetMapping
     @Operation(summary = "Get all showtimes")
@@ -80,7 +80,17 @@ public class ShowtimeController {
 
     @PostMapping("/seed")
     @Operation(summary = "Seed mock showtimes into Firestore")
-    public ApiResponse<Integer> seedShowtimes() throws ExecutionException, InterruptedException {
+    public ApiResponse<Integer> seedShowtimes(
+            @AuthenticationPrincipal String userId
+    ) throws ExecutionException, InterruptedException {
+        if (userId == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Vui lòng đăng nhập.");
+        }
+        UserDTO user = userService.getUserById(userId);
+        if (user == null || (!"staff".equalsIgnoreCase(user.getRole()) && !"admin".equalsIgnoreCase(user.getRole()))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bạn không có quyền thực hiện thao tác này.");
+        }
+
         int count = showtimeService.seedShowtimes();
         return ApiResponse.<Integer>builder()
                 .success(true)
@@ -91,7 +101,18 @@ public class ShowtimeController {
 
      @PostMapping
      @Operation(summary = "Update showtime details")
-     public ResponseEntity<ApiResponse<ShowtimeDTO>> updateShowtime(@RequestBody ShowtimeDTO showtime) throws ExecutionException, InterruptedException {
+     public ResponseEntity<ApiResponse<ShowtimeDTO>> updateShowtime(
+             @AuthenticationPrincipal String userId,
+             @RequestBody ShowtimeDTO showtime
+     ) throws ExecutionException, InterruptedException {
+         if (userId == null) {
+             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Vui lòng đăng nhập.");
+         }
+         UserDTO user = userService.getUserById(userId);
+         if (user == null || (!"staff".equalsIgnoreCase(user.getRole()) && !"admin".equalsIgnoreCase(user.getRole()))) {
+             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bạn không có quyền thực hiện thao tác này.");
+         }
+
          if(showtime == null){
              throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Showtime data is required");
          }

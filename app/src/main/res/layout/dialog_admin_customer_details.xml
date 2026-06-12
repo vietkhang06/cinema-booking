@@ -280,6 +280,16 @@
         </LinearLayout>
 
         <Button
+            android:id="@+id/btnDialogGiveVoucher"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="Tặng Voucher"
+            android:textColor="#E53935"
+            app:strokeColor="#E53935" />
+
+        <Button
             android:id="@+id/btnDialogDeleteUser"
             style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="match_parent"

@@ -127,6 +127,7 @@ public class AuthenticationService {
             @NonNull String email,
             @NonNull String password,
             @NonNull String phone,
+            @NonNull String name,
             AuthCallback callback
     ) {
         com.google.firebase.firestore.FirebaseFirestore.getInstance().collection(com.example.cinemabooking.core.constants.FirestoreCollections.USERS)
@@ -138,14 +139,18 @@ public class AuthenticationService {
                         return;
                     }
 
-                    com.google.firebase.firestore.FirebaseFirestore.getInstance().collection(com.example.cinemabooking.core.constants.FirestoreCollections.USERS)
-                            .whereEqualTo("phone", phone)
-                            .get()
-                            .addOnSuccessListener(phoneQuery -> {
-                                if (!phoneQuery.isEmpty()) {
-                                    callback.onError("Số điện thoại đã tồn tại trong hệ thống.");
-                                    return;
-                                }
+                    userRepo.createUser(newUserDoc(fUser, phone, name), new ResultCallback<User>() {
+                        @Override
+                        public void onSuccess(User data) {
+                            if (data == null) {
+                                callback.onError("Lỗi khởi tạo người dùng.");
+                                return;
+                            }
+
+                            sessionManager.saveLoginState(true, data.role, data.uid);
+                            sessionManager.saveRememberMe(true);
+                            callback.onSuccess(data);
+                        }
 
                                 auth.createUserWithEmailAndPassword(email, password)
                                         .addOnSuccessListener(authResult -> {
@@ -196,6 +201,7 @@ public class AuthenticationService {
                     loadOrCreateUser(
                             fUser,
                             null,
+                            fUser.getDisplayName(),
                             new AuthCallback() {
                                 @Override
                                 public void onSuccess(User user) {
@@ -228,6 +234,7 @@ public class AuthenticationService {
                     loadOrCreateUser(
                             fUser,
                             null,
+                            fUser.getDisplayName(),
                             new AuthCallback() {
                                 @Override
                                 public void onSuccess(User user) {
@@ -266,6 +273,7 @@ public class AuthenticationService {
     private void loadOrCreateUser(
             @NonNull FirebaseUser fUser,
             @Nullable String phone,
+            @Nullable String name,
             @NonNull AuthCallback callback
     ) {
         userRepo.getUserById(fUser.getUid(), new ResultCallback<User>() {
@@ -276,7 +284,7 @@ public class AuthenticationService {
                     return;
                 }
 
-                userRepo.createUser(newUserDoc(fUser, phone), new ResultCallback<User>() {
+                userRepo.createUser(newUserDoc(fUser, phone, name), new ResultCallback<User>() {
                     @Override
                     public void onSuccess(User created) {
                         if (created == null) {
@@ -300,13 +308,14 @@ public class AuthenticationService {
         });
     }
 
-    private User newUserDoc(@Nullable FirebaseUser fUser, @Nullable String phone) {
+    private User newUserDoc(@Nullable FirebaseUser fUser, @Nullable String phone, @Nullable String name) {
         if (fUser == null) return null;
 
         User user = new User();
         user.uid = fUser.getUid();
         user.email = fUser.getEmail();
         user.phone = phone;
+        user.name = name;
         user.role = UserRoles.CUSTOMER;
         user.status = "active";
         user.memberLevel = "standard";

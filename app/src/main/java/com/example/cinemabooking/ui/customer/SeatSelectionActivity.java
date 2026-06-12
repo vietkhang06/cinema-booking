@@ -66,7 +66,7 @@ public class SeatSelectionActivity extends AppCompatActivity {
         showtimeStart = getIntent().getLongExtra(EXTRA_SHOWTIME_START, 0);
 
         initViews();
-        loadSeats();
+        checkPendingBooking();
     }
 
     private void initViews() {
@@ -106,7 +106,7 @@ public class SeatSelectionActivity extends AppCompatActivity {
 
             boolean isBooked = "booked".equalsIgnoreCase(seat.status);
             boolean isHeldByOther = "held".equalsIgnoreCase(seat.status)
-                    && (seat.heldUntil > now)
+                    && (seat.heldUntil != null && seat.heldUntil > now)
                     && !currentUserId.equals(seat.heldBy);
             boolean isLocked = "LOCKED".equalsIgnoreCase(seat.status)
                     || "LOCKED".equalsIgnoreCase(seat.seatType);
@@ -208,6 +208,43 @@ public class SeatSelectionActivity extends AppCompatActivity {
 
     }
 
+    private void checkPendingBooking() {
+        if (showtimeId == null) {
+            loadSeats();
+            return;
+        }
+
+        com.example.cinemabooking.data.remote.api.BookingApiService bookingApi =
+                com.example.cinemabooking.data.remote.api.RetrofitClient.getInstance()
+                        .create(com.example.cinemabooking.data.remote.api.BookingApiService.class);
+
+        bookingApi.getPendingBooking(showtimeId).enqueue(new retrofit2.Callback<com.example.cinemabooking.data.dto.ApiResponse<com.example.cinemabooking.data.dto.BookingDTO>>() {
+            @Override
+            public void onResponse(retrofit2.Call<com.example.cinemabooking.data.dto.ApiResponse<com.example.cinemabooking.data.dto.BookingDTO>> call, retrofit2.Response<com.example.cinemabooking.data.dto.ApiResponse<com.example.cinemabooking.data.dto.BookingDTO>> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess() && response.body().getData() != null) {
+                    com.example.cinemabooking.data.dto.BookingDTO pendingBooking = response.body().getData();
+                    Toast.makeText(SeatSelectionActivity.this, "Bạn có giao dịch đặt vé chưa hoàn tất. Đang chuyển hướng...", Toast.LENGTH_LONG).show();
+
+                    Intent intent = new Intent(SeatSelectionActivity.this, PaymentInstructionActivity.class);
+                    intent.putExtra(PaymentInstructionActivity.EXTRA_BOOKING_ID, pendingBooking.bookingId);
+                    intent.putExtra(PaymentInstructionActivity.EXTRA_PAYMENT_CODE, pendingBooking.paymentCode);
+                    intent.putExtra(PaymentInstructionActivity.EXTRA_AMOUNT, pendingBooking.total);
+                    intent.putExtra(PaymentInstructionActivity.EXTRA_PAYMENT_METHOD, pendingBooking.paymentMethod);
+                    intent.putExtra("createdAt", pendingBooking.createdAt);
+                    startActivity(intent);
+                    finish();
+                } else {
+                    loadSeats();
+                }
+            }
+
+            @Override
+            public void onFailure(retrofit2.Call<com.example.cinemabooking.data.dto.ApiResponse<com.example.cinemabooking.data.dto.BookingDTO>> call, Throwable t) {
+                loadSeats();
+            }
+        });
+    }
+
     private void loadSeats() {
         if (showtimeId == null) { loadDummySeats(); return; }
 
@@ -278,10 +315,10 @@ public class SeatSelectionActivity extends AppCompatActivity {
                                 seat.seatId = doc.getId();
 
                                 boolean isAvailable = "available".equalsIgnoreCase(seat.status)
-                                        || ("held".equalsIgnoreCase(seat.status) && seat.heldUntil < now);
+                                        || ("held".equalsIgnoreCase(seat.status) && seat.heldUntil != null && seat.heldUntil < now);
 
                                 boolean isHeldByMe = "held".equalsIgnoreCase(seat.status)
-                                        && (seat.heldUntil >= now)
+                                        && (seat.heldUntil != null && seat.heldUntil >= now)
                                         && currentUserId.equals(seat.heldBy);
 
                                 // Check if this seat was selected by me previously
@@ -298,7 +335,7 @@ public class SeatSelectionActivity extends AppCompatActivity {
                                     seat.isSelected = false;
                                 }
                                 newSeats.add(seat);
-                                if (seat.columnNo > maxCol) {
+                                if (seat.columnNo != null && seat.columnNo > maxCol) {
                                     maxCol = seat.columnNo;
                                 }
                             }
@@ -314,7 +351,7 @@ public class SeatSelectionActivity extends AppCompatActivity {
                         newSeats.sort((a, b) -> {
                             if (a.rowName == null || b.rowName == null) return 0;
                             int r = a.rowName.compareTo(b.rowName);
-                            return r != 0 ? r : Integer.compare(a.columnNo, b.columnNo);
+                            return r != 0 ? r : Integer.compare(a.columnNo != null ? a.columnNo : 0, b.columnNo != null ? b.columnNo : 0);
                         });
 
                         // 4. Update the seatList and UI

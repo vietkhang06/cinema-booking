@@ -55,6 +55,32 @@ public class ChatController {
             @PathVariable String convoId,
             @RequestParam(defaultValue = "20") int limit
     ) throws ExecutionException, InterruptedException {
+        if (userId == null) {
+            return ResponseEntity.status(401).body(
+                    ApiResponse.<List<ChatMessage>>builder()
+                            .success(false)
+                            .message("Vui lòng đăng nhập.")
+                            .build()
+            );
+        }
+
+        Conversation convo = conversationService.getConversationById(convoId);
+        if (convo == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        boolean isParticipant = convo.getParticipantIds() != null && convo.getParticipantIds().contains(userId);
+        boolean isStaffOrAdmin = isUserActiveStaffOrAdmin(userId);
+
+        if (!isParticipant && !isStaffOrAdmin) {
+            return ResponseEntity.status(403).body(
+                    ApiResponse.<List<ChatMessage>>builder()
+                            .success(false)
+                            .message("Bạn không có quyền truy cập cuộc hội thoại này.")
+                            .build()
+            );
+        }
+
         return ResponseEntity.ok(
                 ApiResponse.<List<ChatMessage>>builder()
                         .success(true)
@@ -71,6 +97,18 @@ public class ChatController {
             @AuthenticationPrincipal String userId,
             @PathVariable String convoId
     ) throws ExecutionException, InterruptedException {
+        Conversation convo = conversationService.getConversationById(convoId);
+        if (convo == null) {
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND, "Không tìm thấy hội thoại.");
+        }
+
+        boolean isParticipant = convo.getParticipantIds().contains(userId);
+        boolean isStaffOrAdmin = isUserActiveStaffOrAdmin(userId);
+
+        if (!isParticipant && !isStaffOrAdmin) {
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.FORBIDDEN, "Bạn không có quyền cập nhật trạng thái đọc của hội thoại này.");
+        }
+
         conversationService.markAsRead(convoId, userId, System.currentTimeMillis());
         return ResponseEntity.noContent().build();
     }

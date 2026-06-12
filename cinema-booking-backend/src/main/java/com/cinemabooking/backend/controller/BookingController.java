@@ -7,8 +7,6 @@ import com.cinemabooking.backend.service.MovieService;
 import com.cinemabooking.backend.service.ShowtimeService;
 import com.cinemabooking.backend.service.UserService;
 import com.cinemabooking.backend.payment.service.PaymentService;
-import com.google.api.core.ApiFutures;
-import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -21,12 +19,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/bookings")
@@ -63,6 +57,25 @@ public class BookingController {
                 .build();
     }
 
+    @GetMapping("/pending")
+    @Operation(summary = "Get active pending booking for a user by showtime")
+    public ResponseEntity<ApiResponse<BookingDTO>> getPendingActiveBooking(
+            @AuthenticationPrincipal String userId,
+            @RequestParam("showtimeId") String showtimeId
+    ) throws ExecutionException, InterruptedException {
+        if (userId == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Vui lòng đăng nhập.");
+        }
+        BookingDTO booking = bookingService.getPendingActiveBooking(userId, showtimeId);
+        return ResponseEntity.ok(
+                ApiResponse.<BookingDTO>builder()
+                        .success(booking != null)
+                        .message(booking != null ? "Tìm thấy booking PENDING" : "Không có booking PENDING")
+                        .data(booking)
+                        .build()
+        );
+    }
+
     @PostMapping
     public ResponseEntity<ApiResponse<BookingDTO>> createBooking(
             @AuthenticationPrincipal String userId,
@@ -71,116 +84,38 @@ public class BookingController {
         if (userId == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Vui lòng đăng nhập.");
         }
-        SeatBookingRequestDTO data = bookingRequest;
-        List<SnackOrderSnapshot> orders = new ArrayList<>();
-        if (data.getSnackOrders() != null && data.getSnackOrders().size() > 0){
-            List<SnackDTO> snacks = firestore.collection("snacks")
-                    .whereIn("snackId", data.getSnackOrders().stream().map(item -> item.snackId()).collect(Collectors.toList()) )
+
+        BookingDTO bookingDTO = bookingService.processBookingCreation(userId, bookingRequest);
+
+        // Kiểm tra xem đã có payment cho bookingId này chưa để tránh tạo trùng hóa đơn
+        try {
+            List<com.google.cloud.firestore.QueryDocumentSnapshot> existingPayments = firestore.collection("payments")
+                    .whereEqualTo("bookingId", bookingDTO.getBookingId())
                     .get()
-                    .get().toObjects(SnackDTO.class);
-            snacks.stream().forEach(snack -> {
-                SeatBookingRequestDTO.SnackOrder order = data.getSnackOrders().stream().filter(snackOrder -> snackOrder.snackId().equals(snack.snackId)).findFirst().orElse(null);
-                orders.add(
-                        SnackOrderSnapshot.builder()
-                                .snackId(snack.getSnackId())
-                                .snackName(snack.getName())
-                                .snackImgURL(snack.getImageUrl())
-                                .price(snack.getPrice())
-                                .quantity(order.quantity())
-                                .build()
+                    .get()
+                    .getDocuments();
+            if (existingPayments.isEmpty()) {
+                paymentService.createPendingPayment(
+                        bookingDTO.getBookingId(),
+                        bookingDTO.getUserId(),
+                        bookingDTO.getPaymentMethod(),
+                        bookingDTO.getTotal()
                 );
-            });
-        }
-
-        String uniqueID = UUID.randomUUID().toString();
-
-        ShowtimeDTO showtime = showtimeService.getShowtimeById(data.getShowtimeId());
-        MovieDTO movie = movieService.getMovieById(showtime.getMovieId());
-
-        List<DocumentSnapshot> taskResult = ApiFutures.allAsList(Arrays.asList(
-                firestore.collection("rooms").document(showtime.getRoomId()).get(),
-                firestore.collection("cinemas").document(showtime.getCinemaId()).get()
-        )).get();
-
-        RoomDTO room = taskResult.get(0).toObject(RoomDTO.class);
-        CinemaDTO cinema = taskResult.get(1).toObject(CinemaDTO.class);
-
-        List<SeatDTO> seats = firestore.collection(SeatDTO.COLLECTION_NAME)
-                .whereIn("seatId", data.getSeatIds())
-                // kiem tra ghe co thuoc phong chieu khong
-                .get()
-                .get().toObjects(SeatDTO.class);
-
-        // Concurrency and Ownership validation check
-        long now = System.currentTimeMillis();
-        for (SeatDTO seat : seats) {
-            if ("booked".equalsIgnoreCase(seat.getStatus())) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "Ghế " + seat.getSeatCode() + " đã được đặt trước bởi người khác!");
             }
-            if (!"held".equalsIgnoreCase(seat.getStatus()) || !userId.equals(seat.getHeldBy()) || seat.getHeldUntil() < now) {
-                log.warn("[SEAT_CONFIRM_FAIL] User {} tried to book seat {} but it is held by user {} until {}",
-                        userId, seat.getSeatId(), seat.getHeldBy(), seat.getHeldUntil());
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Ghế " + seat.getSeatCode() + " chưa được giữ bởi bạn hoặc đã hết hạn giữ ghế!");
-            }
+        } catch (Exception e) {
+            log.error("Failed to check or create payment for bookingId: " + bookingDTO.getBookingId(), e);
         }
-
-        double subTotal = showtime.getBasePrice() * seats.size() + orders.stream().mapToDouble(item -> item.getPrice() * item.getQuantity()).sum();
-        double discount = 0;
-
-        String suffix = uniqueID.contains("_") ? uniqueID.substring(uniqueID.indexOf("_") + 1) : uniqueID;
-        if (suffix.length() > 8) {
-            suffix = suffix.substring(0, 8);
-        }
-        String paymentCode = ("BK" + suffix).toUpperCase();
-
-        BookingDTO booking = BookingDTO.builder()
-                .bookingId(uniqueID)
-                .bookingStatus("PENDING")
-                .userId(userId)
-                .movieId(showtime.getMovieId())
-                .showtimeId(data.getShowtimeId())
-                .showtimeStartAtSnapshot(showtime.getStartAt())
-                .movieTitleSnapshot(movie.getTitle())
-                .movieImageUrlSnapshot(movie.getPosterUrl())
-                .roomNameSnapshot(room.getName())
-                .cinemaNameSnapshot(cinema.getName())
-                .seatIds(data.getSeatIds())
-                .seatCodes(seats.stream().map(seat -> seat.getSeatCode()).collect(Collectors.toList()))
-                .snackOrder(orders)
-                .subtotal(subTotal)
-                .discount(discount)
-                .total(subTotal - discount)
-                // cap nhat payment
-                .paymentMethod(bookingRequest.getPaymentMethod().name())
-                .paymentStatus("PENDING")
-                .paymentCode(paymentCode)
-                .createdAt(System.currentTimeMillis())
-                .updatedAt(System.currentTimeMillis())
-                .build();
-
-        log.info("[BOOKING_FLOW] Creating booking record: bookingId={}, userId={}, total={}, status=PENDING",
-                uniqueID, userId, subTotal - discount);
-
-        BookingDTO bookingDTO = bookingService.createBooking(booking);
-
-        // Tạo document payment với status = PENDING
-        paymentService.createPendingPayment(
-                bookingDTO.getBookingId(),
-                bookingDTO.getUserId(),
-                bookingDTO.getPaymentMethod(),
-                bookingDTO.getTotal()
-        );
 
         if ("cash".equalsIgnoreCase(bookingDTO.getPaymentMethod())) {
             bookingService.confirmBookingSeats(bookingDTO.getBookingId());
         }
 
         return ResponseEntity.ok(
-            ApiResponse.<BookingDTO>builder()
-                    .success(true)
-                    .message("Booking fetched successfully")
-                    .data(bookingDTO)
-                    .build()
+                ApiResponse.<BookingDTO>builder()
+                        .success(true)
+                        .message("Booking fetched successfully")
+                        .data(bookingDTO)
+                        .build()
         );
     }
 
@@ -196,9 +131,9 @@ public class BookingController {
         if (booking == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy vé đặt.");
         }
-//        if (!userId.equals(booking.getUserId())) {
-//            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bạn không có quyền xác nhận vé này.");
-//        }
+        if (!userId.equals(booking.getUserId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bạn không có quyền xác nhận vé này.");
+        }
         bookingService.updatePaymentStatus(bookingId, "SUCCESS", "CONFIRMED");
         bookingService.confirmBookingSeats(bookingId);
 
@@ -220,9 +155,9 @@ public class BookingController {
 
         return ResponseEntity.ok(
                 ApiResponse.<BookingDTO>builder()
-                    .success(true)
-                    .message("Payment confirmed and seats booked successfully")
-                    .build()
+                        .success(true)
+                        .message("Payment confirmed and seats booked successfully")
+                        .build()
         );
     }
 
@@ -262,9 +197,9 @@ public class BookingController {
 
         return ResponseEntity.ok(
                 ApiResponse.<BookingDTO>builder()
-                    .success(true)
-                    .message("Booking cancelled and seats released successfully")
-                    .build()
+                        .success(true)
+                        .message("Booking cancelled and seats released successfully")
+                        .build()
         );
     }
 
@@ -281,43 +216,7 @@ public class BookingController {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bạn không có quyền tìm kiếm vé.");
         }
 
-        List<String> userIds = new ArrayList<>();
-        List<com.google.cloud.firestore.QueryDocumentSnapshot> users = firestore.collection("users")
-                .get().get().getDocuments();
-        for (com.google.cloud.firestore.QueryDocumentSnapshot doc : users) {
-            String name = doc.getString("name");
-            String email = doc.getString("email");
-            String phone = doc.getString("phone");
-            if ((name != null && name.toLowerCase().contains(query.toLowerCase())) ||
-                    (email != null && email.toLowerCase().contains(query.toLowerCase())) ||
-                    (phone != null && phone.contains(query))) {
-                userIds.add(doc.getId());
-            }
-        }
-
-        List<BookingDTO> results = new ArrayList<>();
-        List<com.google.cloud.firestore.QueryDocumentSnapshot> bookings = firestore.collection("bookings")
-                .get().get().getDocuments();
-        for (com.google.cloud.firestore.QueryDocumentSnapshot doc : bookings) {
-            BookingDTO booking = doc.toObject(BookingDTO.class);
-            if (booking != null) {
-                booking.setBookingId(doc.getId());
-                boolean matchesUser = userIds.contains(booking.getUserId());
-                boolean matchesBookingId = booking.getBookingId().equalsIgnoreCase(query) || booking.getBookingId().toLowerCase().contains(query.toLowerCase());
-                boolean matchesPaymentCode = booking.getPaymentCode() != null && booking.getPaymentCode().equalsIgnoreCase(query);
-                if (matchesUser || matchesBookingId || matchesPaymentCode) {
-                    try {
-                        ShowtimeDTO showTime = showtimeService.getShowtimeById(booking.getShowtimeId());
-                        booking.setShowtime(showTime);
-                    } catch (Exception ignored) {}
-                    try {
-                        UserDTO user = userService.getUserById(booking.getUserId());
-                        booking.setUser(user);
-                    } catch (Exception ignored) {}
-                    results.add(booking);
-                }
-            }
-        }
+        List<BookingDTO> results = bookingService.searchBookings(query);
 
         return ResponseEntity.ok(
                 ApiResponse.<List<BookingDTO>>builder()

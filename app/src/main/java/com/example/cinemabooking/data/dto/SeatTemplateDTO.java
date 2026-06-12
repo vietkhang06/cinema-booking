@@ -5,9 +5,9 @@ public class SeatTemplateDTO {
     public String roomId;
     public String seatCode;
     public String rowName;
-    public int columnNo;
+    public Integer columnNo;
     public String seatType;
-    public boolean isEnabled;
+    public Boolean isEnabled;
     public SeatTemplateDTO() {
     }
 }

@@ -59,6 +59,7 @@ public class PaymentInstructionActivity extends AppCompatActivity {
 
     // Guard: đảm bảo payment chỉ được xử lý MỘT LẦN dù listener fire nhiều lần
     private volatile boolean paymentHandled = false;
+    private BookingTimerManager.TimerListener timerListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,6 +86,11 @@ public class PaymentInstructionActivity extends AppCompatActivity {
         loadQrCode();
         startPaymentListener();
         startBookingListener(); // Listener thứ 2: lắng nghe bookings doc để bắt paymentStatus
+
+        long createdAt = getIntent().getLongExtra("createdAt", 0);
+        if (createdAt > 0) {
+            startCountdownTimer(createdAt + 450000);
+        }
     }
 
     private void initViews() {
@@ -104,16 +110,25 @@ public class PaymentInstructionActivity extends AppCompatActivity {
         tvAmount.setText(String.format(Locale.getDefault(), "%,.0f đ", amount));
         tvPaymentCode.setText(paymentCode);
 
+        TextView tvBankName = findViewById(R.id.tvBankName);
+        TextView tvAccountName = findViewById(R.id.tvAccountName);
+
         if ("momo".equals(paymentMethod)) {
             btnOpenApp.setText("Mở ứng dụng MoMo");
             if (layoutTestButtons != null) {
                 layoutTestButtons.setVisibility(View.VISIBLE);
             }
+            if (tvBankName != null) tvBankName.setText("Ví điện tử MOMO");
+            if (tvAccountName != null) tvAccountName.setText("Đoàn Việt Khang");
+            if (tvAccountNumber != null) tvAccountNumber.setText("0762654245");
         } else {
             btnOpenApp.setText("Mở ứng dụng Ngân hàng");
             if (layoutTestButtons != null) {
                 layoutTestButtons.setVisibility(View.GONE);
             }
+            if (tvBankName != null) tvBankName.setText("MB BANK");
+            if (tvAccountName != null) tvAccountName.setText("PHAM NGOC GIA KHANG");
+            if (tvAccountNumber != null) tvAccountNumber.setText("0869612460");
         }
     }
 
@@ -151,9 +166,9 @@ public class PaymentInstructionActivity extends AppCompatActivity {
     }
 
     private void loadQrCode() {
-        String encodedAccountName = Uri.encode("CONG TY CP CINEMA VIETNAM");
+        String encodedAccountName = Uri.encode("PHAM NGOC GIA KHANG");
         String qrUrl = String.format(Locale.US,
-                "https://img.vietqr.io/image/MB-09012345678-compact.png?amount=%.0f&addInfo=%s&accountName=%s",
+                "https://img.vietqr.io/image/MB-0869612460-compact.png?amount=%.0f&addInfo=%s&accountName=%s",
                 amount, paymentCode, encodedAccountName);
 
         pbQrLoading.setVisibility(View.VISIBLE);
@@ -259,6 +274,11 @@ public class PaymentInstructionActivity extends AppCompatActivity {
                         return;
                     }
                     if (snapshot != null && snapshot.exists()) {
+                        Long createdAtVal = snapshot.getLong("createdAt");
+                        if (createdAtVal != null && createdAtVal > 0) {
+                            startCountdownTimer(createdAtVal + 450000);
+                        }
+
                         // Kiểm tra cả paymentStatus lẫn bookingStatus
                         String paymentStatus = snapshot.getString("paymentStatus");
                         String bookingStatus = snapshot.getString("bookingStatus");
@@ -297,9 +317,11 @@ public class PaymentInstructionActivity extends AppCompatActivity {
             startActivity(intent);
             finish();
 
-        } else if ("FAILED".equalsIgnoreCase(status) || "CANCELLED".equalsIgnoreCase(status)) {
+        } else if ("FAILED".equalsIgnoreCase(status) || "CANCELLED".equalsIgnoreCase(status) || "EXPIRED".equalsIgnoreCase(status)) {
             if (!paymentHandled) {
                 paymentHandled = true;
+                stopAllListeners();
+                BookingTimerManager.getInstance().stopTimer(this);
                 createNotification("Thanh toán thất bại", "Giao dịch thanh toán của bạn đã thất bại hoặc bị hủy.", "BOOKING_FAILED");
                 tvStatusText.setText("Trạng thái: Giao dịch thất bại hoặc đã bị huỷ");
                 View banner = findViewById(R.id.layoutStatusBanner);
@@ -307,12 +329,19 @@ public class PaymentInstructionActivity extends AppCompatActivity {
                     banner.setBackgroundColor(0xFFD32F2F);
                 }
             }
-        } else if ("WAITING_CONFIRMATION".equalsIgnoreCase(status)
-                || "PENDING".equalsIgnoreCase(status)) {
+        } else if ("WAITING_CONFIRMATION".equalsIgnoreCase(status)) {
+            paymentHandled = true;
+            stopAllListeners();
+            BookingTimerManager.getInstance().stopTimer(this);
             tvStatusText.setText("Trạng thái: Chờ Admin xác nhận...");
             View banner = findViewById(R.id.layoutStatusBanner);
             if (banner != null) {
                 banner.setBackgroundColor(0xFF1976D2);
+            }
+        } else if ("PENDING".equalsIgnoreCase(status)) {
+            View banner = findViewById(R.id.layoutStatusBanner);
+            if (banner != null) {
+                banner.setBackgroundColor(0xFFF57C00); // Keep orange for active countdown
             }
         }
     }
@@ -345,9 +374,13 @@ public class PaymentInstructionActivity extends AppCompatActivity {
     }
 
     private void handleTestPaymentFailed() {
+        performBookingCancellation(false);
+    }
+
+    private void performBookingCancellation(boolean isAuto) {
         if (btnTestFailed != null) btnTestFailed.setEnabled(false);
 
-        android.util.Log.d("BOOKING_FLOW", "TEST_BUTTON_CLICKED: FAILED. Calling PUT /api/v1/bookings/payment/" + bookingId + "/failed");
+        android.util.Log.d("BOOKING_FLOW", "Cancellation requested. Auto=" + isAuto + ". Calling PUT /api/v1/bookings/payment/" + bookingId + "/failed");
 
         BookingApiService bookingApi = RetrofitClient.getInstance().create(BookingApiService.class);
         bookingApi.cancelBooking(bookingId).enqueue(new retrofit2.Callback<ApiResponse<Void>>() {
@@ -355,10 +388,14 @@ public class PaymentInstructionActivity extends AppCompatActivity {
             public void onResponse(retrofit2.Call<ApiResponse<Void>> call, retrofit2.Response<ApiResponse<Void>> response) {
                 if (response.isSuccessful()) {
                     android.util.Log.d("BOOKING_FLOW", "cancelBooking API succeeded");
-                    Toast.makeText(PaymentInstructionActivity.this, "Giả lập: Thanh toán thất bại!", Toast.LENGTH_SHORT).show();
+                    if (isAuto) {
+                        Toast.makeText(PaymentInstructionActivity.this, "Giao dịch đã bị huỷ do hết hạn giữ ghế!", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(PaymentInstructionActivity.this, "Giả lập: Thanh toán thất bại!", Toast.LENGTH_SHORT).show();
+                    }
                 } else {
                     if (btnTestFailed != null) btnTestFailed.setEnabled(true);
-                    Toast.makeText(PaymentInstructionActivity.this, "Lỗi cập nhật test failed: " + response.code(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(PaymentInstructionActivity.this, "Lỗi huỷ giao dịch: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -396,6 +433,76 @@ public class PaymentInstructionActivity extends AppCompatActivity {
 
         new com.example.cinemabooking.data.repository.NotificationRepositoryImpl()
             .createNotification(notification, null);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (timerListener != null) {
+            BookingTimerManager.getInstance().registerListener(timerListener);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (timerListener != null) {
+            BookingTimerManager.getInstance().unregisterListener(timerListener);
+        }
+    }
+
+    private void startCountdownTimer(long targetEndTime) {
+        if (paymentHandled) return;
+
+        long currentRemaining = BookingTimerManager.getInstance().getRemainingTimeMillis();
+        long currentEndTime = System.currentTimeMillis() + currentRemaining;
+        long diff = Math.abs(currentEndTime - targetEndTime);
+
+        if (BookingTimerManager.getInstance().isTimerActive(this) && diff < 2000) {
+            if (timerListener == null) {
+                setupTimerListener();
+                BookingTimerManager.getInstance().registerListener(timerListener);
+            }
+            return;
+        }
+
+        if (timerListener == null) {
+            setupTimerListener();
+        }
+
+        BookingTimerManager.getInstance().startTimerWithEndTime(this, targetEndTime);
+        BookingTimerManager.getInstance().registerListener(timerListener);
+    }
+
+    private void setupTimerListener() {
+        timerListener = new BookingTimerManager.TimerListener() {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                if (paymentHandled) return;
+                long minutes = millisUntilFinished / 60000;
+                long seconds = (millisUntilFinished % 60000) / 1000;
+                if (tvStatusText != null) {
+                    tvStatusText.setText(String.format(Locale.getDefault(), "Trạng thái: Chờ thanh toán (%02d:%02d)", minutes, seconds));
+                }
+            }
+
+            @Override
+            public void onFinish() {
+                if (paymentHandled) return;
+                paymentHandled = true;
+                stopAllListeners();
+                BookingTimerManager.getInstance().stopTimer(PaymentInstructionActivity.this);
+                if (tvStatusText != null) {
+                    tvStatusText.setText("Trạng thái: Hết hạn giữ ghế!");
+                }
+                View banner = findViewById(R.id.layoutStatusBanner);
+                if (banner != null) {
+                    banner.setBackgroundColor(0xFFD32F2F);
+                }
+                Toast.makeText(PaymentInstructionActivity.this, "Thời gian giữ ghế đã hết!", Toast.LENGTH_LONG).show();
+                performBookingCancellation(true);
+            }
+        };
     }
 
     @Override

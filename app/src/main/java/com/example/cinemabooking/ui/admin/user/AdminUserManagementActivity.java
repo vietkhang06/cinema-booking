@@ -123,7 +123,8 @@ public class AdminUserManagementActivity extends AppCompatActivity {
                 if (users != null) {
                     for (User u : users) {
                         // Filter for only active (non-deleted) customers
-                        if (!u.deleted && "customer".equalsIgnoreCase(u.role)) {
+                        boolean isDeleted = (u.deleted != null) && u.deleted;
+            if (!isDeleted && "customer".equalsIgnoreCase(u.role)) {
                             fullCustomerList.add(u);
                         }
                     }
@@ -218,6 +219,7 @@ public class AdminUserManagementActivity extends AppCompatActivity {
         Button btnChangeLevel = view.findViewById(R.id.btnDialogChangeLevel);
         Button btnAdjustPoints = view.findViewById(R.id.btnDialogAdjustPoints);
         Button btnDeleteUser = view.findViewById(R.id.btnDialogDeleteUser);
+        Button btnGiveVoucher = view.findViewById(R.id.btnDialogGiveVoucher);
 
         // Populate fields
         tvName.setText(user.name != null ? user.name : "Chưa cập nhật");
@@ -228,10 +230,10 @@ public class AdminUserManagementActivity extends AppCompatActivity {
         
         String levelUpper = user.memberLevel != null ? user.memberLevel.toUpperCase(Locale.getDefault()) : "STANDARD";
         tvLevel.setText(levelUpper);
-        tvPoints.setText(user.points + " điểm");
+        tvPoints.setText(((user.points != null) ? user.points : 0) + " điểm");
 
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-        tvJoined.setText(user.createdAt > 0 ? sdf.format(new Date(user.createdAt)) : "Chưa rõ");
+        tvJoined.setText((user.createdAt != null && user.createdAt > 0) ? sdf.format(new Date(user.createdAt)) : "Chưa rõ");
 
         boolean isLocked = "locked".equalsIgnoreCase(user.status);
         if (isLocked) {
@@ -284,6 +286,12 @@ public class AdminUserManagementActivity extends AppCompatActivity {
         btnDeleteUser.setOnClickListener(v -> {
             dialog.dismiss();
             showDeleteConfirmDialog(user);
+        });
+
+        // Action: Give Voucher
+        btnGiveVoucher.setOnClickListener(v -> {
+            dialog.dismiss();
+            showGiveVoucherDialog(user);
         });
 
         dialog.show();
@@ -366,7 +374,7 @@ public class AdminUserManagementActivity extends AppCompatActivity {
         Button btnSubtract = dialog.findViewById(R.id.btnPointsSubtract);
         Button btnCancel = dialog.findViewById(R.id.btnCancelPoints);
 
-        tvCurrentPoints.setText("Điểm hiện tại: " + user.points);
+        tvCurrentPoints.setText("Điểm hiện tại: " + ((user.points != null) ? user.points : 0));
 
         btnCancel.setOnClickListener(v -> dialog.dismiss());
 
@@ -397,7 +405,8 @@ public class AdminUserManagementActivity extends AppCompatActivity {
         }
 
         int diff = isAdd ? amountVal : -amountVal;
-        int finalPoints = user.points + diff;
+        int currentPoints = (user.points != null) ? user.points : 0;
+        int finalPoints = currentPoints + diff;
         if (finalPoints < 0) {
             etAmount.setError("Khách hàng không đủ điểm để trừ");
             return;
@@ -466,8 +475,115 @@ public class AdminUserManagementActivity extends AppCompatActivity {
         dialog.show();
     }
 
+    private void showGiveVoucherDialog(User user) {
+        Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog_admin_give_voucher);
+
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+            lp.copyFrom(dialog.getWindow().getAttributes());
+            lp.width = WindowManager.LayoutParams.MATCH_PARENT;
+            lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+            dialog.getWindow().setAttributes(lp);
+        }
+
+        TextView tvSubtitle = dialog.findViewById(R.id.tvGiftVoucherSubtitle);
+        EditText etDiscount = dialog.findViewById(R.id.etVoucherDiscount);
+        EditText etMessage = dialog.findViewById(R.id.etVoucherMessage);
+        Button btnSend = dialog.findViewById(R.id.btnSendVoucher);
+        Button btnCancel = dialog.findViewById(R.id.btnCancelVoucher);
+
+        tvSubtitle.setText("Khách hàng: " + getUserDisplayName(user));
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+        btnSend.setOnClickListener(v -> {
+            String discountStr = etDiscount.getText().toString().trim();
+            if (discountStr.isEmpty()) {
+                etDiscount.setError("Vui lòng nhập phần trăm giảm giá");
+                return;
+            }
+
+            double discountVal;
+            try {
+                discountVal = Double.parseDouble(discountStr);
+                if (discountVal <= 0 || discountVal > 100) {
+                    etDiscount.setError("Mức giảm giá không hợp lệ (1-100%)");
+                    return;
+                }
+            } catch (NumberFormatException e) {
+                etDiscount.setError("Mức giảm giá không hợp lệ");
+                return;
+            }
+
+            String message = etMessage.getText().toString().trim();
+            if (message.isEmpty()) {
+                message = "Bạn được tặng 1 voucher giảm giá " + discountStr + "% từ Admin. Chúc bạn xem phim vui vẻ!";
+            }
+
+            sendVoucherToFirebase(user, dialog, discountVal, message);
+        });
+
+        dialog.show();
+    }
+
+    private void sendVoucherToFirebase(User user, Dialog dialog, double discount, String message) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        com.google.firebase.firestore.WriteBatch batch = db.batch();
+        long currentTime = System.currentTimeMillis();
+
+        // 1. Create Voucher
+        com.google.firebase.firestore.DocumentReference voucherRef = db.collection("vouchers").document();
+        com.example.cinemabooking.domain.model.Voucher voucher = new com.example.cinemabooking.domain.model.Voucher();
+        voucher.voucherId = voucherRef.getId();
+        voucher.userId = user.uid;
+        voucher.voucherType = "ADMIN_GIFT";
+        voucher.discountValue = discount;
+        voucher.isUsed = false;
+        voucher.createdAt = currentTime;
+        batch.set(voucherRef, voucher);
+
+        // 2. Create Notification
+        com.google.firebase.firestore.DocumentReference notifRef = db.collection("notifications").document();
+        com.example.cinemabooking.domain.model.Notification notif = new com.example.cinemabooking.domain.model.Notification();
+        notif.notificationId = notifRef.getId();
+        notif.userId = user.uid;
+        notif.title = "Nhận Voucher từ Admin";
+        notif.message = message;
+        notif.type = "VOUCHER_RECEIVED";
+        notif.isRead = false;
+        notif.createdAt = currentTime;
+        notif.updatedAt = currentTime;
+        batch.set(notifRef, notif);
+
+        // 3. Create AuditLog
+        com.google.firebase.firestore.DocumentReference auditRef = db.collection("audit_logs").document();
+        com.example.cinemabooking.domain.model.AuditLog auditLog = new com.example.cinemabooking.domain.model.AuditLog();
+        auditLog.logId = auditRef.getId();
+        auditLog.adminId = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() != null 
+                ? com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid() : "ADMIN";
+        auditLog.action = "GIVE_VOUCHER";
+        auditLog.createdAt = currentTime;
+        auditLog.actorId = auditLog.adminId;
+        auditLog.actorRole = "ADMIN";
+        auditLog.targetId = user.uid;
+        auditLog.targetType = "USER";
+        auditLog.note = "Tặng voucher " + discount + "% cho " + getUserDisplayName(user);
+        batch.set(auditRef, auditLog);
+
+        batch.commit()
+                .addOnSuccessListener(aVoid -> {
+                    dialog.dismiss();
+                    Toast.makeText(this, "Đã tặng Voucher thành công!", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Lỗi khi tặng Voucher: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                });
+    }
+
     // RecyclerView Adapter
-    private class CustomerAdapter extends RecyclerView.Adapter<CustomerAdapter.ViewHolder> {
+    public class CustomerAdapter extends RecyclerView.Adapter<CustomerAdapter.ViewHolder> {
         private final List<User> items;
 
         public CustomerAdapter(List<User> items) {
@@ -515,12 +631,12 @@ public class AdminUserManagementActivity extends AppCompatActivity {
             }
 
             // Points
-            holder.tvPoints.setText(u.points + " điểm");
+            holder.tvPoints.setText(((u.points != null) ? u.points : 0) + " điểm");
 
             // Status light indicator
             boolean isActive = !"locked".equalsIgnoreCase(u.status);
             if (isActive) {
-                holder.viewStatus.setBackgroundResource(R.drawable.dot_active);
+                holder.viewStatus.setBackgroundResource(com.example.cinemabooking.R.drawable.dot_active);
             } else {
                 holder.viewStatus.setBackground(new ColorDrawable(Color.RED));
                 // Make red dot round using custom programmatic rounded background
@@ -536,7 +652,7 @@ public class AdminUserManagementActivity extends AppCompatActivity {
             return items.size();
         }
 
-        class ViewHolder extends RecyclerView.ViewHolder {
+        public class ViewHolder extends RecyclerView.ViewHolder {
             TextView tvName, tvContact, tvLevel, tvPoints;
             View viewStatus;
             ImageView imgAvatar;

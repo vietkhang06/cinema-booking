@@ -169,7 +169,8 @@ public class AdminSelectUserActivity extends AppCompatActivity {
                 fullCustomerList.clear();
                 if (users != null) {
                     for (User u : users) {
-                        if (!u.deleted && "customer".equalsIgnoreCase(u.role)) {
+                        boolean isDeleted = (u.deleted != null) && u.deleted;
+            if (!isDeleted && "customer".equalsIgnoreCase(u.role)) {
                             fullCustomerList.add(u);
                         }
                     }
@@ -269,7 +270,7 @@ public class AdminSelectUserActivity extends AppCompatActivity {
     }
 
     // RecyclerView Adapter
-    private class CustomerSelectAdapter extends RecyclerView.Adapter<CustomerSelectAdapter.ViewHolder> {
+    public class CustomerSelectAdapter extends RecyclerView.Adapter<CustomerSelectAdapter.ViewHolder> {
         private final List<User> items;
 
         public CustomerSelectAdapter(List<User> items) {
@@ -317,7 +318,7 @@ public class AdminSelectUserActivity extends AppCompatActivity {
             }
 
             // Points
-            holder.tvPoints.setText(u.points + " điểm");
+            holder.tvPoints.setText(((u.points != null) ? u.points : 0) + " điểm");
 
             // Checkbox state
             holder.cbSelect.setOnCheckedChangeListener(null);
@@ -353,7 +354,7 @@ public class AdminSelectUserActivity extends AppCompatActivity {
             return items.size();
         }
 
-        class ViewHolder extends RecyclerView.ViewHolder {
+        public class ViewHolder extends RecyclerView.ViewHolder {
             TextView tvName, tvContact, tvLevel, tvPoints;
             CheckBox cbSelect;
             ImageView imgAvatar;

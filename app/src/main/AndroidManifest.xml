@@ -130,6 +130,12 @@
             android:name=".ui.admin.movie.AdminMovieFormActivity"
             android:exported="false" />
         <activity
+            android:name=".ui.admin.cineshop.AdminCineShopListActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.admin.cineshop.AdminCineShopFormActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.admin.AdminPaymentListActivity"
             android:exported="false" />
         <activity

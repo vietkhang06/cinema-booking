@@ -9,15 +9,15 @@ public class Promotion {
     public double discountValue;
     public double minAmount;
     public double maxDiscountAmount;
-    public long validFrom;
-    public long validTo;
+    public Long validFrom;
+    public Long validTo;
     public String status;
-    public int usageLimit;
-    public int usedCount;
+    public Integer usageLimit;
+    public Integer usedCount;
     public String targetRole;
-    public long createdAt;
-    public long updatedAt;
-    public boolean deleted;
+    public Long createdAt;
+    public Long updatedAt;
+    public Boolean deleted;
 
     public Promotion() {
     }

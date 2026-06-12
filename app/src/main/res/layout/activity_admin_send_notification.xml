@@ -95,6 +95,31 @@
                     android:maxLines="8" />
             </com.google.android.material.textfield.TextInputLayout>
 
+            <CheckBox
+                android:id="@+id/cbAttachVoucher"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Đính kèm voucher giảm giá"
+                android:textColor="#212121"
+                android:layout_marginBottom="8dp"/>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/layoutVoucherDiscount"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_marginBottom="20dp"
+                android:visibility="gone"
+                app:suffixText="%">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/edtVoucherDiscount"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Phần trăm giảm giá (vd: 10, 15...)"
+                    android:inputType="numberDecimal" />
+            </com.google.android.material.textfield.TextInputLayout>
+
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"

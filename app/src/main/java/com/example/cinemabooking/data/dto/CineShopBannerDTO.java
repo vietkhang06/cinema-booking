@@ -6,10 +6,10 @@ public class CineShopBannerDTO {
     public String imageUrl;
     public String targetType;
     public String targetId;
-    public int sortOrder;
-    public boolean isActive;
-    public long createdAt;
-    public long updatedAt;
+    public Integer sortOrder;
+    public Boolean isActive;
+    public Long createdAt;
+    public Long updatedAt;
 
     public CineShopBannerDTO() {
     }
