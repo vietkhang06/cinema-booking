@@ -1,6 +1,7 @@
 package com.example.cinemabooking.ui.customer;
 
 import android.content.Intent;
+import com.example.cinemabooking.ui.customer.transaction.TicketDetailActivity;
 import android.os.Bundle;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -459,7 +460,14 @@ public class BookingConfirmActivity extends AppCompatActivity {
                     isBookingConfirmed = true;
                     BookingTimerManager.getInstance().stopTimer(BookingConfirmActivity.this);
 
-                    if ("momo".equals(paymentMethod) || "bank".equals(paymentMethod)) {
+                    if ("momo".equals(paymentMethod)) {
+                        Toast.makeText(BookingConfirmActivity.this, "Thanh toán qua Ví MoMo thành công!", Toast.LENGTH_LONG).show();
+                        Intent intent = new Intent(BookingConfirmActivity.this, TicketDetailActivity.class);
+                        intent.putExtra(TicketDetailActivity.EXTRA_BOOKING_ID, booking.bookingId);
+                        intent.putExtra("EXTRA_FROM_BOOKING_SUCCESS", true);
+                        startActivity(intent);
+                        finish();
+                    } else if ("bank".equals(paymentMethod)) {
                         Intent intent = new Intent(BookingConfirmActivity.this, PaymentInstructionActivity.class);
                         intent.putExtra(PaymentInstructionActivity.EXTRA_BOOKING_ID, booking.bookingId);
                         intent.putExtra(PaymentInstructionActivity.EXTRA_PAYMENT_ID, (String) null);

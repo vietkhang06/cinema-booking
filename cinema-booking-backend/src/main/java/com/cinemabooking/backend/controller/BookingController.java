@@ -108,6 +108,23 @@ public class BookingController {
 
         if ("cash".equalsIgnoreCase(bookingDTO.getPaymentMethod())) {
             bookingService.confirmBookingSeats(bookingDTO.getBookingId());
+        } else if ("momo".equalsIgnoreCase(bookingDTO.getPaymentMethod())) {
+            bookingService.confirmBookingAndSeats(bookingDTO.getBookingId());
+            try {
+                List<com.google.cloud.firestore.QueryDocumentSnapshot> payments = firestore.collection("payments")
+                        .whereEqualTo("bookingId", bookingDTO.getBookingId())
+                        .get()
+                        .get()
+                        .getDocuments();
+                for (com.google.cloud.firestore.QueryDocumentSnapshot paymentDoc : payments) {
+                    firestore.collection("payments").document(paymentDoc.getId())
+                            .update("status", "SUCCESS", "updatedAt", System.currentTimeMillis())
+                            .get();
+                }
+            } catch (Exception e) {
+                log.error("Failed to update payment status to SUCCESS for bookingId: " + bookingDTO.getBookingId(), e);
+            }
+            bookingDTO = bookingService.getBookingById(bookingDTO.getBookingId());
         }
 
         return ResponseEntity.ok(
