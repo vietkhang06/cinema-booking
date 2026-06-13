@@ -18,6 +18,8 @@ public class SeatBookingRequestDTO {
     private List<SnackOrder> snackOrders;
 
     private PaymentMethod paymentMethod;
+    private String promoCode;
+    private Boolean useStars;
 
     public record SnackOrder(String snackId, int quantity) { }
 }

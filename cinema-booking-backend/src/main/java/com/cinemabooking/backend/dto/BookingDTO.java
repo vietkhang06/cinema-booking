@@ -40,6 +40,7 @@ public class BookingDTO {
     private long createdAt;
     private long updatedAt;
     private boolean deleted;
+    private int pointsConsumed;
 
     private long paymentAt;
     private List<SnackOrderSnapshot> snackOrder;

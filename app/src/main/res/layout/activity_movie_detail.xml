@@ -270,34 +270,37 @@
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:baselineAligned="false"
                             android:orientation="horizontal">
                             <com.google.android.material.textfield.TextInputLayout
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:layout_marginEnd="8dp"
+                                android:layout_marginEnd="6dp"
                                 android:layout_weight="1"
                                 android:hint="Tỉnh/Thành"
-                                app:boxBackgroundMode="outline"
-                                app:endIconMode="dropdown_menu">
+                                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
                                 <com.google.android.material.textfield.MaterialAutoCompleteTextView
                                     android:id="@+id/actvCity"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
-                                    android:inputType="none" />
+                                    android:inputType="none"
+                                    android:paddingTop="12dp"
+                                    android:paddingBottom="12dp" />
                             </com.google.android.material.textfield.TextInputLayout>
                             <com.google.android.material.textfield.TextInputLayout
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:layout_marginStart="8dp"
+                                android:layout_marginStart="6dp"
                                 android:layout_weight="1"
                                 android:hint="Chọn rạp"
-                                app:boxBackgroundMode="outline"
-                                app:endIconMode="dropdown_menu">
+                                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
                                 <com.google.android.material.textfield.MaterialAutoCompleteTextView
                                     android:id="@+id/actvCinema"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
-                                    android:inputType="none" />
+                                    android:inputType="none"
+                                    android:paddingTop="12dp"
+                                    android:paddingBottom="12dp" />
                             </com.google.android.material.textfield.TextInputLayout>
                         </LinearLayout>
                         <HorizontalScrollView

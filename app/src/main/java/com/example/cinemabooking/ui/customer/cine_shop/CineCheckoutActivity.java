@@ -15,7 +15,14 @@ import android.widget.Toast;
 import androidx.fragment.app.FragmentActivity;
 
 import com.bumptech.glide.Glide;
+import android.content.Intent;
 import com.example.cinemabooking.R;
+import com.example.cinemabooking.data.dto.ApiResponse;
+import com.example.cinemabooking.data.dto.CineShopOrderRequestDTO;
+import com.example.cinemabooking.data.dto.CineShopOrderResponseDTO;
+import com.example.cinemabooking.data.remote.api.CineShopApiService;
+import com.example.cinemabooking.data.remote.api.RetrofitClient;
+import com.example.cinemabooking.ui.customer.PaymentInstructionActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -151,35 +158,51 @@ public class CineCheckoutActivity extends FragmentActivity {
                 totalQuantity += item.quantity;
             }
 
-            // Generate an order ID
-            String orderId = FirebaseFirestore.getInstance().collection("cine_shop_orders").document().getId();
+            CineShopOrderRequestDTO request = new CineShopOrderRequestDTO(
+                    primaryItemName,
+                    primaryImageUrl,
+                    totalQuantity,
+                    totalPrice,
+                    selectedPayment.toUpperCase()
+            );
 
-            Map<String, Object> orderData = new HashMap<>();
-            orderData.put("orderId", orderId);
-            orderData.put("userId", currentUid);
-            orderData.put("type", "CINE_SHOP");
-            orderData.put("itemName", primaryItemName);
-            orderData.put("itemImageUrl", primaryImageUrl);
-            orderData.put("quantity", totalQuantity);
-            orderData.put("totalPrice", totalPrice);
-            orderData.put("paymentMethod", selectedPayment.toUpperCase());
-            orderData.put("status", "success");
-            orderData.put("createdAt", System.currentTimeMillis());
-
-            // Save to Firestore
             btnCheckoutPay.setEnabled(false);
-            FirebaseFirestore.getInstance().collection("cine_shop_orders")
-                    .document(orderId)
-                    .set(orderData)
-                    .addOnSuccessListener(aVoid -> {
-                        Toast.makeText(this, "Đặt hàng thành công! 🎉", Toast.LENGTH_LONG).show();
-                        CineCartManager.getInstance().clear();
-                        finish();
-                    })
-                    .addOnFailureListener(e -> {
-                        btnCheckoutPay.setEnabled(true);
-                        Toast.makeText(this, "Lỗi thanh toán: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                    });
+
+            CineShopApiService apiService = RetrofitClient.getInstance().create(CineShopApiService.class);
+            apiService.createOrder(request).enqueue(new retrofit2.Callback<ApiResponse<CineShopOrderResponseDTO>>() {
+                @Override
+                public void onResponse(retrofit2.Call<ApiResponse<CineShopOrderResponseDTO>> call, retrofit2.Response<ApiResponse<CineShopOrderResponseDTO>> response) {
+                    btnCheckoutPay.setEnabled(true);
+                    if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                        CineShopOrderResponseDTO orderResponse = response.body().getData();
+                        if (orderResponse != null) {
+                            Toast.makeText(CineCheckoutActivity.this, "Đặt hàng thành công! Vui lòng hoàn tất thanh toán. 🎉", Toast.LENGTH_LONG).show();
+                            CineCartManager.getInstance().clear();
+
+                            // Redirect to PaymentInstructionActivity
+                            Intent intent = new Intent(CineCheckoutActivity.this, PaymentInstructionActivity.class);
+                            intent.putExtra(PaymentInstructionActivity.EXTRA_BOOKING_ID, orderResponse.getOrderId());
+                            intent.putExtra(PaymentInstructionActivity.EXTRA_PAYMENT_ID, orderResponse.getPaymentId());
+                            intent.putExtra(PaymentInstructionActivity.EXTRA_PAYMENT_CODE, orderResponse.getPaymentCode());
+                            intent.putExtra(PaymentInstructionActivity.EXTRA_AMOUNT, orderResponse.getTotalPrice());
+                            intent.putExtra(PaymentInstructionActivity.EXTRA_PAYMENT_METHOD, orderResponse.getPaymentMethod());
+                            intent.putExtra("createdAt", orderResponse.getCreatedAt());
+                            startActivity(intent);
+                            finish();
+                        } else {
+                            Toast.makeText(CineCheckoutActivity.this, "Không nhận được thông tin đơn hàng.", Toast.LENGTH_LONG).show();
+                        }
+                    } else {
+                        Toast.makeText(CineCheckoutActivity.this, "Lỗi tạo đơn hàng: " + response.code(), Toast.LENGTH_LONG).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(retrofit2.Call<ApiResponse<CineShopOrderResponseDTO>> call, Throwable t) {
+                    btnCheckoutPay.setEnabled(true);
+                    Toast.makeText(CineCheckoutActivity.this, "Lỗi mạng: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                }
+            });
         });
     }
 

@@ -64,9 +64,26 @@ public class SeatReleaseScheduler {
                 Long createdAtVal = bookingDoc.getLong("createdAt");
                 long createdAt = createdAtVal != null ? createdAtVal : 0L;
 
-                if (createdAt > 0 && (createdAt + 450000) < now) { // 7.5 phút
+                String paymentMethod = bookingDoc.getString("paymentMethod");
+                boolean shouldCancel = false;
+
+                if ("cash".equalsIgnoreCase(paymentMethod)) {
+                    Long showtimeStartAtVal = bookingDoc.getLong("showtimeStartAtSnapshot");
+                    long showtimeStartAt = showtimeStartAtVal != null ? showtimeStartAtVal : 0L;
+                    // Hủy vé tiền mặt nếu sát giờ chiếu dưới 15 phút mà chưa thanh toán
+                    if (showtimeStartAt > 0 && (showtimeStartAt - 900000) < now) { // 15 phút
+                        shouldCancel = true;
+                    }
+                } else {
+                    // Thanh toán online (momo, bank) hủy sau 7.5 phút nếu không thanh toán
+                    if (createdAt > 0 && (createdAt + 450000) < now) {
+                        shouldCancel = true;
+                    }
+                }
+
+                if (shouldCancel) {
                     String bookingId = bookingDoc.getId();
-                    logger.info("[BOOKING_TIMEOUT] Booking {} has expired. Cancelling dynamically...", bookingId);
+                    logger.info("[BOOKING_TIMEOUT] Booking {} (Method: {}) has expired. Cancelling dynamically...", bookingId, paymentMethod);
 
                     WriteBatch batch = firestore.batch();
 
@@ -76,6 +93,17 @@ public class SeatReleaseScheduler {
                             "paymentStatus", "FAILED",
                             "updatedAt", now
                     );
+
+                    // Hoàn trả điểm Stars nếu có
+                    Long ptsConsumedVal = bookingDoc.getLong("pointsConsumed");
+                    int ptsConsumed = ptsConsumedVal != null ? ptsConsumedVal.intValue() : 0;
+                    String userId = bookingDoc.getString("userId");
+                    if (ptsConsumed > 0 && userId != null) {
+                        batch.update(firestore.collection("users").document(userId),
+                                "points", FieldValue.increment(ptsConsumed)
+                        );
+                        logger.info("[LOYALTY_REFUND] Scheduler refunded {} points to user {}", ptsConsumed, userId);
+                    }
 
                     // 2. Tìm và hủy payment
                     List<QueryDocumentSnapshot> paymentDocs = firestore.collection("payments")

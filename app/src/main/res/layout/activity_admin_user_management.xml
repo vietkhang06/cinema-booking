@@ -117,6 +117,13 @@
                 android:text="Hạng Gold" />
 
             <com.google.android.material.chip.Chip
+                android:id="@+id/chipPlatinum"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Hạng Platinum" />
+
+            <com.google.android.material.chip.Chip
                 android:id="@+id/chipLocked"
                 style="@style/Widget.MaterialComponents.Chip.Choice"
                 android:layout_width="wrap_content"

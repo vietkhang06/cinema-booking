@@ -23,6 +23,7 @@
             android:layout_height="40dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/chevron_left_solid_full"
+            android:tint="#000000"
             android:contentDescription="Back" />
 
         <TextView

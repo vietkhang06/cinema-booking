@@ -48,9 +48,10 @@ public class ProfileFragment extends Fragment {
     // Menu items
     LinearLayout menuHotline, menuEmail, menuCompanyInfo,
             menuTerms, menuPaymentPolicy, menuPrivacyPolicy, menuFaq;
-    LinearLayout btnDoiQua, btnMyRewards, btnTinhNangMoi;
+    LinearLayout btnMyTickets, btnMyRewards;
 
     private com.google.firebase.firestore.ListenerRegistration notificationListener;
+    private User currentUserProfile;
 
     // ── Services ──────────────────────────────────────────────────────────────
     AuthenticationService authService;
@@ -139,6 +140,7 @@ public class ProfileFragment extends Fragment {
             @Override
             public void onSuccess(User profileData) {
                 if (profileData == null || !isAdded()) return;
+                currentUserProfile = profileData;
 
                 String displayName = (profileData.name == null || profileData.name.isBlank())
                         ? profileData.email : profileData.name;
@@ -257,9 +259,8 @@ public class ProfileFragment extends Fragment {
         btnMemberCard       = view.findViewById(R.id.btnMemberCard);
         btnSettings         = view.findViewById(R.id.btnProfileSettings);
 
-        btnDoiQua           = view.findViewById(R.id.btnDoiQua);
+        btnMyTickets        = view.findViewById(R.id.btnMyTickets);
         btnMyRewards        = view.findViewById(R.id.btnMyRewards);
-        btnTinhNangMoi      = view.findViewById(R.id.btnTinhNangMoi);
 
         menuHotline         = view.findViewById(R.id.menuHotline);
         menuEmail           = view.findViewById(R.id.menuEmail);
@@ -320,19 +321,41 @@ public class ProfileFragment extends Fragment {
 
         // Mã thành viên
         if (btnMemberCard != null)
-            btnMemberCard.setOnClickListener(v ->
-                    Toast.makeText(getContext(), "Mã thành viên đang được cập nhật", Toast.LENGTH_SHORT).show());
+            btnMemberCard.setOnClickListener(v -> {
+                boolean isLoggedIn = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() != null;
+                if (!isLoggedIn) {
+                    Toast.makeText(getContext(), "Vui lòng đăng nhập để xem mã thành viên", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (currentUserProfile == null) {
+                    Toast.makeText(getContext(), "Đang tải thông tin thành viên, vui lòng thử lại sau", Toast.LENGTH_SHORT).show();
+                    loadUserProfile();
+                    return;
+                }
+                showMemberCardDialog(currentUserProfile);
+            });
 
-        // Feature cards (tạm thời)
-        if (btnDoiQua != null)
-            btnDoiQua.setOnClickListener(v ->
-                    Toast.makeText(getContext(), "Đổi quà sắp ra mắt!", Toast.LENGTH_SHORT).show());
-        if (btnMyRewards != null)
-            btnMyRewards.setOnClickListener(v ->
-                    Toast.makeText(getContext(), "My Rewards sắp ra mắt!", Toast.LENGTH_SHORT).show());
-        if (btnTinhNangMoi != null)
-            btnTinhNangMoi.setOnClickListener(v ->
-                    Toast.makeText(getContext(), "Tính năng mới sắp ra mắt!", Toast.LENGTH_SHORT).show());
+        // Feature cards
+        if (btnMyTickets != null) {
+            btnMyTickets.setOnClickListener(v -> {
+                boolean isLoggedIn = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() != null;
+                if (isLoggedIn) {
+                    AppNavigator.goToTransactionHistory(requireActivity());
+                } else {
+                    AppNavigator.goToLoginForBooking(requireActivity());
+                }
+            });
+        }
+        if (btnMyRewards != null) {
+            btnMyRewards.setOnClickListener(v -> {
+                boolean isLoggedIn = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() != null;
+                if (isLoggedIn) {
+                    startActivity(new Intent(getContext(), MyPromotionListActivity.class));
+                } else {
+                    AppNavigator.goToLoginForBooking(requireActivity());
+                }
+            });
+        }
 
         // Menu items
         if (menuHotline != null)
@@ -400,5 +423,81 @@ public class ProfileFragment extends Fragment {
             tvLogoutBtnLabel.setText("Đăng nhập");
             tvLogoutBtnLabel.setTextColor(android.graphics.Color.parseColor("#1E4F8F")); // xanh
         }
+    }
+
+    private void showMemberCardDialog(User user) {
+        if (getContext() == null) return;
+        
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_member_card, null);
+        builder.setView(dialogView);
+        
+        AlertDialog dialog = builder.create();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
+        
+        com.google.android.material.card.MaterialCardView layoutCardBackground = dialogView.findViewById(R.id.layoutCardBackground);
+        ImageView ivQrCode = dialogView.findViewById(R.id.ivQrCode);
+        TextView tvMemberName = dialogView.findViewById(R.id.tvMemberName);
+        TextView tvMemberLevelBadge = dialogView.findViewById(R.id.tvMemberLevelBadge);
+        TextView tvMemberId = dialogView.findViewById(R.id.tvMemberId);
+        View btnClose = dialogView.findViewById(R.id.btnClose);
+        
+        String name = (user.name != null && !user.name.trim().isEmpty()) ? user.name : user.email;
+        if (tvMemberName != null) tvMemberName.setText(name);
+        
+        String level = (user.memberLevel != null) ? user.memberLevel.toLowerCase() : "standard";
+        if (tvMemberLevelBadge != null) {
+            tvMemberLevelBadge.setText((level.toUpperCase() + " MEMBER"));
+        }
+        
+        if (tvMemberId != null) {
+            tvMemberId.setText("ID: " + (user.uid != null ? user.uid : "—"));
+        }
+        
+        // Customize styling based on level
+        int cardColor = 0xFF1A3A8C;      // standard
+        int badgeTextColor = 0xFF1A3A8C;
+        int badgeBgColor = 0xFFEBF0FF;
+        
+        if ("vip".equals(level)) {
+            cardColor = 0xFFA13345;
+            badgeTextColor = 0xFFA13345;
+            badgeBgColor = 0xFFFFEBEB;
+        } else if ("gold".equals(level)) {
+            cardColor = 0xFFB8860B;
+            badgeTextColor = 0xFFB8860B;
+            badgeBgColor = 0xFFFFF8E7;
+        } else if ("platinum".equals(level)) {
+            cardColor = 0xFF4A4A4A;
+            badgeTextColor = 0xFF4A4A4A;
+            badgeBgColor = 0xFFF0F0F0;
+        }
+        
+        if (layoutCardBackground != null) {
+            layoutCardBackground.setCardBackgroundColor(android.content.res.ColorStateList.valueOf(cardColor));
+        }
+        if (tvMemberLevelBadge != null) {
+            tvMemberLevelBadge.setTextColor(badgeTextColor);
+            tvMemberLevelBadge.setBackgroundTintList(android.content.res.ColorStateList.valueOf(badgeBgColor));
+        }
+        
+        // Generate QR code URL
+        String data = user.uid != null ? user.uid : "";
+        String qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=" + data;
+        
+        if (ivQrCode != null && getContext() != null) {
+            Glide.with(this)
+                .load(qrUrl)
+                .placeholder(R.drawable.ic_scan_qr)
+                .into(ivQrCode);
+        }
+        
+        if (btnClose != null) {
+            btnClose.setOnClickListener(v -> dialog.dismiss());
+        }
+        
+        dialog.show();
     }
 }

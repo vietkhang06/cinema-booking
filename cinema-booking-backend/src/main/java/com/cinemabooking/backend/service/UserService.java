@@ -39,6 +39,7 @@ public class UserService {
                 .createdAt(doc.get("createdAt") instanceof Number ? doc.getLong("createdAt") : 0L)
                 .updatedAt(doc.get("updatedAt") instanceof Number ? doc.getLong("updatedAt") : 0L)
                 .deleted(doc.getBoolean("deleted") != null ? doc.getBoolean("deleted") : false)
+                .points(doc.getLong("points") != null ? doc.getLong("points").intValue() : 0)
                 .build();
     }
 }

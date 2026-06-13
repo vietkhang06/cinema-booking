@@ -391,9 +391,22 @@ public class ShowtimeRepositoryImpl implements ShowtimeRepository {
 
                         for (DocumentSnapshot doc : activeBookings) {
                             batch.update(doc.getReference(),
-                                    "status", com.example.cinemabooking.core.constants.BookingStatus.CANCELLED,
+                                    "bookingStatus", com.example.cinemabooking.core.constants.BookingStatus.CANCELLED,
                                     "paymentStatus", com.example.cinemabooking.core.constants.PaymentStatus.REFUND_PENDING,
                                     "updatedAt", currentTime);
+
+                            java.util.List<String> seatIds = (java.util.List<String>) doc.get("seatIds");
+                            if (seatIds != null) {
+                                for (String seatId : seatIds) {
+                                    DocumentReference seatRef = firestore.collection("seats").document(seatId);
+                                    batch.update(seatRef,
+                                            "status", "available",
+                                            "heldBy", null,
+                                            "heldUntil", 0L,
+                                            "bookedBy", null,
+                                            "bookedAt", null);
+                                }
+                            }
 
                             String userId = doc.getString("userId");
                             if (userId != null) {

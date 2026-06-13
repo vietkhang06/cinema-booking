@@ -128,14 +128,55 @@ public class BookingController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Vui lòng đăng nhập.");
         }
         BookingDTO booking = bookingService.getBookingById(bookingId);
+        UserDTO user = userService.getUserById(userId);
+        boolean isStaffOrAdmin = user != null && ("staff".equalsIgnoreCase(user.getRole()) || "admin".equalsIgnoreCase(user.getRole()));
+
         if (booking == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy vé đặt.");
+            // Check if it's a CineShop order
+            com.google.cloud.firestore.DocumentSnapshot shopDoc = firestore.collection("cine_shop_orders").document(bookingId).get().get();
+            if (shopDoc.exists()) {
+                String orderUserId = shopDoc.getString("userId");
+                if (!userId.equals(orderUserId) && !isStaffOrAdmin) {
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bạn không có quyền xác nhận đơn hàng này.");
+                }
+
+                // Confirm CineShop order
+                firestore.collection("cine_shop_orders").document(bookingId)
+                        .update("status", "success")
+                        .get();
+
+                // Also update payments document status to SUCCESS
+                try {
+                    List<com.google.cloud.firestore.QueryDocumentSnapshot> payments = firestore.collection("payments")
+                            .whereEqualTo("bookingId", bookingId)
+                            .get()
+                            .get()
+                            .getDocuments();
+                    for (com.google.cloud.firestore.QueryDocumentSnapshot paymentDoc : payments) {
+                        firestore.collection("payments").document(paymentDoc.getId())
+                                .update("status", "SUCCESS", "updatedAt", System.currentTimeMillis())
+                                .get();
+                    }
+                } catch (Exception e) {
+                    log.error("Failed to update payment status to SUCCESS for CineShop order: " + bookingId, e);
+                }
+
+                return ResponseEntity.ok(
+                        ApiResponse.builder()
+                                .success(true)
+                                .message("CineShop order payment confirmed successfully")
+                                .build()
+                );
+            }
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy vé đặt hoặc đơn hàng.");
         }
-        if (!userId.equals(booking.getUserId())) {
+
+        if (!userId.equals(booking.getUserId()) && !isStaffOrAdmin) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bạn không có quyền xác nhận vé này.");
         }
-        bookingService.updatePaymentStatus(bookingId, "SUCCESS", "CONFIRMED");
-        bookingService.confirmBookingSeats(bookingId);
+
+        // Atomic update of booking status and seat allocation
+        bookingService.confirmBookingAndSeats(bookingId);
 
         // Also update payments document status to SUCCESS
         try {
@@ -154,7 +195,7 @@ public class BookingController {
         }
 
         return ResponseEntity.ok(
-                ApiResponse.<BookingDTO>builder()
+                ApiResponse.builder()
                         .success(true)
                         .message("Payment confirmed and seats booked successfully")
                         .build()
@@ -170,14 +211,55 @@ public class BookingController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Vui lòng đăng nhập.");
         }
         BookingDTO booking = bookingService.getBookingById(bookingId);
+        UserDTO user = userService.getUserById(userId);
+        boolean isStaffOrAdmin = user != null && ("staff".equalsIgnoreCase(user.getRole()) || "admin".equalsIgnoreCase(user.getRole()));
+
         if (booking == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy vé đặt.");
+            // Check if it's a CineShop order
+            com.google.cloud.firestore.DocumentSnapshot shopDoc = firestore.collection("cine_shop_orders").document(bookingId).get().get();
+            if (shopDoc.exists()) {
+                String orderUserId = shopDoc.getString("userId");
+                if (!userId.equals(orderUserId) && !isStaffOrAdmin) {
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bạn không có quyền hủy đơn hàng này.");
+                }
+
+                // Cancel CineShop order
+                firestore.collection("cine_shop_orders").document(bookingId)
+                        .update("status", "failed")
+                        .get();
+
+                // Also update payments document status to FAILED
+                try {
+                    List<com.google.cloud.firestore.QueryDocumentSnapshot> payments = firestore.collection("payments")
+                            .whereEqualTo("bookingId", bookingId)
+                            .get()
+                            .get()
+                            .getDocuments();
+                    for (com.google.cloud.firestore.QueryDocumentSnapshot paymentDoc : payments) {
+                        firestore.collection("payments").document(paymentDoc.getId())
+                                .update("status", "FAILED", "updatedAt", System.currentTimeMillis())
+                                .get();
+                    }
+                } catch (Exception e) {
+                    log.error("Failed to update payment status to FAILED for CineShop order: " + bookingId, e);
+                }
+
+                return ResponseEntity.ok(
+                        ApiResponse.builder()
+                                .success(true)
+                                .message("CineShop order cancelled successfully")
+                                .build()
+                );
+            }
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy vé đặt hoặc đơn hàng.");
         }
-        if (!userId.equals(booking.getUserId())) {
+
+        if (!userId.equals(booking.getUserId()) && !isStaffOrAdmin) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bạn không có quyền hủy vé này.");
         }
-        bookingService.updatePaymentStatus(bookingId, "FAILED", "CANCELLED");
-        bookingService.releaseBookingSeats(bookingId);
+
+        // Atomic update of booking status and seat release
+        bookingService.cancelBookingAndReleaseSeats(bookingId);
 
         // Also update payments document status to FAILED
         try {
@@ -196,9 +278,30 @@ public class BookingController {
         }
 
         return ResponseEntity.ok(
-                ApiResponse.<BookingDTO>builder()
+                ApiResponse.builder()
                         .success(true)
                         .message("Booking cancelled and seats released successfully")
+                        .build()
+        );
+    }
+
+    @PutMapping("/{id}/checkin")
+    public ResponseEntity<ApiResponse<Void>> checkInBooking(
+            @AuthenticationPrincipal String userId,
+            @PathVariable("id") String bookingId
+    ) throws ExecutionException, InterruptedException {
+        if (userId == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Vui lòng đăng nhập.");
+        }
+        UserDTO staffUser = userService.getUserById(userId);
+        if (staffUser == null || (!"staff".equalsIgnoreCase(staffUser.getRole()) && !"admin".equalsIgnoreCase(staffUser.getRole()))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bạn không có quyền check-in vé.");
+        }
+        bookingService.updateCheckInTime(bookingId, System.currentTimeMillis());
+        return ResponseEntity.ok(
+                ApiResponse.<Void>builder()
+                        .success(true)
+                        .message("Check-in successfully")
                         .build()
         );
     }

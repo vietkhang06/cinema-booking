@@ -30,6 +30,7 @@ public class BookingDTO {
     public Long createdAt;
     public Long updatedAt;
     public Boolean deleted;
+    public int pointsConsumed;
 
     public BookingDTO() {
     }

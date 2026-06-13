@@ -404,7 +404,8 @@ public class SeatSelectionActivity extends AppCompatActivity {
         double total = 0;
 
         for (SeatDTO s : selected) {
-            total += (s.priceOverride > 0) ? s.priceOverride : basePrice;
+            double price = "VIP".equalsIgnoreCase(s.seatType) ? 75000 : 60000;
+            total += price;
         }
 
         tvTotalPrice.setText(String.format(Locale.getDefault(), "%,.0f đ", total));
@@ -451,7 +452,8 @@ public class SeatSelectionActivity extends AppCompatActivity {
         for (SeatDTO s : selected) {
             seatCodes.add(s.seatCode);
             if (s.seatId != null) seatIds.add(s.seatId);
-            total += (s.priceOverride > 0) ? s.priceOverride : basePrice;
+            double price = "VIP".equalsIgnoreCase(s.seatType) ? 75000 : 60000;
+            total += price;
         }
 
         Intent intent = new Intent(this, BookingConfirmActivity.class);

@@ -167,6 +167,8 @@ public class AdminUserManagementActivity extends AppCompatActivity {
                 matchesFilter = "vip".equals(level);
             } else if (currentFilterId == R.id.chipGold) {
                 matchesFilter = "gold".equals(level);
+            } else if (currentFilterId == R.id.chipPlatinum) {
+                matchesFilter = "platinum".equals(level);
             } else if (currentFilterId == R.id.chipLocked) {
                 matchesFilter = "locked".equals(status);
             }
@@ -315,7 +317,7 @@ public class AdminUserManagementActivity extends AppCompatActivity {
         Button btnSave = dialog.findViewById(R.id.btnSaveLevel);
         Button btnCancel = dialog.findViewById(R.id.btnCancelLevel);
 
-        String[] levels = {"standard", "vip", "gold"};
+        String[] levels = {"standard", "vip", "gold", "platinum"};
         ArrayAdapter<String> adapterLevel = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, levels);
         adapterLevel.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerLevel.setAdapter(adapterLevel);
@@ -622,6 +624,9 @@ public class AdminUserManagementActivity extends AppCompatActivity {
             if ("GOLD".equals(level)) {
                 holder.tvLevel.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#FFF3CD")));
                 holder.tvLevel.setTextColor(Color.parseColor("#856404"));
+            } else if ("PLATINUM".equals(level)) {
+                holder.tvLevel.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#E2E8F0")));
+                holder.tvLevel.setTextColor(Color.parseColor("#475569"));
             } else if ("VIP".equals(level)) {
                 holder.tvLevel.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#F8D7DA")));
                 holder.tvLevel.setTextColor(Color.parseColor("#721C24"));

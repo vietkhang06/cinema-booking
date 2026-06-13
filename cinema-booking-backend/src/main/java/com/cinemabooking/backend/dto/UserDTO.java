@@ -25,4 +25,5 @@ public class UserDTO {
     private Long createdAt;
     private Long updatedAt;
     private Boolean deleted;
+    private Integer points;
 }

@@ -57,7 +57,7 @@ public class BookingConfirmActivity extends AppCompatActivity {
 
     // Phase 4 Payment Fields
     private android.widget.RadioGroup rgPayment;
-    private String selectedPaymentMethod = "cash";
+    private String selectedPaymentMethod = "bank";
     private com.google.android.material.bottomsheet.BottomSheetDialog momoDialog;
 
     // Phase 5 Age Rating Fields
@@ -65,6 +65,12 @@ public class BookingConfirmActivity extends AppCompatActivity {
     private String movieAgeRating = "P";
 
     private boolean isBookingConfirmed = false;
+
+    // Snack order fields
+    private android.widget.LinearLayout layoutSnackContainer;
+    private final List<com.example.cinemabooking.domain.model.Snack> snackList = new ArrayList<>();
+    private final java.util.Map<String, Integer> selectedSnacks = new java.util.HashMap<>();
+    private double totalSnacksPrice = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -158,9 +164,7 @@ public class BookingConfirmActivity extends AppCompatActivity {
         rgPayment = findViewById(R.id.rgPayment);
         if (rgPayment != null) {
             rgPayment.setOnCheckedChangeListener((group, checkedId) -> {
-                if (checkedId == R.id.rbPayCash) {
-                    selectedPaymentMethod = "cash";
-                } else if (checkedId == R.id.rbPayBank) {
+                if (checkedId == R.id.rbPayBank) {
                     selectedPaymentMethod = "bank";
                 } else if (checkedId == R.id.rbPayMomo) {
                     selectedPaymentMethod = "momo";
@@ -176,6 +180,9 @@ public class BookingConfirmActivity extends AppCompatActivity {
         if (btnConfirm != null) {
             btnConfirm.setOnClickListener(v -> checkAgeRatingAndProceed());
         }
+
+        layoutSnackContainer = findViewById(R.id.layoutSnackContainer);
+        loadSnacks();
     }
 
     private void loadMovieData() {
@@ -331,13 +338,13 @@ public class BookingConfirmActivity extends AppCompatActivity {
     }
 
     private void updateTotalPrice() {
-        double finalTotal = total - discountVoucher - discountRank - discountStars;
+        double finalTotal = (total + totalSnacksPrice) - discountVoucher - discountRank - discountStars;
         if (finalTotal < 0) finalTotal = 0;
 
         if (discountVoucher > 0 || discountRank > 0 || discountStars > 0) {
             if (tvOriginalPrice != null) {
                 tvOriginalPrice.setVisibility(android.view.View.VISIBLE);
-                tvOriginalPrice.setText(String.format(Locale.getDefault(), "%,.0f đ", total));
+                tvOriginalPrice.setText(String.format(Locale.getDefault(), "%,.0f đ", total + totalSnacksPrice));
                 tvOriginalPrice.setPaintFlags(tvOriginalPrice.getPaintFlags() | android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);
             }
         } else {
@@ -427,6 +434,9 @@ public class BookingConfirmActivity extends AppCompatActivity {
         if (btnConfirm != null) btnConfirm.setEnabled(false);
 
         List<SeatBookingRequestDTO.SnackOrder> snackOrders = new ArrayList<>();
+        for (java.util.Map.Entry<String, Integer> entry : selectedSnacks.entrySet()) {
+            snackOrders.add(new SeatBookingRequestDTO.SnackOrder(entry.getKey(), entry.getValue()));
+        }
 
         SeatBookingRequestDTO request = new SeatBookingRequestDTO(
                 showtimeId,
@@ -434,6 +444,8 @@ public class BookingConfirmActivity extends AppCompatActivity {
                 snackOrders,
                 paymentMethod
         );
+        request.promoCode = appliedPromoCode;
+        request.useStars = isStarsApplied;
 
         BookingApiService bookingApi = RetrofitClient.getInstance()
                 .create(BookingApiService.class);
@@ -568,6 +580,117 @@ public class BookingConfirmActivity extends AppCompatActivity {
                 android.util.Log.e("BOOKING_FLOW", "Failed to release seats: " + t.getMessage());
             }
         });
+    }
+
+    private void loadSnacks() {
+        if (layoutSnackContainer == null) return;
+        layoutSnackContainer.removeAllViews();
+
+        android.widget.TextView tvLoading = new android.widget.TextView(this);
+        tvLoading.setText("Đang tải danh sách bắp nước...");
+        tvLoading.setTextColor(android.graphics.Color.GRAY);
+        layoutSnackContainer.addView(tvLoading);
+
+        new com.example.cinemabooking.data.repository.SnackRepositoryImpl().getAllSnacks(
+                new com.example.cinemabooking.domain.common.ResultCallback<List<com.example.cinemabooking.domain.model.Snack>>() {
+                    @Override
+                    public void onSuccess(List<com.example.cinemabooking.domain.model.Snack> snacks) {
+                        layoutSnackContainer.removeAllViews();
+                        snackList.clear();
+                        if (snacks == null || snacks.isEmpty()) {
+                            android.widget.TextView tvEmpty = new android.widget.TextView(BookingConfirmActivity.this);
+                            tvEmpty.setText("Không có combo bắp nước khả dụng.");
+                            tvEmpty.setTextColor(android.graphics.Color.GRAY);
+                            layoutSnackContainer.addView(tvEmpty);
+                            return;
+                        }
+                        snackList.addAll(snacks);
+                        for (com.example.cinemabooking.domain.model.Snack snack : snacks) {
+                            addSnackItemToView(snack);
+                        }
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        layoutSnackContainer.removeAllViews();
+                        android.widget.TextView tvError = new android.widget.TextView(BookingConfirmActivity.this);
+                        tvError.setText("Không thể tải danh sách bắp nước.");
+                        tvError.setTextColor(android.graphics.Color.RED);
+                        layoutSnackContainer.addView(tvError);
+                    }
+                }
+        );
+    }
+
+    private void addSnackItemToView(com.example.cinemabooking.domain.model.Snack snack) {
+        android.view.View snackView = getLayoutInflater().inflate(R.layout.item_booking_snack, layoutSnackContainer, false);
+
+        android.widget.ImageView ivSnackImage = snackView.findViewById(R.id.ivSnackImage);
+        android.widget.TextView tvSnackName = snackView.findViewById(R.id.tvSnackName);
+        android.widget.TextView tvSnackDesc = snackView.findViewById(R.id.tvSnackDesc);
+        android.widget.TextView tvSnackPrice = snackView.findViewById(R.id.tvSnackPrice);
+        android.widget.TextView tvQuantity = snackView.findViewById(R.id.tvQuantity);
+        android.view.View btnMinus = snackView.findViewById(R.id.btnMinus);
+        android.view.View btnPlus = snackView.findViewById(R.id.btnPlus);
+
+        if (tvSnackName != null) tvSnackName.setText(snack.name);
+        if (tvSnackDesc != null) tvSnackDesc.setText(snack.description);
+        if (tvSnackPrice != null) {
+            tvSnackPrice.setText(String.format(Locale.getDefault(), "%,.0f đ", snack.price));
+        }
+
+        if (ivSnackImage != null && snack.imageUrl != null && !snack.imageUrl.isEmpty()) {
+            com.bumptech.glide.Glide.with(this)
+                    .load(snack.imageUrl)
+                    .placeholder(R.drawable.gift_solid_full)
+                    .into(ivSnackImage);
+        }
+
+        if (tvQuantity != null) {
+            tvQuantity.setText("0");
+        }
+
+        if (btnPlus != null) {
+            btnPlus.setOnClickListener(v -> {
+                int currentQty = selectedSnacks.containsKey(snack.snackId) ? selectedSnacks.get(snack.snackId) : 0;
+                currentQty++;
+                selectedSnacks.put(snack.snackId, currentQty);
+                if (tvQuantity != null) {
+                    tvQuantity.setText(String.valueOf(currentQty));
+                }
+                recalculateSnacksTotal();
+            });
+        }
+
+        if (btnMinus != null) {
+            btnMinus.setOnClickListener(v -> {
+                int currentQty = selectedSnacks.containsKey(snack.snackId) ? selectedSnacks.get(snack.snackId) : 0;
+                if (currentQty > 0) {
+                    currentQty--;
+                    if (currentQty == 0) {
+                        selectedSnacks.remove(snack.snackId);
+                    } else {
+                        selectedSnacks.put(snack.snackId, currentQty);
+                    }
+                    if (tvQuantity != null) {
+                        tvQuantity.setText(String.valueOf(currentQty));
+                    }
+                    recalculateSnacksTotal();
+                }
+            });
+        }
+
+        layoutSnackContainer.addView(snackView);
+    }
+
+    private void recalculateSnacksTotal() {
+        totalSnacksPrice = 0;
+        for (com.example.cinemabooking.domain.model.Snack snack : snackList) {
+            if (selectedSnacks.containsKey(snack.snackId)) {
+                totalSnacksPrice += snack.price * selectedSnacks.get(snack.snackId);
+            }
+        }
+        updateTotalPrice();
     }
 
     @Override

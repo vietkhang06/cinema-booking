@@ -218,7 +218,7 @@ public class AdminShowtimeListActivity extends AppCompatActivity implements Admi
                     int bookingCount = 0;
                     if (queryDocumentSnapshots != null) {
                         for (com.google.firebase.firestore.DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
-                            String status = doc.getString("status");
+                            String status = doc.getString("bookingStatus");
                             if (!com.example.cinemabooking.core.constants.BookingStatus.CANCELLED.equals(status)) {
                                 bookingCount++;
                             }

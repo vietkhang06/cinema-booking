@@ -152,8 +152,72 @@ public class BookingService {
             }
         }
 
-        double subTotal = showtime.getBasePrice() * seats.size() + orders.stream().mapToDouble(item -> item.getPrice() * item.getQuantity()).sum();
-        double discount = 0;
+        double seatTotal = 0;
+        for (SeatDTO seat : seats) {
+            double price = "VIP".equalsIgnoreCase(seat.getSeatType()) ? 75000 : 60000;
+            seatTotal += price;
+        }
+        double subTotal = seatTotal + orders.stream().mapToDouble(item -> item.getPrice() * item.getQuantity()).sum();
+        
+        // 1. Tính chiết khấu theo hạng thành viên (VIP 10%, Gold 8%, Platinum 15%) tính trên tiền vé
+        double discountRank = 0;
+        int userPoints = 0;
+        try {
+            DocumentSnapshot userDoc = firestore.collection("users").document(userId).get().get();
+            if (userDoc.exists()) {
+                String memberLevel = userDoc.getString("memberLevel");
+                double factor = 0.0;
+                if (memberLevel != null) {
+                    String levelLower = memberLevel.toLowerCase();
+                    if (levelLower.contains("vip")) {
+                        factor = 0.10;
+                    } else if (levelLower.contains("platinum")) {
+                        factor = 0.15;
+                    } else if (levelLower.contains("gold")) {
+                        factor = 0.08;
+                    }
+                }
+                discountRank = seatTotal * factor;
+
+                Long ptsVal = userDoc.getLong("points");
+                userPoints = ptsVal != null ? ptsVal.intValue() : 0;
+            }
+        } catch (Exception e) {
+            logger.error("Failed to calculate user member discount", e);
+        }
+
+        // 2. Tính chiết khấu theo Voucher / Mã khuyến mãi
+        double discountVoucher = 0;
+        String promoCode = data.getPromoCode();
+        if (promoCode != null && !promoCode.trim().isEmpty()) {
+            String code = promoCode.trim().toUpperCase();
+            if ("GALAXY50".equals(code)) {
+                discountVoucher = 50000;
+            } else if ("WELCOME10".equals(code)) {
+                discountVoucher = seatTotal * 0.10;
+            } else if ("FREESHOP".equals(code)) {
+                discountVoucher = 20000;
+            }
+        }
+
+        // 3. Tính chiết khấu theo điểm Stars và trừ điểm tích lũy
+        double discountStars = 0;
+        int pointsConsumed = 0;
+        if (Boolean.TRUE.equals(data.getUseStars()) && userPoints > 0) {
+            discountStars = userPoints * 1000.0;
+            pointsConsumed = userPoints;
+            try {
+                firestore.collection("users").document(userId).update("points", 0).get();
+                logger.info("[LOYALTY_STARS] Deducted {} points from user {}", userPoints, userId);
+            } catch (Exception e) {
+                logger.error("Failed to deduct user points", e);
+            }
+        }
+
+        double discount = discountRank + discountVoucher + discountStars;
+        if (discount > subTotal) {
+            discount = subTotal;
+        }
 
         String suffix = uniqueID.contains("_") ? uniqueID.substring(uniqueID.indexOf("_") + 1) : uniqueID;
         if (suffix.length() > 8) {
@@ -178,6 +242,7 @@ public class BookingService {
                 .subtotal(subTotal)
                 .discount(discount)
                 .total(subTotal - discount)
+                .pointsConsumed(pointsConsumed)
                 .paymentMethod(data.getPaymentMethod().name())
                 .paymentStatus("PENDING")
                 .paymentCode(paymentCode)
@@ -201,6 +266,145 @@ public class BookingService {
                                 .build(),
                         SetOptions.mergeFields("paymentStatus", "bookingStatus", "paymentAt", "updatedAt"))
                 .get();
+    }
+
+    public void confirmBookingAndSeats(String bookingId) throws ExecutionException, InterruptedException {
+        DocumentReference bookingRef = firestore.collection(COLLECTION).document(bookingId);
+
+        firestore.runTransaction(transaction -> {
+            DocumentSnapshot bookingSnap = transaction.get(bookingRef).get();
+            if (!bookingSnap.exists()) {
+                throw new RuntimeException("Booking not found");
+            }
+            BookingDTO booking = bookingSnap.toObject(BookingDTO.class);
+            if (booking == null) {
+                throw new RuntimeException("Booking data is invalid");
+            }
+
+            // Check if seats are already booked/held by others
+            List<String> seatIds = booking.getSeatIds();
+            if (seatIds != null && !seatIds.isEmpty()) {
+                long now = System.currentTimeMillis();
+                List<DocumentReference> refs = new ArrayList<>();
+                for (String seatId : seatIds) {
+                    refs.add(firestore.collection("seats").document(seatId));
+                }
+
+                List<DocumentSnapshot> snapshots = transaction.getAll(refs.toArray(new DocumentReference[0])).get();
+                for (DocumentSnapshot doc : snapshots) {
+                    if (!doc.exists()) {
+                        throw new RuntimeException("Ghế " + doc.getId() + " không tồn tại");
+                    }
+
+                    String status = doc.getString("status");
+                    String heldBy = doc.getString("heldBy");
+                    Long heldUntilVal = doc.getLong("heldUntil");
+                    long heldUntil = heldUntilVal != null ? heldUntilVal : 0L;
+                    String bookedBy = doc.getString("bookedBy");
+
+                    if ("booked".equalsIgnoreCase(status)) {
+                        if (booking.getUserId().equals(bookedBy)) {
+                            continue;
+                        }
+                        throw new RuntimeException("Ghế " + doc.getId() + " đã được đặt bởi người khác");
+                    }
+
+                    boolean isHeldBySelf = "held".equalsIgnoreCase(status) && booking.getUserId().equals(heldBy);
+                    boolean isAvailable = "available".equalsIgnoreCase(status) || status == null || status.isEmpty();
+
+                    if (!isHeldBySelf && !isAvailable) {
+                        throw new RuntimeException("Ghế " + doc.getId() + " không khả dụng hoặc đã được giữ/đặt bởi người khác!");
+                    }
+                }
+
+                // Update seats to booked
+                for (DocumentReference ref : refs) {
+                    logger.info("[PAYMENT_SUCCESS] Booking {} confirmed. Marking seat {} as booked by {}", bookingId, ref.getId(), booking.getUserId());
+                    transaction.update(ref,
+                            "status", "booked",
+                            "bookedBy", booking.getUserId(),
+                            "bookedAt", now,
+                            "heldBy", null,
+                            "heldUntil", 0L
+                    );
+                }
+            }
+
+            // Update booking status
+            transaction.update(bookingRef,
+                    "paymentStatus", "SUCCESS",
+                    "bookingStatus", "CONFIRMED",
+                    "paymentAt", System.currentTimeMillis(),
+                    "updatedAt", System.currentTimeMillis()
+            );
+
+            return null;
+        }).get();
+    }
+
+    public void cancelBookingAndReleaseSeats(String bookingId) throws ExecutionException, InterruptedException {
+        DocumentReference bookingRef = firestore.collection(COLLECTION).document(bookingId);
+
+        firestore.runTransaction(transaction -> {
+            DocumentSnapshot bookingSnap = transaction.get(bookingRef).get();
+            if (!bookingSnap.exists()) {
+                throw new RuntimeException("Booking not found");
+            }
+            BookingDTO booking = bookingSnap.toObject(BookingDTO.class);
+            if (booking == null) {
+                throw new RuntimeException("Booking data is invalid");
+            }
+
+            // Hoàn trả điểm Stars nếu có
+            int pointsRefund = booking.getPointsConsumed();
+            if (pointsRefund > 0) {
+                DocumentReference userRef = firestore.collection("users").document(booking.getUserId());
+                transaction.update(userRef, "points", FieldValue.increment(pointsRefund));
+                logger.info("[LOYALTY_REFUND] Refunded {} points to user {}", pointsRefund, booking.getUserId());
+            }
+
+            List<String> seatIds = booking.getSeatIds();
+            if (seatIds != null && !seatIds.isEmpty()) {
+                for (String seatId : seatIds) {
+                    DocumentReference seatRef = firestore.collection("seats").document(seatId);
+                    DocumentSnapshot seatSnap = transaction.get(seatRef).get();
+                    if (seatSnap.exists()) {
+                        String status = seatSnap.getString("status");
+                        String heldBy = seatSnap.getString("heldBy");
+                        String bookedBy = seatSnap.getString("bookedBy");
+
+                        boolean isHeldBySelf = "held".equalsIgnoreCase(status) && booking.getUserId().equals(heldBy);
+                        boolean isBookedBySelf = "booked".equalsIgnoreCase(status) && booking.getUserId().equals(bookedBy);
+
+                        if (isHeldBySelf || isBookedBySelf) {
+                            logger.info("[RELEASE_SEAT] Booking {} failed/cancelled. Releasing seat {} (previously {})", bookingId, seatId, status);
+                            transaction.update(seatRef,
+                                    "status", "available",
+                                    "heldBy", null,
+                                    "heldUntil", 0L,
+                                    "bookedBy", null,
+                                    "bookedAt", null
+                            );
+                        }
+                    }
+                }
+            }
+
+            // Decrease booked seats count of showtime
+            if (booking.getShowtimeId() != null && seatIds != null && !seatIds.isEmpty()) {
+                DocumentReference showtimeRef = firestore.collection("showtimes").document(booking.getShowtimeId());
+                transaction.update(showtimeRef, "bookedSeatsCount", FieldValue.increment(-seatIds.size()));
+            }
+
+            // Update booking status to CANCELLED and payment to FAILED
+            transaction.update(bookingRef,
+                    "paymentStatus", "FAILED",
+                    "bookingStatus", "CANCELLED",
+                    "updatedAt", System.currentTimeMillis()
+            );
+
+            return null;
+        }).get();
     }
 
     public void confirmBookingSeats(String bookingId) throws ExecutionException, InterruptedException {

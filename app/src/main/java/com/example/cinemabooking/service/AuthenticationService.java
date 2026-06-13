@@ -139,29 +139,24 @@ public class AuthenticationService {
                         return;
                     }
 
-                    userRepo.createUser(newUserDoc(fUser, phone, name), new ResultCallback<User>() {
-                        @Override
-                        public void onSuccess(User data) {
-                            if (data == null) {
-                                callback.onError("Lỗi khởi tạo người dùng.");
-                                return;
-                            }
-
-                            sessionManager.saveLoginState(true, data.role, data.uid);
-                            sessionManager.saveRememberMe(true);
-                            callback.onSuccess(data);
-                        }
+                    com.google.firebase.firestore.FirebaseFirestore.getInstance().collection(com.example.cinemabooking.core.constants.FirestoreCollections.USERS)
+                            .whereEqualTo("phone", phone)
+                            .get()
+                            .addOnSuccessListener(phoneQuery -> {
+                                if (!phoneQuery.isEmpty()) {
+                                    callback.onError("Số điện thoại đã tồn tại.");
+                                    return;
+                                }
 
                                 auth.createUserWithEmailAndPassword(email, password)
                                         .addOnSuccessListener(authResult -> {
-
                                             FirebaseUser fUser = authResult.getUser();
                                             if (fUser == null) {
                                                 callback.onError("User null");
                                                 return;
                                             }
 
-                                            userRepo.createUser(newUserDoc(fUser, phone), new ResultCallback<User>() {
+                                            userRepo.createUser(newUserDoc(fUser, phone, name), new ResultCallback<User>() {
                                                 @Override
                                                 public void onSuccess(User data) {
                                                     if (data == null) {

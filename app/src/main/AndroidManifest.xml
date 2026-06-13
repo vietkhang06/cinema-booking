@@ -163,6 +163,9 @@
             android:name=".ui.customer.profile.EditProfileActivity"
             android:exported="false" />
         <activity
+            android:name=".ui.customer.profile.MyPromotionListActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.customer.notification.NotificationActivity"
             android:exported="false" />
         <activity

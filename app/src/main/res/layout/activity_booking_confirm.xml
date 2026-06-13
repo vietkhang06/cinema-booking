@@ -263,6 +263,35 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
+            <!-- Bắp nước mua kèm -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="BẮP NƯỚC MUA KÈM"
+                android:textColor="#A13345"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.1"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="12dp"/>
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeColor="#ECE8F0"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:id="@+id/layoutSnackContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp" />
+            </androidx.cardview.widget.CardView>
+
             <!-- Phương thức thanh toán -->
             <TextView
                 android:layout_width="wrap_content"
@@ -289,23 +318,6 @@
                     android:orientation="vertical"
                     android:padding="8dp">
 
-                    <!-- Tiền mặt -->
-                    <RadioButton
-                        android:id="@+id/rbPayCash"
-                        android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        android:text="Tiền mặt tại quầy"
-                        android:textColor="#FFFFFF"
-                        android:textSize="14sp"
-                        android:buttonTint="#E53935"
-                        android:checked="true"
-                        android:paddingStart="12dp"
-                        android:textStyle="bold"/>
-
-                    <!-- Divider -->
-                    <View android:layout_width="match_parent" android:layout_height="1dp"
-                        android:background="#2A2A4A" android:layout_marginHorizontal="8dp"/>
-
                     <!-- MBBank -->
                     <RadioButton
                         android:id="@+id/rbPayBank"
@@ -315,6 +327,7 @@
                         android:textColor="#FFFFFF"
                         android:textSize="14sp"
                         android:buttonTint="#E53935"
+                        android:checked="true"
                         android:paddingStart="12dp"
                         android:textStyle="bold"/>
 

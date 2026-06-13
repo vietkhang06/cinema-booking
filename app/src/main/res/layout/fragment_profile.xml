@@ -378,7 +378,7 @@
 
             <View android:layout_width="match_parent" android:layout_height="8dp" android:background="#F2F2F7" />
 
-            <!-- ── FEATURES: Đổi Quà | My Rewards | Tính Năng Mới ── -->
+            <!-- ── FEATURES: Vé của tôi | Ưu đãi của tôi ── -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -387,9 +387,9 @@
                 android:paddingVertical="16dp"
                 android:background="#FFFFFF">
 
-                <!-- Đổi Quà -->
+                <!-- Vé của tôi -->
                 <LinearLayout
-                    android:id="@+id/btnDoiQua"
+                    android:id="@+id/btnMyTickets"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -407,8 +407,8 @@
                         <ImageView
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:padding="16dp"
-                            android:src="@drawable/retweet_solid_full"
+                            android:padding="18dp"
+                            android:src="@drawable/ic_ticket_search"
                             app:tint="#FFD700" />
                     </com.google.android.material.card.MaterialCardView>
 
@@ -416,13 +416,13 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:text="Đổi Quà"
+                        android:text="Vé của tôi"
                         android:textColor="#1A3A8C"
                         android:textSize="13sp"
                         android:textStyle="bold" />
                 </LinearLayout>
 
-                <!-- My Rewards -->
+                <!-- Ưu đãi của tôi -->
                 <LinearLayout
                     android:id="@+id/btnMyRewards"
                     android:layout_width="0dp"
@@ -451,42 +451,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:text="My Rewards"
-                        android:textColor="#1A3A8C"
-                        android:textSize="13sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
-                <!-- Tính Năng Mới -->
-                <LinearLayout
-                    android:id="@+id/btnTinhNangMoi"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:gravity="center"
-                    android:background="?attr/selectableItemBackgroundBorderless">
-
-                    <com.google.android.material.card.MaterialCardView
-                        android:layout_width="72dp"
-                        android:layout_height="72dp"
-                        app:cardCornerRadius="36dp"
-                        app:cardElevation="2dp"
-                        app:cardBackgroundColor="#1A3A8C">
-
-                        <ImageView
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:padding="16dp"
-                            android:src="@drawable/gem_solid_full"
-                            app:tint="#40E0D0" />
-                    </com.google.android.material.card.MaterialCardView>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="Tính Năng Mới"
+                        android:text="Ưu đãi của tôi"
                         android:textColor="#1A3A8C"
                         android:textSize="13sp"
                         android:textStyle="bold" />

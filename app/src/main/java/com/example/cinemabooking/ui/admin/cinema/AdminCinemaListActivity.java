@@ -67,6 +67,9 @@ public class AdminCinemaListActivity extends BaseActivity {
                             repo.softDeleteCinema(cinema.cinemaId, new ResultCallback<Void>() {
                                 @Override
                                 public void onSuccess(Void data) {
+                                    com.example.cinemabooking.ui.admin.log.AdminAuditLogger.log(
+                                            "DELETE_CINEMA", "CINEMA", cinema.cinemaId, "Đã xóa rạp: " + cinema.name
+                                    );
                                     showToast("Đã xóa rạp thành công");
                                     loadData();
                                 }
