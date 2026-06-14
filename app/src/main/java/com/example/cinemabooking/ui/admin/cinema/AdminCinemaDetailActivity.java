@@ -343,7 +343,13 @@ public class AdminCinemaDetailActivity extends BaseActivity {
                 tvPhone.setText(c.phone);
                 tvLat.setText(String.valueOf(c.latitude));
                 tvLng.setText(String.valueOf(c.longitude));
-                tvStatus.setText(c.status);
+                if (c.status != null && ("active".equalsIgnoreCase(c.status) || "hoạt động".equalsIgnoreCase(c.status))) {
+                    tvStatus.setText("HOẠT ĐỘNG");
+                    tvStatus.setTextColor(android.graphics.Color.parseColor("#10B981"));
+                } else {
+                    tvStatus.setText("TẠM NGỪNG");
+                    tvStatus.setTextColor(android.graphics.Color.parseColor("#EF4444"));
+                }
             }
 
             @Override
