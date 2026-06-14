@@ -22,18 +22,24 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import java.util.Locale;
+
 public class AdminMovieDetailActivity extends BaseActivity {
 
     private final SimpleDateFormat dateFormat =
             new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
 
     private ImageView imgPoster;
-    private TextView tvTitle, tvGenres, tvLanguage, tvDuration, tvReleaseDate, tvAgeRating, tvStatus, tvDescription;
+    private TextView tvTitle, tvGenres, tvLanguage, tvDuration, tvReleaseDate, tvAgeRating, tvStatus, tvDescription, tvRating;
     private MaterialButton btnEdit, btnDelete;
 
     private MovieRepository movieRepository;
     private String movieId;
     private Movie currentMovie;
+
+    private androidx.recyclerview.widget.RecyclerView rvAdminReviews;
+    private com.example.cinemabooking.ui.admin.adapter.AdminReviewAdapter reviewAdapter;
+    private com.example.cinemabooking.domain.repository.ReviewRepository reviewRepository;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +47,7 @@ public class AdminMovieDetailActivity extends BaseActivity {
         setContentView(R.layout.activity_admin_movie_detail);
 
         movieRepository = new MovieRepositoryImpl();
+        reviewRepository = new com.example.cinemabooking.data.repository.ReviewRepositoryImpl();
         movieId = getIntent().getStringExtra(AdminMovieListActivity.EXTRA_MOVIE_ID);
 
         initViews();
@@ -65,6 +72,7 @@ public class AdminMovieDetailActivity extends BaseActivity {
         tvAgeRating = findViewById(R.id.tvAgeRating);
         tvStatus = findViewById(R.id.tvStatus);
         tvDescription = findViewById(R.id.tvDescription);
+        tvRating = findViewById(R.id.tvRating);
 
         btnEdit = findViewById(R.id.btnEdit);
         btnDelete = findViewById(R.id.btnDelete);
@@ -73,6 +81,40 @@ public class AdminMovieDetailActivity extends BaseActivity {
         if (btnBack != null) {
             btnBack.setOnClickListener(v -> finish());
         }
+
+        rvAdminReviews = findViewById(R.id.rvAdminReviews);
+        rvAdminReviews.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(this));
+        reviewAdapter = new com.example.cinemabooking.ui.admin.adapter.AdminReviewAdapter();
+        rvAdminReviews.setAdapter(reviewAdapter);
+
+        reviewAdapter.setListener(new com.example.cinemabooking.ui.admin.adapter.AdminReviewAdapter.AdminReviewActionListener() {
+            @Override
+            public void onDeleteClick(com.example.cinemabooking.domain.model.Review review, int position) {
+                if ("hidden".equals(review.status)) {
+                    showToast("Bình luận này đã bị ẩn rồi");
+                    return;
+                }
+                new AlertDialog.Builder(AdminMovieDetailActivity.this)
+                        .setTitle("Ẩn bình luận")
+                        .setMessage("Bạn có chắc muốn ẩn nội dung bình luận này? Đánh giá sao vẫn sẽ được giữ lại.")
+                        .setPositiveButton("Ẩn", (dialog, which) -> {
+                            reviewRepository.hideReview(review.reviewId, new ResultCallback<com.example.cinemabooking.domain.model.Review>() {
+                                @Override
+                                public void onSuccess(com.example.cinemabooking.domain.model.Review data) {
+                                    showToast("Đã ẩn bình luận");
+                                    review.status = "hidden";
+                                    reviewAdapter.notifyItemChanged(position);
+                                }
+                                @Override
+                                public void onError(String message) {
+                                    showToast(message);
+                                }
+                            });
+                        })
+                        .setNegativeButton("Hủy", null)
+                        .show();
+            }
+        });
     }
 
     private void bindActions() {
@@ -97,12 +139,28 @@ public class AdminMovieDetailActivity extends BaseActivity {
 
                 currentMovie = data;
                 bindMovie(data);
+                loadReviews(id);
             }
 
             @Override
             public void onError(String message) {
                 showToast(message);
                 finish();
+            }
+        });
+    }
+
+    private void loadReviews(String id) {
+        reviewRepository.getReviewsByMovieIdPaged(id, null, 100, new ResultCallback<android.util.Pair<List<com.example.cinemabooking.domain.model.Review>, com.google.firebase.firestore.DocumentSnapshot>>() {
+            @Override
+            public void onSuccess(android.util.Pair<List<com.example.cinemabooking.domain.model.Review>, com.google.firebase.firestore.DocumentSnapshot> data) {
+                if (data.first != null) {
+                    reviewAdapter.setReviews(data.first);
+                }
+            }
+            @Override
+            public void onError(String message) {
+                showToast("Lỗi tải bình luận: " + message);
             }
         });
     }
@@ -115,6 +173,13 @@ public class AdminMovieDetailActivity extends BaseActivity {
         tvReleaseDate.setText("Ngày phát hành: " + formatDate(movie.releaseDate));
         tvAgeRating.setText("Độ tuổi: " + safe(movie.ageRating));
         tvStatus.setText("Trạng thái: " + statusLabel(movie.status));
+        
+        if (movie.ratingAvg > 0) {
+            tvRating.setText(String.format(Locale.getDefault(), "Đánh giá: ★ %.1f", movie.ratingAvg));
+        } else {
+            tvRating.setText("Đánh giá: Chưa có đánh giá");
+        }
+        
         tvDescription.setText(safe(movie.description));
 
         Glide.with(this)

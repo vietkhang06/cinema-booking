@@ -108,6 +108,7 @@ public class HomeActivity extends BaseActivity {
     private GetMoviesUseCase getMoviesUseCase;
     private String currentMovieFilter = FILTER_NOW_SHOWING;
     private GetBannersUseCase getBannersUseCase;
+    private com.google.firebase.firestore.ListenerRegistration moviesListener;
 
     private View scrollContent;
     private View fragmentContainer;
@@ -159,10 +160,6 @@ public class HomeActivity extends BaseActivity {
         initMovieUseCase();
         initBottomNav();
         showHomeScreen();
-//        initBottomNav();
-
-//        applyBottomNavState(0);
-        loadMoviesFromFirestore();
         initBannerUseCase();
         loadBannersFromFirestore();
     }
@@ -171,6 +168,7 @@ public class HomeActivity extends BaseActivity {
     protected void onStart() {
         super.onStart();
         listenToNotifications();
+        loadMoviesFromFirestore();
     }
 
     private void listenToNotifications() {
@@ -212,6 +210,9 @@ public class HomeActivity extends BaseActivity {
         super.onStop();
         if (notificationListener != null) {
             notificationListener.remove();
+        }
+        if (moviesListener != null) {
+            moviesListener.remove();
         }
     }
 
@@ -326,41 +327,33 @@ public class HomeActivity extends BaseActivity {
     }
 
     private void loadMoviesFromFirestore() {
-        if (getMoviesUseCase == null) {
-            showToast("Chưa khởi tạo movie use case");
-            return;
+        if (moviesListener != null) {
+            moviesListener.remove();
         }
-
-        getMoviesUseCase.execute(new ResultCallback<List<Movie>>() {
-            @Override
-            public void onSuccess(List<Movie> movies) {
-                allMovies.clear();
-
-                if (movies != null && !movies.isEmpty()) {
-                    for (Movie movie : movies) {
-                        HomeMovieItem item = mapMovieToHomeMovieItem(movie);
-                        if (item != null) {
-                            allMovies.add(item);
-                        }
+        
+        moviesListener = com.google.firebase.firestore.FirebaseFirestore.getInstance()
+                .collection("movies")
+                .addSnapshotListener((snapshot, e) -> {
+                    if (e != null) {
+                        Log.e("HomeActivity", "Failed to listen for movies", e);
+                        return;
                     }
-                } else {
-                    Log.d("HomeActivity", "No movies received from API");
-                }
-                buildGenreChipsFromData();
-                showMovies(currentMovieFilter);
-                
-                if (allMovies.isEmpty()) {
-                    showToast("Hiện không có phim nào để hiển thị");
-                }
-            }
-
-            @Override
-            public void onError(String errorMessage) {
-                Log.e("HomeActivity", "Failed to load movies: " + errorMessage);
-                showToast("Không thể kết nối đến máy chủ. Vui lòng thử lại sau.");
-                showMovies(currentMovieFilter);
-            }
-        });
+                    if (snapshot != null) {
+                        allMovies.clear();
+                        for (com.google.firebase.firestore.QueryDocumentSnapshot doc : snapshot) {
+                            Movie movie = doc.toObject(Movie.class);
+                            if (!movie.deleted) {
+                                HomeMovieItem item = mapMovieToHomeMovieItem(movie);
+                                if (item != null) {
+                                    allMovies.add(item);
+                                }
+                            }
+                        }
+                        
+                        buildGenreChipsFromData();
+                        showMovies(currentMovieFilter);
+                    }
+                });
     }
 
     private HomeMovieItem mapMovieToHomeMovieItem(Movie movie) {
@@ -373,10 +366,19 @@ public class HomeActivity extends BaseActivity {
                 readString(movie, "imageUrl", "posterUrl"),
                 ""
         );
-        String rating = firstNonEmpty(
-                readString(movie, "rating", "ratingAvg"),
+        String ratingVal = firstNonEmpty(
+                readString(movie, "ratingAvg", "rating"),
                 ""
         );
+        String rating = "";
+        if (!ratingVal.isEmpty()) {
+            try {
+                double r = Double.parseDouble(ratingVal);
+                rating = String.format(java.util.Locale.getDefault(), "★ %.1f", r);
+            } catch (Exception e) {
+                rating = "★ " + ratingVal;
+            }
+        }
         String ageRating = firstNonEmpty(
                 readString(movie, "ageRating", "age"),
                 ""

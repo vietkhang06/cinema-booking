@@ -21,6 +21,9 @@ public final class ReviewMapper {
         model.createdAt = dto.createdAt;
         model.updatedAt = dto.updatedAt;
         model.deleted = dto.deleted;
+        if (dto.likedBy != null) model.likedBy = new java.util.ArrayList<>(dto.likedBy);
+        if (dto.dislikedBy != null) model.dislikedBy = new java.util.ArrayList<>(dto.dislikedBy);
+        model.replyCount = dto.replyCount != null ? dto.replyCount : 0;
         return model;
     }
 
@@ -38,6 +41,9 @@ public final class ReviewMapper {
         dto.createdAt = model.createdAt;
         dto.updatedAt = model.updatedAt;
         dto.deleted = model.deleted;
+        if (model.likedBy != null) dto.likedBy = new java.util.ArrayList<>(model.likedBy);
+        if (model.dislikedBy != null) dto.dislikedBy = new java.util.ArrayList<>(model.dislikedBy);
+        dto.replyCount = model.replyCount;
         return dto;
     }
 }
