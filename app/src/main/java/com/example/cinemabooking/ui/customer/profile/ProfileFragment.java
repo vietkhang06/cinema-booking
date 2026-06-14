@@ -150,6 +150,10 @@ public class ProfileFragment extends Fragment {
                     tvMemberLevel.setText(profileData.memberLevel != null ? profileData.memberLevel : "Basic");
                 }
 
+                if (tvStarCount != null) {
+                    tvStarCount.setText(((profileData.points != null) ? profileData.points : 0) + " Stars");
+                }
+
                 if (profileData.avatarUrl != null && profileData.avatarUrl.startsWith("data:image")) {
                     String base64Content = profileData.avatarUrl.substring(profileData.avatarUrl.indexOf(",") + 1);
                     byte[] imageBytes = android.util.Base64.decode(base64Content, android.util.Base64.DEFAULT);

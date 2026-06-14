@@ -355,6 +355,18 @@ public class BookingService {
                 throw new RuntimeException("Booking data is invalid");
             }
 
+            // Read all seats first, before doing any write operations
+            List<String> seatIds = booking.getSeatIds();
+            List<DocumentSnapshot> seatSnaps = new ArrayList<>();
+            List<DocumentReference> seatRefs = new ArrayList<>();
+            if (seatIds != null && !seatIds.isEmpty()) {
+                for (String seatId : seatIds) {
+                    seatRefs.add(firestore.collection("seats").document(seatId));
+                }
+                seatSnaps = transaction.getAll(seatRefs.toArray(new DocumentReference[0])).get();
+            }
+
+            // Now perform write operations
             // Hoàn trả điểm Stars nếu có
             int pointsRefund = booking.getPointsConsumed();
             if (pointsRefund > 0) {
@@ -363,11 +375,10 @@ public class BookingService {
                 logger.info("[LOYALTY_REFUND] Refunded {} points to user {}", pointsRefund, booking.getUserId());
             }
 
-            List<String> seatIds = booking.getSeatIds();
             if (seatIds != null && !seatIds.isEmpty()) {
-                for (String seatId : seatIds) {
-                    DocumentReference seatRef = firestore.collection("seats").document(seatId);
-                    DocumentSnapshot seatSnap = transaction.get(seatRef).get();
+                for (int i = 0; i < seatRefs.size(); i++) {
+                    DocumentReference seatRef = seatRefs.get(i);
+                    DocumentSnapshot seatSnap = seatSnaps.get(i);
                     if (seatSnap.exists()) {
                         String status = seatSnap.getString("status");
                         String heldBy = seatSnap.getString("heldBy");
@@ -377,7 +388,7 @@ public class BookingService {
                         boolean isBookedBySelf = "booked".equalsIgnoreCase(status) && booking.getUserId().equals(bookedBy);
 
                         if (isHeldBySelf || isBookedBySelf) {
-                            logger.info("[RELEASE_SEAT] Booking {} failed/cancelled. Releasing seat {} (previously {})", bookingId, seatId, status);
+                            logger.info("[RELEASE_SEAT] Booking {} failed/cancelled. Releasing seat {} (previously {})", bookingId, seatRef.getId(), status);
                             transaction.update(seatRef,
                                     "status", "available",
                                     "heldBy", null,
@@ -480,9 +491,17 @@ public class BookingService {
             List<String> seatIds = booking.getSeatIds();
             if (seatIds == null || seatIds.isEmpty()) return null;
 
+            // Read all seats first, before doing any write operations
+            List<DocumentSnapshot> seatSnaps = new ArrayList<>();
+            List<DocumentReference> seatRefs = new ArrayList<>();
             for (String seatId : seatIds) {
-                DocumentReference seatRef = firestore.collection("seats").document(seatId);
-                DocumentSnapshot seatSnap = transaction.get(seatRef).get();
+                seatRefs.add(firestore.collection("seats").document(seatId));
+            }
+            seatSnaps = transaction.getAll(seatRefs.toArray(new DocumentReference[0])).get();
+
+            for (int i = 0; i < seatRefs.size(); i++) {
+                DocumentReference seatRef = seatRefs.get(i);
+                DocumentSnapshot seatSnap = seatSnaps.get(i);
                 if (seatSnap.exists()) {
                     String status = seatSnap.getString("status");
                     String heldBy = seatSnap.getString("heldBy");
@@ -492,7 +511,7 @@ public class BookingService {
                     boolean isBookedBySelf = "booked".equalsIgnoreCase(status) && booking.getUserId().equals(bookedBy);
 
                     if (isHeldBySelf || isBookedBySelf) {
-                        logger.info("[RELEASE_SEAT] Booking {} failed/cancelled. Releasing seat {} (previously {})", bookingId, seatId, status);
+                        logger.info("[RELEASE_SEAT] Booking {} failed/cancelled. Releasing seat {} (previously {})", bookingId, seatRef.getId(), status);
                         transaction.update(seatRef,
                                 "status", "available",
                                 "heldBy", null,
