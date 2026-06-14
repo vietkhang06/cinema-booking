@@ -89,7 +89,7 @@ public class PaymentInstructionActivity extends AppCompatActivity {
 
         long createdAt = getIntent().getLongExtra("createdAt", 0);
         if (createdAt > 0) {
-            startCountdownTimer(createdAt + 450000);
+            startCountdownTimer(createdAt + 300000);
         }
     }
 
@@ -276,7 +276,7 @@ public class PaymentInstructionActivity extends AppCompatActivity {
                     if (snapshot != null && snapshot.exists()) {
                         Long createdAtVal = snapshot.getLong("createdAt");
                         if (createdAtVal != null && createdAtVal > 0) {
-                            startCountdownTimer(createdAtVal + 450000);
+                            startCountdownTimer(createdAtVal + 300000);
                         }
 
                         // Kiểm tra cả paymentStatus lẫn bookingStatus

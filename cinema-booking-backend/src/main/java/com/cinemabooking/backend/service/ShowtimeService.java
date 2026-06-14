@@ -49,20 +49,26 @@ public class  ShowtimeService {
         ApiFuture<QuerySnapshot> future = firestore.collection(COLLECTION)
                 .whereEqualTo("movieId", movieId)
                 .get();
-        List<ShowtimeDTO> showtimes = new ArrayList<>(processQuerySnapshot(future.get()));
-        showtimes.sort(java.util.Comparator.comparingLong(ShowtimeDTO::getStartAt));
-        logger.info("Loaded {} showtimes for movie {}", showtimes.size(), movieId);
+        long now = System.currentTimeMillis();
+        List<ShowtimeDTO> showtimes = processQuerySnapshot(future.get()).stream()
+                .filter(s -> s.getStartAt() >= now)
+                .sorted(java.util.Comparator.comparingLong(ShowtimeDTO::getStartAt))
+                .collect(Collectors.toList());
+        logger.info("Loaded {} future showtimes for movie {}", showtimes.size(), movieId);
         return showtimes;
     }
-
+ 
     public List<ShowtimeDTO> getShowtimesByCinemaId(String cinemaId) throws ExecutionException, InterruptedException {
         logger.info("Fetching showtimes for cinemaId: {}", cinemaId);
         ApiFuture<QuerySnapshot> future = firestore.collection(COLLECTION)
                 .whereEqualTo("cinemaId", cinemaId)
                 .get();
-        List<ShowtimeDTO> showtimes = new ArrayList<>(processQuerySnapshot(future.get()));
-        showtimes.sort(java.util.Comparator.comparingLong(ShowtimeDTO::getStartAt));
-        logger.info("Loaded {} showtimes for cinema {}", showtimes.size(), cinemaId);
+        long now = System.currentTimeMillis();
+        List<ShowtimeDTO> showtimes = processQuerySnapshot(future.get()).stream()
+                .filter(s -> s.getStartAt() >= now)
+                .sorted(java.util.Comparator.comparingLong(ShowtimeDTO::getStartAt))
+                .collect(Collectors.toList());
+        logger.info("Loaded {} future showtimes for cinema {}", showtimes.size(), cinemaId);
         return showtimes;
     }
 
