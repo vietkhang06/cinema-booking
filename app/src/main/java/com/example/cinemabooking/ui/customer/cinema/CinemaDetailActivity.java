@@ -83,7 +83,7 @@ public class CinemaDetailActivity extends BaseActivity {
     private ShowtimeRepository showtimeRepository;
     private MovieRepository movieRepository;
     private String cinemaId = "";
-    private String cinemaName = "Rap phim";
+    private String cinemaName = "Rạp phim";
     private String address = "";
     private String city = "";
     private String district = "";
@@ -170,7 +170,7 @@ public class CinemaDetailActivity extends BaseActivity {
             return;
         }
 
-        boolean hasFallback = !TextUtils.isEmpty(cinemaName) && !cinemaName.equals("Rap phim");
+        boolean hasFallback = !TextUtils.isEmpty(cinemaName) && !cinemaName.equals("Rạp phim");
 
         if (!hasFallback) {
             scrollCinemaDetail.setVisibility(View.GONE);
@@ -224,16 +224,39 @@ public class CinemaDetailActivity extends BaseActivity {
     }
 
     private void bindCinemaInfo() {
-        tvCinemaTitle.setText(safe(cinemaName, "Rap phim"));
+        tvCinemaTitle.setText(safe(cinemaName, "Rạp phim"));
         tvCinemaTagline.setText(buildLocationText());
-        tvStatus.setText(TextUtils.isEmpty(status) ? "Dang hoat dong" : status);
+        
+        String statusText = "Đang hoạt động";
+        int textColor = Color.parseColor("#10B981");
+        int bgColor = Color.parseColor("#E6FBF3");
+        
+        if (!TextUtils.isEmpty(status)) {
+            if ("active".equalsIgnoreCase(status) || "available".equalsIgnoreCase(status) || "scheduled".equalsIgnoreCase(status) || "đang hoạt động".equalsIgnoreCase(status)) {
+                statusText = "Đang hoạt động";
+                textColor = Color.parseColor("#10B981");
+                bgColor = Color.parseColor("#E6FBF3");
+            } else if ("inactive".equalsIgnoreCase(status) || "tạm dừng".equalsIgnoreCase(status)) {
+                statusText = "Tạm dừng";
+                textColor = Color.parseColor("#EF4444");
+                bgColor = Color.parseColor("#FEE2E2");
+            } else {
+                statusText = status;
+                textColor = Color.parseColor("#1E1A23");
+                bgColor = Color.parseColor("#F3F4F6");
+            }
+        }
+        tvStatus.setText(statusText);
+        tvStatus.setTextColor(textColor);
+        tvStatus.setBackgroundTintList(ColorStateList.valueOf(bgColor));
+        
         tvCityDistrict.setText(buildLocationText());
-        tvPhone.setText(TextUtils.isEmpty(phone) ? "Chua cap nhat hotline" : phone);
-        tvAddress.setText(TextUtils.isEmpty(address) ? "Chua cap nhat dia chi" : address);
-        tvAbout.setText("Khong gian rap duoc thiet ke cho trai nghiem xem phim thoai mai, am thanh ro net va khu vuc ghe ngoi hien dai.");
+        tvPhone.setText(TextUtils.isEmpty(phone) ? "Chưa cập nhật hotline" : phone);
+        tvAddress.setText(TextUtils.isEmpty(address) ? "Chưa cập nhật địa chỉ" : address);
+        tvAbout.setText("Không gian rạp được thiết kế cho trải nghiệm xem phim thoải mái, âm thanh rõ nét và khu vực ghế ngồi hiện đại.");
         tvMapInfo.setText(hasCoordinate()
                 ? String.format(Locale.getDefault(), "%.5f, %.5f", latitude, longitude)
-                : "Chua cap nhat toa do");
+                : "Chưa cập nhật tọa độ");
     }
 
     private void loadCinemaImage() {
@@ -275,7 +298,7 @@ public class CinemaDetailActivity extends BaseActivity {
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("text/plain");
         intent.putExtra(Intent.EXTRA_TEXT, shareText.trim());
-        startActivity(Intent.createChooser(intent, "Chia se rap phim"));
+        startActivity(Intent.createChooser(intent, "Chia sẻ rạp phim"));
     }
 
     private void openMap() {
@@ -292,7 +315,7 @@ public class CinemaDetailActivity extends BaseActivity {
             }
             uri = Uri.parse("geo:0,0?q=" + Uri.encode(queryBuilder.toString()));
         } else {
-            showToast("Chua co dia chi de mo ban do");
+            showToast("Chưa có địa chỉ để mở bản đồ");
             return;
         }
 
@@ -300,13 +323,13 @@ public class CinemaDetailActivity extends BaseActivity {
         try {
             startActivity(intent);
         } catch (Exception e) {
-            showToast("Khong the mo ban do");
+            showToast("Không thể mở bản đồ");
         }
     }
 
     private void callCinema() {
         if (TextUtils.isEmpty(phone)) {
-            showToast("Chua co so dien thoai");
+            showToast("Chưa có số điện thoại");
             return;
         }
         Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + phone));
@@ -671,7 +694,7 @@ public class CinemaDetailActivity extends BaseActivity {
         if (!TextUtils.isEmpty(district)) {
             return district;
         }
-        return "Khu vuc dang cap nhat";
+        return "Khu vực đang cập nhật";
     }
 
     private String safe(String value, String fallback) {

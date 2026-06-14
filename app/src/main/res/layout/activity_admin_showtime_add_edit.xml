@@ -28,7 +28,7 @@
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@android:drawable/ic_media_previous"
+                android:src="@drawable/chevron_left_solid_full"
                 app:tint="#1E1A23" />
 
             <TextView

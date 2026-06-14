@@ -45,10 +45,37 @@ public class CinemaAdapter extends RecyclerView.Adapter<CinemaAdapter.ViewHolder
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Cinema cinema = cinemas.get(position);
-        holder.tvName.setText(valueOrDefault(cinema.name, "Rap phim"));
-        holder.tvAddress.setText(valueOrDefault(cinema.address, "Chua cap nhat dia chi"));
-        holder.tvDistrict.setText(valueOrDefault(joinLocation(cinema.district, cinema.city), "Chua cap nhat khu vuc"));
-        holder.tvPhone.setText(valueOrDefault(cinema.phone, "Chua cap nhat hotline"));
+        holder.tvName.setText(valueOrDefault(cinema.name, "Rạp phim"));
+        holder.tvAddress.setText(valueOrDefault(cinema.address, "Chưa cập nhật địa chỉ"));
+        holder.tvDistrict.setText(valueOrDefault(joinLocation(cinema.district, cinema.city), "Chưa cập nhật khu vực"));
+        holder.tvPhone.setText(valueOrDefault(cinema.phone, "Chưa cập nhật hotline"));
+        
+        // Status Badge styling
+        String status = cinema.status;
+        String statusText = "Đang hoạt động";
+        int textColor = android.graphics.Color.parseColor("#10B981");
+        int bgColor = android.graphics.Color.parseColor("#E6FBF3");
+
+        if (status != null && !status.trim().isEmpty()) {
+            String cleanStatus = status.trim().toLowerCase();
+            if ("active".equals(cleanStatus) || "available".equals(cleanStatus) || "scheduled".equals(cleanStatus) || "đang hoạt động".equals(cleanStatus)) {
+                statusText = "Đang hoạt động";
+                textColor = android.graphics.Color.parseColor("#10B981");
+                bgColor = android.graphics.Color.parseColor("#E6FBF3");
+            } else if ("inactive".equals(cleanStatus) || "tạm dừng".equals(cleanStatus)) {
+                statusText = "Tạm dừng";
+                textColor = android.graphics.Color.parseColor("#EF4444");
+                bgColor = android.graphics.Color.parseColor("#FEE2E2");
+            } else {
+                statusText = status;
+                textColor = android.graphics.Color.parseColor("#1E1A23");
+                bgColor = android.graphics.Color.parseColor("#F3F4F6");
+            }
+        }
+        holder.tvStatus.setText(statusText);
+        holder.tvStatus.setTextColor(textColor);
+        holder.tvStatus.setBackgroundTintList(android.content.res.ColorStateList.valueOf(bgColor));
+
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
                 listener.onCinemaClick(cinema);
@@ -82,6 +109,7 @@ public class CinemaAdapter extends RecyclerView.Adapter<CinemaAdapter.ViewHolder
         final TextView tvAddress;
         final TextView tvDistrict;
         final TextView tvPhone;
+        final TextView tvStatus;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -89,6 +117,7 @@ public class CinemaAdapter extends RecyclerView.Adapter<CinemaAdapter.ViewHolder
             tvAddress = itemView.findViewById(R.id.tvCinemaAddress);
             tvDistrict = itemView.findViewById(R.id.tvCinemaDistrict);
             tvPhone = itemView.findViewById(R.id.tvCinemaPhone);
+            tvStatus = itemView.findViewById(R.id.tvCinemaStatus);
         }
     }
 }
