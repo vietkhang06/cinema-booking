@@ -130,56 +130,34 @@ public class AuthenticationService {
             @NonNull String name,
             AuthCallback callback
     ) {
-        com.google.firebase.firestore.FirebaseFirestore.getInstance().collection(com.example.cinemabooking.core.constants.FirestoreCollections.USERS)
-                .whereEqualTo("email", email)
-                .get()
-                .addOnSuccessListener(emailQuery -> {
-                    if (!emailQuery.isEmpty()) {
-                        callback.onError("Email đã tồn tại trong hệ thống.");
+        auth.createUserWithEmailAndPassword(email, password)
+                .addOnSuccessListener(authResult -> {
+                    FirebaseUser fUser = authResult.getUser();
+                    if (fUser == null) {
+                        callback.onError("User null");
                         return;
                     }
 
-                    com.google.firebase.firestore.FirebaseFirestore.getInstance().collection(com.example.cinemabooking.core.constants.FirestoreCollections.USERS)
-                            .whereEqualTo("phone", phone)
-                            .get()
-                            .addOnSuccessListener(phoneQuery -> {
-                                if (!phoneQuery.isEmpty()) {
-                                    callback.onError("Số điện thoại đã tồn tại.");
-                                    return;
-                                }
+                    userRepo.createUser(newUserDoc(fUser, phone, name), new ResultCallback<User>() {
+                        @Override
+                        public void onSuccess(User data) {
+                            if (data == null) {
+                                callback.onError("Lỗi khởi tạo người dùng.");
+                                return;
+                            }
 
-                                auth.createUserWithEmailAndPassword(email, password)
-                                        .addOnSuccessListener(authResult -> {
-                                            FirebaseUser fUser = authResult.getUser();
-                                            if (fUser == null) {
-                                                callback.onError("User null");
-                                                return;
-                                            }
+                            sessionManager.saveLoginState(true, data.role, data.uid);
+                            sessionManager.saveRememberMe(true);
+                            callback.onSuccess(data);
+                        }
 
-                                            userRepo.createUser(newUserDoc(fUser, phone, name), new ResultCallback<User>() {
-                                                @Override
-                                                public void onSuccess(User data) {
-                                                    if (data == null) {
-                                                        callback.onError("Lỗi khởi tạo người dùng.");
-                                                        return;
-                                                    }
-
-                                                    sessionManager.saveLoginState(true, data.role, data.uid);
-                                                    sessionManager.saveRememberMe(true);
-                                                    callback.onSuccess(data);
-                                                }
-
-                                                @Override
-                                                public void onError(String message) {
-                                                    callback.onError(message);
-                                                }
-                                            });
-                                        })
-                                        .addOnFailureListener(e -> callback.onError("Lỗi tạo tài khoản: " + e.getMessage()));
-                            })
-                            .addOnFailureListener(e -> callback.onError("Lỗi kiểm tra số điện thoại: " + e.getMessage()));
+                        @Override
+                        public void onError(String message) {
+                            callback.onError(message);
+                        }
+                    });
                 })
-                .addOnFailureListener(e -> callback.onError("Lỗi kiểm tra email: " + e.getMessage()));
+                .addOnFailureListener(e -> callback.onError("Lỗi tạo tài khoản: " + e.getMessage()));
     }
 
     public void handleFacebookAccessToken(AccessToken token, AuthCallback callback) {
