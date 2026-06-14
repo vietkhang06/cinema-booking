@@ -255,7 +255,7 @@
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
-                            android:text="Tin tức"
+                            android:text="Bình luận"
                             android:textAllCaps="false"
                             app:cornerRadius="15dp" />
                     </com.google.android.material.button.MaterialButtonToggleGroup>
@@ -391,40 +391,51 @@
                         android:orientation="vertical"
                         android:visibility="gone">
 
-                        <com.google.android.material.card.MaterialCardView
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="16dp"
-                            app:cardCornerRadius="16dp"
-                            app:strokeColor="#E6E6E6"
-                            app:strokeWidth="1dp">
-                            <LinearLayout
-                                android:layout_width="match_parent"
+                            android:layout_marginBottom="12dp"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+                            <TextView
+                                android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:orientation="vertical"
-                                android:padding="16dp">
+                                android:layout_weight="1"
+                                android:text="Đánh giá &amp; Bình luận"
+                                android:textColor="#111111"
+                                android:textSize="16sp"
+                                android:textStyle="bold" />
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:gravity="center_vertical"
+                                android:background="@drawable/bg_rating_chip"
+                                android:paddingHorizontal="10dp"
+                                android:paddingVertical="4dp">
                                 <TextView
+                                    android:id="@+id/tvAverageRatingReview"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="Tin nổi bật"
-                                    android:textStyle="bold" />
-                                <TextView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="8dp"
-                                    android:text="Thông tin hậu trường và tin tức về phim."
-                                    android:textColor="#555555" />
+                                    android:text="★ 0.0"
+                                    android:textColor="#B56B00"
+                                    android:textSize="14sp"
+                                    android:textStyle="bold"/>
                             </LinearLayout>
-                        </com.google.android.material.card.MaterialCardView>
+                        </LinearLayout>
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="12dp"
-                            android:text="Bình luận từ khán giả"
-                            android:textColor="#111111"
-                            android:textSize="16sp"
-                            android:textStyle="bold" />
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnRateMovie"
+                            android:layout_width="match_parent"
+                            android:layout_height="44dp"
+                            android:layout_marginBottom="16dp"
+                            android:text="Đánh giá phim"
+                            android:textAllCaps="false"
+                            android:textColor="#1E1A23"
+                            app:backgroundTint="#F4F4F4"
+                            app:cornerRadius="22dp"
+                            app:strokeColor="#DDDDDD"
+                            app:strokeWidth="1dp" />
 
                         <com.google.android.material.card.MaterialCardView
                             android:layout_width="match_parent"
@@ -466,6 +477,20 @@
                             android:layout_height="wrap_content"
                             android:nestedScrollingEnabled="false"
                             tools:listitem="@layout/item_review"/>
+
+                        <TextView
+                            android:id="@+id/tvLoadMoreComments"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:text="Tải thêm bình luận"
+                            android:textColor="#1E4F8F"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:gravity="center"
+                            android:padding="8dp"
+                            android:background="?attr/selectableItemBackground"
+                            android:visibility="gone"/>
                     </LinearLayout>
 
                     <com.google.android.material.button.MaterialButton

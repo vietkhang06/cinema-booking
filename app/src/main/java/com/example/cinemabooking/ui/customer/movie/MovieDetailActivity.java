@@ -139,6 +139,25 @@ public class MovieDetailActivity extends BaseActivity {
     private GetReviewsByMovieUseCase getReviewsByMovieUseCase;
     private com.example.cinemabooking.ui.customer.adapter.ReviewAdapter reviewAdapter;
 
+    private com.example.cinemabooking.domain.repository.ReviewRepository reviewRepository;
+    private com.google.firebase.firestore.DocumentSnapshot lastReviewVisible = null;
+    private boolean isReviewLoading = false;
+    private boolean isReviewsLoaded = false;
+    private boolean hasMoreReviews = true;
+    private com.google.android.material.button.MaterialButton btnRateMovie;
+    private TextView tvLoadMoreComments;
+    private TextView tvAverageRatingReview;
+    private Review userReview; 
+    private com.google.firebase.firestore.ListenerRegistration movieListener;
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (movieListener != null) {
+            movieListener.remove();
+        }
+    }
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -191,6 +210,10 @@ public class MovieDetailActivity extends BaseActivity {
         btnBookTickets = findViewById(R.id.btnBookTickets);
         btnBookTickets.setVisibility(View.GONE);
 
+        btnRateMovie = findViewById(R.id.btnRateMovie);
+        tvLoadMoreComments = findViewById(R.id.tvLoadMoreComments);
+        tvAverageRatingReview = findViewById(R.id.tvAverageRatingReview);
+
         rvReviews = findViewById(R.id.rvReviews);
         rvReviews.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(this));
         reviewAdapter = new com.example.cinemabooking.ui.customer.adapter.ReviewAdapter();
@@ -207,6 +230,51 @@ public class MovieDetailActivity extends BaseActivity {
         cinemaRepository = new CinemaRepositoryImpl();
         addReviewUseCase = appContainer.getAddReviewUseCase();
         getReviewsByMovieUseCase = appContainer.getGetReviewsByMovieUseCase();
+        reviewRepository = new com.example.cinemabooking.data.repository.ReviewRepositoryImpl();
+
+        String currentUid = com.google.firebase.auth.FirebaseAuth.getInstance().getUid();
+        reviewAdapter.setListener(new com.example.cinemabooking.ui.customer.adapter.ReviewAdapter.ReviewActionListener() {
+            @Override
+            public void onLikeClick(Review review, int position) {
+                if (currentUid == null) {
+                    showLoginRequiredDialog("Đăng nhập để thực hiện chức năng này");
+                    return;
+                }
+                reviewRepository.toggleLike(review.reviewId, currentUid, new ResultCallback<Review>() {
+                    @Override
+                    public void onSuccess(Review data) {
+                        review.likedBy = data.likedBy;
+                        review.dislikedBy = data.dislikedBy;
+                        reviewAdapter.notifyItemChanged(position);
+                    }
+                    @Override
+                    public void onError(String message) {}
+                });
+            }
+
+            @Override
+            public void onDislikeClick(Review review, int position) {
+                if (currentUid == null) {
+                    showLoginRequiredDialog("Đăng nhập để thực hiện chức năng này");
+                    return;
+                }
+                reviewRepository.toggleDislike(review.reviewId, currentUid, new ResultCallback<Review>() {
+                    @Override
+                    public void onSuccess(Review data) {
+                        review.likedBy = data.likedBy;
+                        review.dislikedBy = data.dislikedBy;
+                        reviewAdapter.notifyItemChanged(position);
+                    }
+                    @Override
+                    public void onError(String message) {}
+                });
+            }
+
+            @Override
+            public void onReplyClick(Review review, int position) {
+                showToast("Tính năng trả lời đang được phát triển");
+            }
+        }, currentUid);
     }
 
     private void initScheduleCatalog() {
@@ -258,8 +326,24 @@ public class MovieDetailActivity extends BaseActivity {
             }
         });
 
+        if (movieListener != null) {
+            movieListener.remove();
+        }
+        movieListener = com.google.firebase.firestore.FirebaseFirestore.getInstance()
+                .collection("movies")
+                .document(selectedMovieId)
+                .addSnapshotListener((snapshot, e) -> {
+                    if (e != null || snapshot == null || !snapshot.exists()) return;
+                    Double ratingAvg = snapshot.getDouble("ratingAvg");
+                    if (ratingAvg != null) {
+                        tvRating.setText(String.format(java.util.Locale.getDefault(), "★ %.1f", ratingAvg));
+                        if (tvAverageRatingReview != null) {
+                            tvAverageRatingReview.setText(String.format(java.util.Locale.getDefault(), "%.1f", ratingAvg));
+                        }
+                    }
+                });
+
         loadShowtimesFromFirestore();
-        loadReviews();
     }
 
     private void loadShowtimesFromFirestore() {
@@ -356,25 +440,122 @@ public class MovieDetailActivity extends BaseActivity {
 
     // Hàm tải danh sách bình luận (gọi trong loadMovieFromFirestore)
     private void loadReviews() {
-        getReviewsByMovieUseCase.execute(selectedMovieId, new ResultCallback<List<Review>>() {
+        lastReviewVisible = null;
+        isReviewLoading = false;
+        hasMoreReviews = true;
+        reviewAdapter.setReviews(new java.util.ArrayList<>());
+        tvLoadMoreComments.setVisibility(View.GONE);
+        
+        // Fetch user's rating first
+        String currentUid = com.google.firebase.auth.FirebaseAuth.getInstance().getUid();
+        if (currentUid != null && !TextUtils.isEmpty(selectedMovieId)) {
+            reviewRepository.getUserReviewForMovie(currentUid, selectedMovieId, new ResultCallback<Review>() {
+                @Override
+                public void onSuccess(Review data) {
+                    userReview = data;
+                    if (userReview != null && userReview.rating != null && userReview.rating > 0) {
+                        btnRateMovie.setText("Cập nhật đánh giá");
+                    } else {
+                        btnRateMovie.setText("Đánh giá phim");
+                    }
+                }
+                @Override
+                public void onError(String message) {}
+            });
+        }
+        
+        loadReviewsPaged();
+    }
+    
+    private void loadReviewsPaged() {
+        if (isReviewLoading || !hasMoreReviews || TextUtils.isEmpty(selectedMovieId)) return;
+        isReviewLoading = true;
+        
+        reviewRepository.getReviewsByMovieIdPaged(selectedMovieId, lastReviewVisible, 10, new ResultCallback<android.util.Pair<List<Review>, com.google.firebase.firestore.DocumentSnapshot>>() {
             @Override
-            public void onSuccess(List<Review> data) {
-                // Hiển thị data lên RecyclerView bình luận
-                Log.d("Review", "Số lượng bình luận: " + data.size());
-                if (reviewAdapter != null) {
-                    reviewAdapter.setReviews(data);
+            public void onSuccess(android.util.Pair<List<Review>, com.google.firebase.firestore.DocumentSnapshot> data) {
+                isReviewLoading = false;
+                List<Review> list = data.first;
+                if (list != null && !list.isEmpty()) {
+                    reviewAdapter.addReviews(list);
+                    lastReviewVisible = data.second;
+                    hasMoreReviews = (lastReviewVisible != null);
+                    tvLoadMoreComments.setVisibility(hasMoreReviews ? View.VISIBLE : View.GONE);
+                } else {
+                    hasMoreReviews = false;
+                    tvLoadMoreComments.setVisibility(View.GONE);
                 }
             }
+
             @Override
             public void onError(String message) {
+                isReviewLoading = false;
                 Log.e("Review", message);
             }
         });
     }
 
+    private void showRatingBottomSheet() {
+        if (com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() == null) {
+            showLoginRequiredDialog("Đăng nhập để có thể để lại đánh giá");
+            return;
+        }
+
+        com.google.android.material.bottomsheet.BottomSheetDialog bottomSheetDialog = new com.google.android.material.bottomsheet.BottomSheetDialog(this);
+        View view = getLayoutInflater().inflate(R.layout.bottom_sheet_rating, null);
+        bottomSheetDialog.setContentView(view);
+
+        android.widget.RatingBar ratingBar = view.findViewById(R.id.ratingBar);
+        Button btnSubmitRating = view.findViewById(R.id.btnSubmitRating);
+
+        if (userReview != null && userReview.rating != null && userReview.rating > 0) {
+            ratingBar.setRating(userReview.rating);
+        }
+
+        btnSubmitRating.setOnClickListener(v -> {
+            float rating = ratingBar.getRating();
+            if (rating == 0) {
+                showToast("Vui lòng chọn mức đánh giá!");
+                return;
+            }
+            submitRating(rating);
+            bottomSheetDialog.dismiss();
+        });
+
+        bottomSheetDialog.show();
+    }
+    
+    private void submitRating(float rating) {
+        String content = ""; // Đánh giá không kèm chữ (hoặc có thể kèm nếu muốn gộp chung)
+        
+        if (userReview != null) {
+            // Update exist
+            int oldRating = userReview.rating != null ? userReview.rating : 0;
+            userReview.rating = Math.round(rating);
+            // using reviewRepository.updateReview
+            com.example.cinemabooking.domain.repository.ReviewRepository repo = new com.example.cinemabooking.data.repository.ReviewRepositoryImpl();
+            repo.updateReview(userReview, new ResultCallback<Review>() {
+                @Override
+                public void onSuccess(Review data) {
+                    showToast("Cập nhật đánh giá thành công!");
+                    btnRateMovie.setText("Cập nhật đánh giá");
+                    isReviewsLoaded = false;
+                    loadReviews(); 
+                }
+                @Override
+                public void onError(String message) {
+                    showToast("Lỗi cập nhật đánh giá");
+                }
+            });
+        } else {
+            // Add new
+            postComment(content, Math.round(rating));
+        }
+    }
+
     private void postComment(String content, int rating) {
         if (com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() == null) {
-            showLoginRequiredDialog();
+            showLoginRequiredDialog("Đăng nhập để có thể để lại đánh giá");
             return;
         }
 
@@ -388,8 +569,14 @@ public class MovieDetailActivity extends BaseActivity {
         addReviewUseCase.execute(newReview, new ResultCallback<Review>() {
             @Override
             public void onSuccess(Review data) {
-                showToast("Đã đăng bình luận!");
-                etCommentInput.setText("");
+                if (rating > 0) {
+                    showToast("Đã gửi đánh giá!");
+                    btnRateMovie.setText("Cập nhật đánh giá");
+                } else {
+                    showToast("Đã đăng bình luận!");
+                    etCommentInput.setText("");
+                }
+                isReviewsLoaded = false;
                 loadReviews(); // Tải lại danh sách
             }
             @Override
@@ -410,6 +597,9 @@ public class MovieDetailActivity extends BaseActivity {
         tvMovieTitle.setText(safe(movie.title, tvMovieTitle.getText().toString()));
         tvMovieTagline.setText(buildTagline(movie));
         tvRating.setText(String.format("★ %s", formatRating(movie.ratingAvg)));
+        if (tvAverageRatingReview != null) {
+            tvAverageRatingReview.setText(String.format("★ %s", formatRating(movie.ratingAvg)));
+        }
         tvAgeRating.setText(safe(movie.ageRating, "T13"));
         tvDuration.setText(String.format("⏱ %d phút", movie.durationMinutes));
 
@@ -848,6 +1038,18 @@ public class MovieDetailActivity extends BaseActivity {
         layoutScheduleSection.setVisibility(scheduleSelected ? View.VISIBLE : View.GONE);
         layoutInfoSection.setVisibility(infoSelected ? View.VISIBLE : View.GONE);
         layoutNewsSection.setVisibility(newsSelected ? View.VISIBLE : View.GONE);
+        
+        if (newsSelected) {
+            if (!isReviewsLoaded) {
+                loadReviews();
+                isReviewsLoaded = true;
+            } else if (rvReviews != null && reviewAdapter != null) {
+                rvReviews.post(() -> {
+                    reviewAdapter.notifyDataSetChanged();
+                    rvReviews.requestLayout();
+                });
+            }
+        }
 
         showBookingButton(scheduleSelected);
 
@@ -898,6 +1100,10 @@ public class MovieDetailActivity extends BaseActivity {
 
         btnBookTickets.setOnClickListener(v -> prepareBookingPayload());
 
+        btnRateMovie.setOnClickListener(v -> showRatingBottomSheet());
+        
+        tvLoadMoreComments.setOnClickListener(v -> loadReviewsPaged());
+
         btnPostComment.setOnClickListener(v -> {
             String content = etCommentInput.getText().toString().trim();
 
@@ -940,9 +1146,9 @@ public class MovieDetailActivity extends BaseActivity {
     }
 
     private void prepareBookingPayload() {
-        // 1. Kiểm tra đăng nhập trước
-        if (com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() == null) {
-            showLoginRequiredDialog();
+        String currentUid = com.google.firebase.auth.FirebaseAuth.getInstance().getUid();
+        if (currentUid == null) {
+            showLoginRequiredDialog("Đăng nhập để đặt vé");
             return;
         }
 
@@ -1046,7 +1252,7 @@ public class MovieDetailActivity extends BaseActivity {
      * Nút "Đăng nhập" → mở LoginActivity (sau khi login xong sẽ quay về màn hình này).
      * Nút "Để sau" → đóng dialog, người dùng có thể tiếp tục xem phim.
      */
-    private void showLoginRequiredDialog() {
+    private void showLoginRequiredDialog(String message) {
         com.google.android.material.bottomsheet.BottomSheetDialog dialog =
                 new com.google.android.material.bottomsheet.BottomSheetDialog(this);
 
@@ -1067,7 +1273,7 @@ public class MovieDetailActivity extends BaseActivity {
 
         // Tiêu đề
         android.widget.TextView tvTitle = new android.widget.TextView(this);
-        tvTitle.setText("Đăng nhập để đặt vé");
+        tvTitle.setText(message);
         tvTitle.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 20f);
         tvTitle.setTypeface(tvTitle.getTypeface(), android.graphics.Typeface.BOLD);
         tvTitle.setTextColor(android.graphics.Color.parseColor("#1A1A2E"));
