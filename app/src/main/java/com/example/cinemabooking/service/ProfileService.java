@@ -52,26 +52,56 @@ public class ProfileService {
     }
 
     public void getUserTotalSpending(ResultCallback<Double> callback){
-        User cached = getCachedProfile();
-        if (cached == null || cached.uid == null) {
+        com.google.firebase.auth.FirebaseUser fUser = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
+        String uid = null;
+        if (fUser != null) {
+            uid = fUser.getUid();
+        } else {
+            User cached = getCachedProfile();
+            if (cached != null) {
+                uid = cached.uid;
+            }
+        }
+
+        if (uid == null) {
             if (callback != null) callback.onSuccess(0.0);
             return;
         }
 
+        final String userId = uid;
+
         firestore.collection(FirestoreCollections.BOOKINGS)
-                .where(Filter.and(
-                        Filter.equalTo("userId", cached.uid),
-                        Filter.equalTo("bookingStatus", "confirmed")
-                ))
+                .whereEqualTo("userId", userId)
                 .get()
-                .addOnSuccessListener(querySnapshot -> {
-                    double total = querySnapshot.toObjects(Booking.class).stream()
+                .addOnSuccessListener(bookingSnapshot -> {
+                    double movieTotal = bookingSnapshot.toObjects(Booking.class).stream()
+                            .filter(b -> b.bookingStatus != null && 
+                                    ("confirmed".equalsIgnoreCase(b.bookingStatus) || "success".equalsIgnoreCase(b.bookingStatus)))
                             .mapToDouble(b -> b.total)
                             .sum();
-                    if (callback != null) callback.onSuccess(total);
+
+                    firestore.collection("cine_shop_orders")
+                            .whereEqualTo("userId", userId)
+                            .get()
+                            .addOnSuccessListener(shopSnapshot -> {
+                                double shopTotal = 0.0;
+                                for (com.google.firebase.firestore.DocumentSnapshot doc : shopSnapshot.getDocuments()) {
+                                    String status = doc.getString("status");
+                                    if (status != null && ("confirmed".equalsIgnoreCase(status) || "success".equalsIgnoreCase(status))) {
+                                        Double price = doc.getDouble("totalPrice");
+                                        if (price != null) {
+                                            shopTotal += price;
+                                        }
+                                    }
+                                }
+                                if (callback != null) callback.onSuccess(movieTotal + shopTotal);
+                            })
+                            .addOnFailureListener(e -> {
+                                if (callback != null) callback.onSuccess(movieTotal);
+                            });
                 })
                 .addOnFailureListener(e -> {
-                    if (callback != null) callback.onSuccess(0.0); // Fallback to 0
+                    if (callback != null) callback.onSuccess(0.0);
                 });
     }
 }
