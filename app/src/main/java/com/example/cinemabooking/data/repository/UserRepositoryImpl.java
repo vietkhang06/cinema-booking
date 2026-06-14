@@ -41,7 +41,33 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public void getUserById(String uid, ResultCallback<User> callback) {
-        Log.d(TAG, "Requesting profile for UID: " + uid);
+        Log.d(TAG, "Requesting profile directly from Firestore for UID: " + uid);
+        firestore.collection(FirestoreCollections.USERS).document(uid)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        User user = documentSnapshot.toObject(User.class);
+                        if (user != null) {
+                            user.uid = documentSnapshot.getId();
+                            Log.d(TAG, "Profile fetched successfully from Firestore for UID: " + uid + ", points: " + user.points);
+                            if (callback != null) callback.onSuccess(user);
+                        } else {
+                            Log.w(TAG, "Failed to parse user document from Firestore, falling back to API");
+                            fetchProfileFromApi(uid, callback);
+                        }
+                    } else {
+                        Log.d(TAG, "User document does not exist in Firestore, falling back to API");
+                        fetchProfileFromApi(uid, callback);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.w(TAG, "Failed to fetch profile from Firestore, falling back to API: " + e.getMessage());
+                    fetchProfileFromApi(uid, callback);
+                });
+    }
+
+    private void fetchProfileFromApi(String uid, ResultCallback<User> callback) {
+        Log.d(TAG, "Requesting profile from API for UID: " + uid);
         profileApi.getMyProfile().enqueue(new Callback<ApiResponse<User>>() {
             @Override
             public void onResponse(Call<ApiResponse<User>> call, Response<ApiResponse<User>> response) {
@@ -51,7 +77,7 @@ public class UserRepositoryImpl implements UserRepository {
                 if (response.isSuccessful() && response.body() != null) {
                     ApiResponse<User> apiResponse = response.body();
                     if (apiResponse.isSuccess() && apiResponse.getData() != null) {
-                        Log.d(TAG, "Profile fetched successfully for UID: " + uid);
+                        Log.d(TAG, "Profile fetched successfully from API for UID: " + uid);
                         if (callback != null) callback.onSuccess(apiResponse.getData());
                     } else {
                         String errorMsg = apiResponse.getMessage() != null ? apiResponse.getMessage() : "API success but no data/message";

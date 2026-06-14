@@ -41,10 +41,7 @@ public class AuthenticationService {
             return;
         }
 
-        if (currentAuthUser != null && currentAuthUser.uid.equals(fUser.getUid())) {
-            callback.onSuccess(currentAuthUser);
-            return;
-        }
+
 
         userRepo.getUserById(fUser.getUid(), new ResultCallback<User>() {
             @Override
