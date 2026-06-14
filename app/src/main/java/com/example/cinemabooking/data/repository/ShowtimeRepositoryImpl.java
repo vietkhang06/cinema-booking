@@ -166,10 +166,36 @@ public class ShowtimeRepositoryImpl implements ShowtimeRepository {
     @Override
     public void getShowtimesByCinemaId(String cinemaId, ResultCallback<List<Showtime>> callback) {
         if (useBackendReads) {
-            enqueueList(showtimeApi.getShowtimesByCinemaId(cinemaId), callback, "Unable to load cinema showtimes.");
+            showtimeApi.getShowtimesByCinemaId(cinemaId).enqueue(new Callback<ApiResponse<List<Showtime>>>() {
+                @Override
+                public void onResponse(Call<ApiResponse<List<Showtime>>> call, Response<ApiResponse<List<Showtime>>> response) {
+                    if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                        List<Showtime> data = response.body().getData();
+                        if (data != null && !data.isEmpty()) {
+                            if (callback != null) callback.onSuccess(data);
+                            return;
+                        }
+                        android.util.Log.w("SHOWTIME_REPO", "API returned empty showtimes for cinemaId=" + cinemaId + ", falling back to Firestore");
+                        getShowtimesByCinemaIdFromFirestore(cinemaId, callback);
+                    } else {
+                        android.util.Log.w("SHOWTIME_REPO", "API error (code=" + response.code() + "), falling back to Firestore");
+                        getShowtimesByCinemaIdFromFirestore(cinemaId, callback);
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ApiResponse<List<Showtime>>> call, Throwable t) {
+                    android.util.Log.w("SHOWTIME_REPO", "API network error, falling back to Firestore: " + t.getMessage());
+                    getShowtimesByCinemaIdFromFirestore(cinemaId, callback);
+                }
+            });
             return;
         }
 
+        getShowtimesByCinemaIdFromFirestore(cinemaId, callback);
+    }
+
+    private void getShowtimesByCinemaIdFromFirestore(String cinemaId, ResultCallback<List<Showtime>> callback) {
         firestore.collection(FirestoreCollections.SHOWTIMES)
                 .whereEqualTo("cinemaId", cinemaId)
                 .get()

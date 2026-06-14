@@ -37,6 +37,16 @@ public class HomeBannerAdapter extends RecyclerView.Adapter<HomeBannerAdapter.Ba
         return new BannerViewHolder(view);
     }
 
+    public interface OnBannerClickListener {
+        void onBannerClick(HomeBannerItem item);
+    }
+
+    private OnBannerClickListener onBannerClickListener;
+
+    public void setOnBannerClickListener(OnBannerClickListener listener) {
+        this.onBannerClickListener = listener;
+    }
+
     @Override
     public void onBindViewHolder(@NonNull BannerViewHolder holder, int position) {
         HomeBannerItem item = banners.get(position);
@@ -46,6 +56,12 @@ public class HomeBannerAdapter extends RecyclerView.Adapter<HomeBannerAdapter.Ba
                 .load(item.getImageUrl())
                 .placeholder(R.drawable.login_icon)
                 .into(holder.imgBanner);
+
+        holder.itemView.setOnClickListener(v -> {
+            if (onBannerClickListener != null) {
+                onBannerClickListener.onBannerClick(item);
+            }
+        });
     }
 
     @Override

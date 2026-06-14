@@ -110,7 +110,7 @@
             android:layout_width="36dp"
             android:layout_height="36dp"
             android:padding="6dp"
-            android:src="@drawable/clipboard_solid_full"
+            android:src="@drawable/ic_close_x"
             android:background="?attr/selectableItemBackgroundBorderless"
             app:tint="#AAAAAA" />
     </LinearLayout>

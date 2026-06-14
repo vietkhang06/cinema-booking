@@ -323,6 +323,18 @@
                         android:textColor="#666666"
                         android:textSize="13sp" />
 
+                    <HorizontalScrollView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="14dp"
+                        android:scrollbars="none">
+                        <LinearLayout
+                            android:id="@+id/layoutDateChips"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal" />
+                    </HorizontalScrollView>
+
                     <LinearLayout
                         android:id="@+id/layoutNowShowing"
                         android:layout_width="match_parent"
@@ -330,29 +342,7 @@
                         android:layout_marginTop="14dp"
                         android:orientation="vertical" />
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="20dp"
-                        android:text="Phim sắp chiếu"
-                        android:textColor="#111111"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:text="Các phim sẽ có lịch tại rạp trong thời gian tới"
-                        android:textColor="#666666"
-                        android:textSize="13sp" />
-
-                    <LinearLayout
-                        android:id="@+id/layoutComingSoon"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="14dp"
-                        android:orientation="vertical" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>

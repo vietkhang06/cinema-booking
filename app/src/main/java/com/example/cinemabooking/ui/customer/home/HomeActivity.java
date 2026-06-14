@@ -239,6 +239,29 @@ public class HomeActivity extends BaseActivity {
         });
 
         viewPagerBanner.setAdapter(bannerAdapter);
+        bannerAdapter.setOnBannerClickListener(item -> {
+            if (item.getBannerId() == null) return;
+            String suffix = item.getBannerId().replace("banner_", "");
+            String targetMovieId = "movie_" + suffix;
+
+            HomeMovieItem matchedMovie = null;
+            for (HomeMovieItem m : allMovies) {
+                if (m != null && targetMovieId.equals(m.getMovieId())) {
+                    matchedMovie = m;
+                    break;
+                }
+            }
+
+            if (matchedMovie != null) {
+                Intent intent = new Intent(this, MovieDetailActivity.class);
+                intent.putExtra(MovieDetailActivity.EXTRA_MOVIE_ID, matchedMovie.getMovieId());
+                intent.putExtra(MovieDetailActivity.EXTRA_MOVIE_TITLE, matchedMovie.getTitle());
+                intent.putExtra(MovieDetailActivity.EXTRA_MOVIE_POSTER_URL, matchedMovie.getImageUrl());
+                intent.putExtra(MovieDetailActivity.EXTRA_MOVIE_RATING, matchedMovie.getRating());
+                intent.putExtra(MovieDetailActivity.EXTRA_MOVIE_AGE_RATING, matchedMovie.getAgeRating());
+                startActivity(intent);
+            }
+        });
         viewPagerBanner.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageSelected(int position) {
@@ -384,7 +407,7 @@ public class HomeActivity extends BaseActivity {
 
                 if (banners != null) {
                     for (Banner banner : banners) {
-                        bannerItems.add(new HomeBannerItem(banner.imageUrl));
+                        bannerItems.add(new HomeBannerItem(banner.bannerId, banner.imageUrl));
                     }
                 }
 
