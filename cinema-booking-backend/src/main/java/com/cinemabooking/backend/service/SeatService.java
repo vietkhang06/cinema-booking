@@ -154,7 +154,7 @@ public class SeatService {
         }
         firestore.runTransaction(transaction -> {
             long now = System.currentTimeMillis();
-            long holdUntil = now + (7 * 60 * 1000); // 7 minutes
+            long holdUntil = now + (5 * 60 * 1000); // 5 minutes
             
             List<DocumentReference> refs = new ArrayList<>();
             for (String seatId : seatIds) {
