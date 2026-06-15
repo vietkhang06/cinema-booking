@@ -93,7 +93,7 @@ public class BookingConfirmActivity extends AppCompatActivity {
 
         // Start timer if not already active
         if (!BookingTimerManager.getInstance().isTimerActive(this)) {
-            BookingTimerManager.getInstance().startTimer(this, 7 * 60 * 1000);
+            BookingTimerManager.getInstance().startTimer(this, 5 * 60 * 1000);
         } else {
             BookingTimerManager.getInstance().restoreTimer(this);
         }
