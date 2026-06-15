@@ -1,3 +1,11 @@
+/**
+ * Dự án: Hệ thống Đặt vé Xem phim (Cinema Booking System)
+ * Phân hệ: Backend DTO
+ * 
+ * Mô tả: 
+ * Đối tượng truyền tải dữ liệu (Data Transfer Object) lưu trữ bản tóm tắt
+ * của đơn đặt đồ ăn vặt (Snack). Dùng để hiển thị hoặc lưu trữ lịch sử giao dịch.
+ */
 package com.cinemabooking.backend.dto;
 
 import lombok.AllArgsConstructor;

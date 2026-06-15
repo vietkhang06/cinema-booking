@@ -1,3 +1,10 @@
+/**
+ * Dự án: Hệ thống Đặt vé Xem phim (Cinema Booking System)
+ * Phân hệ: Backend Request DTO
+ * 
+ * Mô tả: 
+ * Đối tượng payload chứa yêu cầu đặt hàng đồ ăn vặt (Bắp/Nước) đi kèm với vé.
+ */
 package com.cinemabooking.backend.dto.request;
 
 import lombok.AllArgsConstructor;

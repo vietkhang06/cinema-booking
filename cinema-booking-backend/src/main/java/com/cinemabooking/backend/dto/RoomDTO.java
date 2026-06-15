@@ -1,3 +1,11 @@
+/**
+ * Dự án: Hệ thống Đặt vé Xem phim (Cinema Booking System)
+ * Phân hệ: Backend DTO
+ * 
+ * Mô tả: 
+ * Đối tượng mô tả dữ liệu Phòng chiếu (Room).
+ * Quản lý thông tin về cấu trúc ghế ngồi và số lượng ghế trong một phòng của rạp.
+ */
 package com.cinemabooking.backend.dto;
 
 import lombok.AllArgsConstructor;

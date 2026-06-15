@@ -1,3 +1,11 @@
+/**
+ * Dự án: Hệ thống Đặt vé Xem phim (Cinema Booking System)
+ * Phân hệ: Backend API
+ * 
+ * Mô tả: 
+ * Controller chịu trách nhiệm quản lý quy trình đặt vé và giữ chỗ.
+ * Cung cấp các API để tạo mới, lấy thông tin và cập nhật trạng thái của các đơn đặt vé.
+ */
 package com.cinemabooking.backend.controller;
 
 import com.cinemabooking.backend.dto.*;

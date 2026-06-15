@@ -1,3 +1,11 @@
+/**
+ * Dự án: Hệ thống Đặt vé Xem phim (Cinema Booking System)
+ * Phân hệ: Backend DTO
+ * 
+ * Mô tả: 
+ * Đối tượng DTO đại diện cho một bộ Phim.
+ * Dùng để trả về chi tiết phim (ảnh poster, trailer, đạo diễn, mô tả ngắn) về cho client.
+ */
 package com.cinemabooking.backend.dto;
 
 import lombok.AllArgsConstructor;

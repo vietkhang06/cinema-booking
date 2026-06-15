@@ -1,3 +1,11 @@
+/**
+ * Dự án: Hệ thống Đặt vé Xem phim (Cinema Booking System)
+ * Phân hệ: Backend DTO
+ * 
+ * Mô tả: 
+ * Dữ liệu của một Đơn đặt vé (Booking). Chứa các thông tin về vé, 
+ * ghế đã chọn, suất chiếu và tổng tiền giao dịch.
+ */
 package com.cinemabooking.backend.dto;
 
 import com.google.cloud.firestore.annotation.Exclude;

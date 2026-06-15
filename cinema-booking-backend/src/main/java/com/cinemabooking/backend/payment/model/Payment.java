@@ -1,3 +1,10 @@
+/**
+ * Dự án: Hệ thống Đặt vé Xem phim (Cinema Booking System)
+ * Phân hệ: Backend Payment
+ * 
+ * Mô tả: 
+ * Entity mô tả một giao dịch thanh toán cụ thể, bao gồm số tiền, phương thức, và thời gian.
+ */
 package com.cinemabooking.backend.payment.model;
 
 import lombok.AllArgsConstructor;

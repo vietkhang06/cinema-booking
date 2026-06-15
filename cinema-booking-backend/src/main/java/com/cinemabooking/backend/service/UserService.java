@@ -1,3 +1,11 @@
+/**
+ * Dự án: Hệ thống Đặt vé Xem phim (Cinema Booking System)
+ * Phân hệ: Backend Service
+ * 
+ * Mô tả: 
+ * Lớp Service cốt lõi quản lý Người dùng. Xử lý xác thực tài khoản, 
+ * cập nhật hồ sơ, phân quyền và giao tiếp với Firebase Auth cũng như database.
+ */
 package com.cinemabooking.backend.service;
 
 import com.cinemabooking.backend.dto.UserDTO;

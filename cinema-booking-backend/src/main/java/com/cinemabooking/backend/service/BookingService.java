@@ -1,3 +1,11 @@
+/**
+ * Dự án: Hệ thống Đặt vé Xem phim (Cinema Booking System)
+ * Phân hệ: Backend Service
+ * 
+ * Mô tả: 
+ * Lớp Service xử lý logic đặt vé, phân bổ ghế ngồi và giao tiếp với 
+ * cơ sở dữ liệu để hoàn tất giao dịch mua vé của người dùng.
+ */
 package com.cinemabooking.backend.service;
 
 import com.cinemabooking.backend.dto.*;

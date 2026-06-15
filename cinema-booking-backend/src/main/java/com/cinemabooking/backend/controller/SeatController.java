@@ -1,3 +1,12 @@
+/**
+ * Dự án: Hệ thống Đặt vé Xem phim (Cinema Booking System)
+ * Phân hệ: Backend API
+ * 
+ * Mô tả: 
+ * Controller quản lý tình trạng ghế ngồi theo thời gian thực.
+ * Cung cấp API kiểm tra ghế trống, khoá ghế tạm thời khi người dùng đang chọn
+ * và đồng bộ trạng thái ghế.
+ */
 package com.cinemabooking.backend.controller;
 
 import com.cinemabooking.backend.dto.ApiResponse;

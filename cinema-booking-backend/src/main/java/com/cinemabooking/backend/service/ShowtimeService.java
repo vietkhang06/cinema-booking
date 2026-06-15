@@ -1,3 +1,11 @@
+/**
+ * Dự án: Hệ thống Đặt vé Xem phim (Cinema Booking System)
+ * Phân hệ: Backend Service
+ * 
+ * Mô tả: 
+ * Lớp Service xử lý các truy vấn phức tạp về thời gian và lịch chiếu.
+ * Tương tác với cơ sở dữ liệu để tìm ra các suất chiếu phù hợp với rạp và khung giờ.
+ */
 package com.cinemabooking.backend.service;
 
 import com.cinemabooking.backend.dto.ShowtimeDTO;

@@ -1,3 +1,11 @@
+/**
+ * Dự án: Hệ thống Đặt vé Xem phim (Cinema Booking System)
+ * Phân hệ: Backend Service
+ * 
+ * Mô tả: 
+ * Lớp Service chứa các logic nghiệp vụ chính cho tính năng Banner.
+ * Tương tác với cơ sở dữ liệu Firestore để lấy các banner đang hoạt động và chuyển đổi dữ liệu.
+ */
 package com.cinemabooking.backend.service;
 
 import com.cinemabooking.backend.dto.BannerDTO;

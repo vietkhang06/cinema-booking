@@ -1,3 +1,11 @@
+/**
+ * Dự án: Hệ thống Đặt vé Xem phim (Cinema Booking System)
+ * Phân hệ: Backend Service
+ * 
+ * Mô tả: 
+ * Lớp Service quản lý các nghiệp vụ phức tạp về ghế ngồi, bao gồm giải quyết xung đột
+ * khi có nhiều người cùng đặt một ghế, cơ chế khoá ghế tạm thời và cập nhật trạng thái.
+ */
 package com.cinemabooking.backend.service;
 
 import com.cinemabooking.backend.dto.SeatDTO;

@@ -1,3 +1,11 @@
+/**
+ * Dự án: Hệ thống Đặt vé Xem phim (Cinema Booking System)
+ * Phân hệ: Backend API
+ * 
+ * Mô tả: 
+ * Controller xử lý các thao tác liên quan đến Rạp chiếu phim (Cinema).
+ * Cung cấp API để lấy danh sách rạp, xem chi tiết và tra cứu vị trí rạp.
+ */
 package com.cinemabooking.backend.controller;
 
 import com.cinemabooking.backend.dto.ApiResponse;

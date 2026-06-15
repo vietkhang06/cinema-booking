@@ -1,3 +1,10 @@
+/**
+ * Dự án: Hệ thống Đặt vé Xem phim (Cinema Booking System)
+ * Phân hệ: Backend DTO
+ * 
+ * Mô tả: 
+ * DTO mô tả thông tin Rạp chiếu phim (Cinema), bao gồm tên rạp, địa chỉ và cơ sở vật chất.
+ */
 package com.cinemabooking.backend.dto;
 
 import lombok.AllArgsConstructor;

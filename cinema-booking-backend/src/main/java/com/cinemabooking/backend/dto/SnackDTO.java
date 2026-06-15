@@ -1,3 +1,11 @@
+/**
+ * Dự án: Hệ thống Đặt vé Xem phim (Cinema Booking System)
+ * Phân hệ: Backend DTO
+ * 
+ * Mô tả: 
+ * Đối tượng truyền tải dữ liệu cho các sản phẩm Đồ ăn/Thức uống (Snack).
+ * Trả về thông tin sản phẩm và giá cả cho client hiển thị.
+ */
 package com.cinemabooking.backend.dto;
 
 import lombok.AllArgsConstructor;

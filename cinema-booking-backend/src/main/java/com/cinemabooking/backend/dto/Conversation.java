@@ -1,3 +1,10 @@
+/**
+ * Dự án: Hệ thống Đặt vé Xem phim (Cinema Booking System)
+ * Phân hệ: Backend DTO
+ * 
+ * Mô tả: 
+ * DTO mô tả thông tin của một Cuộc hội thoại (Conversation) trong tính năng chat.
+ */
 package com.cinemabooking.backend.dto;
 
 import com.google.cloud.firestore.annotation.Exclude;
