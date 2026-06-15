@@ -1,3 +1,11 @@
+/**
+ * Dự án: Hệ thống Đặt vé Xem phim (Cinema Booking System)
+ * Phân hệ: Backend Service
+ * 
+ * Mô tả: 
+ * Lớp Service quản lý dữ liệu về rạp chiếu phim. Xử lý việc truy xuất thông tin rạp
+ * từ Firestore, map dữ liệu và xử lý các logic tìm kiếm rạp.
+ */
 package com.cinemabooking.backend.service;
 
 import com.cinemabooking.backend.dto.CinemaDTO;

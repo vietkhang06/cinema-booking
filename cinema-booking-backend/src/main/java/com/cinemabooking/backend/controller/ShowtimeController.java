@@ -1,3 +1,11 @@
+/**
+ * Dự án: Hệ thống Đặt vé Xem phim (Cinema Booking System)
+ * Phân hệ: Backend API
+ * 
+ * Mô tả: 
+ * Controller truy vấn lịch chiếu phim. Cho phép client lọc lịch chiếu theo
+ * ngày, theo rạp và theo từng bộ phim cụ thể.
+ */
 package com.cinemabooking.backend.controller;
 
 import com.cinemabooking.backend.dto.ApiResponse;

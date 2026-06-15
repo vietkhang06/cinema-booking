@@ -1,3 +1,11 @@
+/**
+ * Dự án: Hệ thống Đặt vé Xem phim (Cinema Booking System)
+ * Phân hệ: Backend API
+ * 
+ * Mô tả: 
+ * Controller quản lý hồ sơ người dùng. Xử lý các request bảo mật để xem
+ * và cập nhật thông tin cá nhân, ảnh đại diện, cũng như các tuỳ chọn của người dùng.
+ */
 package com.cinemabooking.backend.controller;
 
 import com.cinemabooking.backend.dto.ApiResponse;

@@ -1,3 +1,11 @@
+/**
+ * Dự án: Hệ thống Đặt vé Xem phim (Cinema Booking System)
+ * Phân hệ: Backend DTO
+ * 
+ * Mô tả: 
+ * Đối tượng truyền tải dữ liệu đại diện cho Người dùng (User).
+ * Dùng để trả về thông tin hồ sơ người dùng một cách an toàn mà không làm lộ dữ liệu nhạy cảm.
+ */
 package com.cinemabooking.backend.dto;
 
 import lombok.AllArgsConstructor;

@@ -1,3 +1,11 @@
+/**
+ * Dự án: Hệ thống Đặt vé Xem phim (Cinema Booking System)
+ * Phân hệ: Backend DTO
+ * 
+ * Mô tả: 
+ * Đối tượng gói dữ liệu trả về chuẩn (Standard Response Format) cho toàn bộ API.
+ * Giúp client dễ dàng parse status code, message và payload.
+ */
 package com.cinemabooking.backend.dto;
 
 import lombok.AllArgsConstructor;

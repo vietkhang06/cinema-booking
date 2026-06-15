@@ -1,3 +1,11 @@
+/**
+ * Dự án: Hệ thống Đặt vé Xem phim (Cinema Booking System)
+ * Phân hệ: Backend DTO
+ * 
+ * Mô tả: 
+ * Đối tượng truyền tải dữ liệu Suất chiếu (Showtime).
+ * Chứa thông tin về thời gian chiếu, rạp chiếu, và bộ phim tương ứng.
+ */
 package com.cinemabooking.backend.dto;
 
 import lombok.AllArgsConstructor;

@@ -1,3 +1,11 @@
+/**
+ * Dự án: Hệ thống Đặt vé Xem phim (Cinema Booking System)
+ * Phân hệ: Backend Payment
+ * 
+ * Mô tả: 
+ * Kho lưu trữ (Repository) cho các giao dịch thanh toán.
+ * Giao tiếp trực tiếp với database để lưu lại lịch sử dòng tiền.
+ */
 package com.cinemabooking.backend.payment.repository;
 
 import com.cinemabooking.backend.payment.model.Payment;

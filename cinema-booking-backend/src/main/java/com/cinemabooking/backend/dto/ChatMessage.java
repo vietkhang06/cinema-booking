@@ -1,3 +1,10 @@
+/**
+ * Dự án: Hệ thống Đặt vé Xem phim (Cinema Booking System)
+ * Phân hệ: Backend DTO
+ * 
+ * Mô tả: 
+ * Dữ liệu chuyển giao mô tả một tin nhắn đơn lẻ trong hội thoại Chat.
+ */
 package com.cinemabooking.backend.dto;
 
 import lombok.AllArgsConstructor;

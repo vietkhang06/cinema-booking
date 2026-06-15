@@ -1,3 +1,11 @@
+/**
+ * Dự án: Hệ thống Đặt vé Xem phim (Cinema Booking System)
+ * Phân hệ: Backend API
+ * 
+ * Mô tả: 
+ * Controller chịu trách nhiệm tiếp nhận và xử lý các HTTP request liên quan đến Banner.
+ * Cung cấp các API để lấy danh sách banner hiển thị trên ứng dụng.
+ */
 package com.cinemabooking.backend.controller;
 
 import com.cinemabooking.backend.dto.ApiResponse;

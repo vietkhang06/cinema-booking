@@ -1,3 +1,11 @@
+/**
+ * Dự án: Hệ thống Đặt vé Xem phim (Cinema Booking System)
+ * Phân hệ: Backend Security
+ * 
+ * Mô tả: 
+ * Bộ lọc (Filter) kiểm tra tính hợp lệ của Firebase Auth Token trong header.
+ * Giúp chặn các request không có quyền truy cập hoặc token đã hết hạn.
+ */
 package com.cinemabooking.backend.security;
 
 import com.google.firebase.FirebaseApp;

@@ -1,3 +1,11 @@
+/**
+ * Dự án: Hệ thống Đặt vé Xem phim (Cinema Booking System)
+ * Phân hệ: Backend Security
+ * 
+ * Mô tả: 
+ * Cấu hình bảo mật toàn cục cho ứng dụng (Spring Security).
+ * Quản lý CORS, phân quyền các route và thiết lập các bộ lọc (Filters).
+ */
 package com.cinemabooking.backend.security;
 
 import org.springframework.context.annotation.Bean;

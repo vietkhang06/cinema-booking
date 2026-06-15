@@ -1,3 +1,11 @@
+/**
+ * Dự án: Hệ thống Đặt vé Xem phim (Cinema Booking System)
+ * Phân hệ: Backend Request DTO
+ * 
+ * Mô tả: 
+ * Đối tượng payload khi người dùng xác nhận đặt ghế (sau khi đã khoá ghế thành công).
+ * Chứa danh sách các ghế đã chọn và mã đơn hàng liên quan.
+ */
 package com.cinemabooking.backend.dto.request;
 
 import com.cinemabooking.backend.common.PaymentMethod;

@@ -1,3 +1,11 @@
+/**
+ * Dự án: Hệ thống Đặt vé Xem phim (Cinema Booking System)
+ * Phân hệ: Backend Payment
+ * 
+ * Mô tả: 
+ * Service quản lý các giao dịch thanh toán. Tích hợp với bên thứ ba (VNPay, Momo...)
+ * hoặc xử lý logic thanh toán nội bộ.
+ */
 package com.cinemabooking.backend.payment.service;
 
 import com.cinemabooking.backend.payment.model.Payment;

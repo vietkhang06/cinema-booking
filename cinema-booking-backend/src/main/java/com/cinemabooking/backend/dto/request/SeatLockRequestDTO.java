@@ -1,3 +1,11 @@
+/**
+ * Dự án: Hệ thống Đặt vé Xem phim (Cinema Booking System)
+ * Phân hệ: Backend Request DTO
+ * 
+ * Mô tả: 
+ * Đối tượng gửi từ Client lên Server để yêu cầu khoá ghế tạm thời (Hold seat)
+ * trong lúc người dùng thực hiện các bước thanh toán, tránh người khác chọn trùng.
+ */
 package com.cinemabooking.backend.dto.request;
 
 import lombok.AllArgsConstructor;
