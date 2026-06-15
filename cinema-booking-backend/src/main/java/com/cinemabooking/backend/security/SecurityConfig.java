@@ -34,7 +34,8 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/api/ping",
                                 "/api/v1/health",
-                                "/api/v1/version"
+                                "/api/v1/version",
+                                "/api/v1/auth/**"
                         ).permitAll()
 
                         .requestMatchers(HttpMethod.GET,
