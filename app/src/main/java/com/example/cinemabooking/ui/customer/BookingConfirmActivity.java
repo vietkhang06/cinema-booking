@@ -24,6 +24,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+
 public class BookingConfirmActivity extends AppCompatActivity {
 
     public static final String EXTRA_SHOWTIME_ID = "showtimeId";
@@ -91,7 +94,6 @@ public class BookingConfirmActivity extends AppCompatActivity {
 
         tvTimer = findViewById(R.id.tvTimer);
 
-        // Start timer if not already active
         if (!BookingTimerManager.getInstance().isTimerActive(this)) {
             BookingTimerManager.getInstance().startTimer(this, 5 * 60 * 1000);
         } else {
@@ -132,7 +134,6 @@ public class BookingConfirmActivity extends AppCompatActivity {
     private void initViews() {
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
 
-        // Bind data lên UI
         TextView tvMovie = findViewById(R.id.tvMovieName);
         TextView tvCinema = findViewById(R.id.tvCinemaName);
         TextView tvTime = findViewById(R.id.tvShowtime);
@@ -376,50 +377,163 @@ public class BookingConfirmActivity extends AppCompatActivity {
         if (btnApplyPromo != null) {
             btnApplyPromo.setOnClickListener(v -> {
                 if (edtPromoCode == null) return;
-                String code = edtPromoCode.getText().toString().trim().toUpperCase();
+
+                String code = edtPromoCode.getText().toString().trim().toUpperCase(Locale.getDefault());
                 if (code.isEmpty()) {
                     Toast.makeText(this, "Vui lòng nhập mã khuyến mãi!", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
-                double voucherValue = 0;
-                String promoMsg = "";
-                boolean isValid = false;
+                double subtotal = total + totalSnacksPrice;
 
-                if ("GALAXY50".equals(code)) {
-                    voucherValue = 50000;
-                    promoMsg = "Đã áp dụng mã GALAXY50 (-50k)";
-                    isValid = true;
-                } else if ("WELCOME10".equals(code)) {
-                    voucherValue = total * 0.10;
-                    promoMsg = "Đã áp dụng mã WELCOME10 (-10%)";
-                    isValid = true;
-                } else if ("FREESHOP".equals(code)) {
-                    voucherValue = 20000;
-                    promoMsg = "Đã áp dụng mã FREESHOP (-20k)";
-                    isValid = true;
+                btnApplyPromo.setEnabled(false);
+                if (tvPromoStatus != null) {
+                    tvPromoStatus.setVisibility(android.view.View.VISIBLE);
+                    tvPromoStatus.setText("Đang kiểm tra mã khuyến mãi...");
                 }
 
-                if (isValid) {
-                    discountVoucher = voucherValue;
-                    appliedPromoCode = code;
-                    if (tvAppliedPromo != null) {
-                        tvAppliedPromo.setText(promoMsg);
-                        tvAppliedPromo.setTextColor(0xFF4CAF50);
-                    }
-                    updateTotalPrice();
-                    dialog.dismiss();
-                    Toast.makeText(this, "Áp dụng mã khuyến mãi thành công!", Toast.LENGTH_SHORT).show();
-                } else {
-                    if (tvPromoStatus != null) {
-                        tvPromoStatus.setText("Mã khuyến mãi không hợp lệ hoặc đã hết hạn!");
-                        tvPromoStatus.setVisibility(android.view.View.VISIBLE);
-                    }
-                }
+                FirebaseFirestore.getInstance()
+                        .collection("promotions") // nếu collection của bạn tên khác, đổi ở đây
+                        .whereEqualTo("code", code)
+                        .limit(1)
+                        .get()
+                        .addOnSuccessListener(snapshot -> {
+                            btnApplyPromo.setEnabled(true);
+
+                            if (snapshot == null || snapshot.isEmpty()) {
+                                showPromoInvalid(tvPromoStatus, "Mã khuyến mãi không hợp lệ hoặc đã hết hạn!");
+                                return;
+                            }
+
+                            DocumentSnapshot doc = snapshot.getDocuments().get(0);
+
+                            String status = doc.getString("status");
+                            Boolean deleted = doc.getBoolean("deleted");
+                            Long validFrom = doc.getLong("validFrom");
+                            Long validTo = doc.getLong("validTo");
+                            Long usageLimit = doc.getLong("usageLimit");
+                            Long usedCount = doc.getLong("usedCount");
+                            Double minAmount = doc.getDouble("minAmount");
+                            String targetRole = doc.getString("targetRole");
+                            String discountType = doc.getString("discountType");
+                            Double discountValue = doc.getDouble("discountValue");
+                            Double maxDiscountAmount = doc.getDouble("maxDiscountAmount");
+                            String title = doc.getString("title");
+
+                            long now = System.currentTimeMillis();
+
+                            // 1) Trạng thái
+                            if (!"active".equalsIgnoreCase(status)) {
+                                showPromoInvalid(tvPromoStatus, "Mã khuyến mãi không còn hoạt động!");
+                                return;
+                            }
+
+                            if (Boolean.TRUE.equals(deleted)) {
+                                showPromoInvalid(tvPromoStatus, "Mã khuyến mãi đã bị xoá!");
+                                return;
+                            }
+
+                            // 2) Thời gian hiệu lực
+                            if (validFrom != null && now < validFrom) {
+                                showPromoInvalid(tvPromoStatus, "Mã khuyến mãi chưa đến thời gian áp dụng!");
+                                return;
+                            }
+
+                            if (validTo != null && now > validTo) {
+                                showPromoInvalid(tvPromoStatus, "Mã khuyến mãi đã hết hạn!");
+                                return;
+                            }
+
+                            // 3) Giới hạn lượt dùng
+                            if (usageLimit != null && usedCount != null && usedCount >= usageLimit) {
+                                showPromoInvalid(tvPromoStatus, "Mã khuyến mãi đã hết lượt sử dụng!");
+                                return;
+                            }
+
+                            // 4) Điều kiện tối thiểu
+                            if (minAmount != null && subtotal < minAmount) {
+                                showPromoInvalid(tvPromoStatus,
+                                        String.format(Locale.getDefault(),
+                                                "Đơn hàng phải tối thiểu %,.0f đ để áp dụng mã này!", minAmount));
+                                return;
+                            }
+
+                            // 5) Đối tượng áp dụng
+                            if (!isPromoTargetMatch(targetRole)) {
+                                showPromoInvalid(tvPromoStatus, "Mã khuyến mãi không áp dụng cho tài khoản của bạn!");
+                                return;
+                            }
+
+                            // 6) Tính discount
+                            double voucherValue = 0;
+
+                            if ("percentage".equalsIgnoreCase(discountType)) {
+                                double percent = discountValue != null ? discountValue : 0;
+                                voucherValue = subtotal * (percent / 100.0);
+
+                                if (maxDiscountAmount != null && maxDiscountAmount > 0) {
+                                    voucherValue = Math.min(voucherValue, maxDiscountAmount);
+                                }
+                            } else if ("fixed".equalsIgnoreCase(discountType)
+                                    || "amount".equalsIgnoreCase(discountType)) {
+                                voucherValue = discountValue != null ? discountValue : 0;
+                            }
+
+                            if (voucherValue <= 0) {
+                                showPromoInvalid(tvPromoStatus, "Mã khuyến mãi không hợp lệ!");
+                                return;
+                            }
+
+                            discountVoucher = voucherValue;
+                            appliedPromoCode = code;
+
+                            if (tvAppliedPromo != null) {
+                                String promoLabel = (title != null && !title.trim().isEmpty())
+                                        ? title
+                                        : code;
+
+                                tvAppliedPromo.setText(
+                                        String.format(Locale.getDefault(),
+                                                "Đã áp dụng: %s (-%,.0f đ)", promoLabel, voucherValue)
+                                );
+                                tvAppliedPromo.setTextColor(0xFF4CAF50);
+                            }
+
+                            updateTotalPrice();
+                            dialog.dismiss();
+                            Toast.makeText(this, "Áp dụng mã khuyến mãi thành công!", Toast.LENGTH_SHORT).show();
+                        })
+                        .addOnFailureListener(e -> {
+                            btnApplyPromo.setEnabled(true);
+                            showPromoInvalid(tvPromoStatus, "Không thể kiểm tra khuyến mãi: " + e.getMessage());
+                        });
             });
         }
 
         dialog.show();
+    }
+
+    private void showPromoInvalid(TextView tvPromoStatus, String message) {
+        if (tvPromoStatus != null) {
+            tvPromoStatus.setText(message);
+            tvPromoStatus.setVisibility(android.view.View.VISIBLE);
+        }
+    }
+
+    private boolean isPromoTargetMatch(String targetRole) {
+        if (targetRole == null || targetRole.trim().isEmpty() || "all".equalsIgnoreCase(targetRole.trim())) {
+            return true;
+        }
+
+        if (currentUser == null) {
+            return false;
+        }
+
+        String userRole = currentUser.role != null ? currentUser.role : "";
+        String memberLevel = currentUser.memberLevel != null ? currentUser.memberLevel : "";
+
+        return targetRole.equalsIgnoreCase(userRole)
+                || targetRole.equalsIgnoreCase(memberLevel);
     }
 
     private void confirmBooking() {
