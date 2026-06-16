@@ -75,8 +75,8 @@ public class SeatReleaseScheduler {
                         shouldCancel = true;
                     }
                 } else {
-                    // Thanh toán online (momo, bank) hủy sau 7.5 phút nếu không thanh toán
-                    if (createdAt > 0 && (createdAt + 450000) < now) {
+                    // Thanh toán online (momo, bank) hủy sau 5 phút nếu không thanh toán
+                    if (createdAt > 0 && (createdAt + 300000) < now) {
                         shouldCancel = true;
                     }
                 }
