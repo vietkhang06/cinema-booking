@@ -138,6 +138,7 @@ public class AuthenticationService {
                     userRepo.createUser(newUserDoc(fUser, phone, name), new ResultCallback<User>() {
                         @Override
                         public void onSuccess(User data) {
+                            new WelcomeVoucherService().sendWelcomeVoucher(data.uid);
                             if (data == null) {
                                 callback.onError("Lỗi khởi tạo người dùng.");
                                 return;
@@ -257,6 +258,7 @@ public class AuthenticationService {
                 userRepo.createUser(newUserDoc(fUser, phone, name), new ResultCallback<User>() {
                     @Override
                     public void onSuccess(User created) {
+                        new WelcomeVoucherService().sendWelcomeVoucher(created.uid);
                         if (created == null) {
                             callback.onError("Không tạo được user.");
                             return;
