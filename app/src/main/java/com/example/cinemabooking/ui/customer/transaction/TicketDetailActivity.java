@@ -223,7 +223,7 @@ public class TicketDetailActivity extends AppCompatActivity {
 
         tvTitle.setText(booking.movieTitleSnapshot);
         tvCinema.setText(booking.cinemaNameSnapshot);
-        
+
         if (booking.showtimeStartAtSnapshot != null && booking.showtimeStartAtSnapshot > 0) {
             Date date = new Date(booking.showtimeStartAtSnapshot);
             tvDate.setText(dateFormat.format(date));
@@ -231,7 +231,7 @@ public class TicketDetailActivity extends AppCompatActivity {
         }
 
         tvRoom.setText(booking.roomNameSnapshot != null ? booking.roomNameSnapshot : "Chưa xác định");
-        
+
         if (booking.seatCodes != null && !booking.seatCodes.isEmpty()) {
             tvSeats.setText(String.join(", ", booking.seatCodes));
         } else {
@@ -272,12 +272,12 @@ public class TicketDetailActivity extends AppCompatActivity {
         }
 
         // Generate QR Code: bookingId | userId | showtimeId | timestamp
-        String qrContent = String.format("%s|%s|%s|%d", 
-                booking.bookingId, 
-                booking.userId, 
-                booking.showtimeId, 
+        String qrContent = String.format("%s|%s|%s|%d",
+                booking.bookingId,
+                booking.userId,
+                booking.showtimeId,
                 System.currentTimeMillis());
-        
+
         new Thread(() -> {
             Bitmap qrBitmap = QRCodeUtils.generateQRCode(qrContent, 500, 500);
             if (qrBitmap != null) {
@@ -298,7 +298,7 @@ public class TicketDetailActivity extends AppCompatActivity {
         }
 
         // Create Bitmap from View
-        Bitmap bitmap = Bitmap.createBitmap(ticketContainer.getWidth(), 
+        Bitmap bitmap = Bitmap.createBitmap(ticketContainer.getWidth(),
                 ticketContainer.getHeight(), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
         ticketContainer.draw(canvas);
@@ -322,7 +322,7 @@ public class TicketDetailActivity extends AppCompatActivity {
 
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
             if (fos != null) fos.close();
-            
+
             Toast.makeText(this, "Đã lưu vé vào thư viện ảnh!", Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
             Toast.makeText(this, "Lỗi khi lưu vé: " + e.getMessage(), Toast.LENGTH_SHORT).show();
