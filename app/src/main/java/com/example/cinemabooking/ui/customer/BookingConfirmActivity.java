@@ -46,6 +46,7 @@ public class BookingConfirmActivity extends AppCompatActivity {
 
     private TextView tvTimer;
     private BookingTimerManager.TimerListener timerListener;
+    private boolean hasShownWarning = false;
 
     // Phase 3 Promotion Fields
     private com.example.cinemabooking.domain.model.User currentUser;
@@ -107,6 +108,17 @@ public class BookingConfirmActivity extends AppCompatActivity {
                 long seconds = (millisUntilFinished % 60000) / 1000;
                 if (tvTimer != null) {
                     tvTimer.setText(String.format(Locale.getDefault(), "Thời gian giữ ghế: %02d:%02d", minutes, seconds));
+                }
+                if (millisUntilFinished <= 60000 && !hasShownWarning) {
+                    hasShownWarning = true;
+                    if (!isFinishing() && !isDestroyed()) {
+                        new androidx.appcompat.app.AlertDialog.Builder(BookingConfirmActivity.this)
+                                .setTitle("Thông báo")
+                                .setMessage("Chú ý thời gian giữ ghế còn 1 phút, xin vui lòng thanh toán")
+                                .setPositiveButton("Đóng", (dialog, which) -> dialog.dismiss())
+                                .setCancelable(false)
+                                .show();
+                    }
                 }
             }
 
@@ -755,11 +767,19 @@ public class BookingConfirmActivity extends AppCompatActivity {
             tvSnackPrice.setText(String.format(Locale.getDefault(), "%,.0f đ", snack.price));
         }
 
-        if (ivSnackImage != null && snack.imageUrl != null && !snack.imageUrl.isEmpty()) {
-            com.bumptech.glide.Glide.with(this)
-                    .load(snack.imageUrl)
-                    .placeholder(R.drawable.gift_solid_full)
-                    .into(ivSnackImage);
+        if (ivSnackImage != null) {
+            if (snack.imageUrl != null && !snack.imageUrl.isEmpty()) {
+                // Clear tint list so downloaded images are displayed in their original colors
+                ivSnackImage.setImageTintList(null);
+                com.bumptech.glide.Glide.with(this)
+                        .load(snack.imageUrl)
+                        .placeholder(R.drawable.gift_solid_full)
+                        .into(ivSnackImage);
+            } else {
+                // Apply fallback tint color to the placeholder image
+                ivSnackImage.setImageResource(R.drawable.gift_solid_full);
+                ivSnackImage.setImageTintList(android.content.res.ColorStateList.valueOf(0xFFA13345));
+            }
         }
 
         if (tvQuantity != null) {

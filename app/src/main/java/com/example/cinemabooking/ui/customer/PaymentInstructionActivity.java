@@ -60,6 +60,7 @@ public class PaymentInstructionActivity extends AppCompatActivity {
     // Guard: đảm bảo payment chỉ được xử lý MỘT LẦN dù listener fire nhiều lần
     private volatile boolean paymentHandled = false;
     private BookingTimerManager.TimerListener timerListener;
+    private boolean hasShownWarning = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -483,6 +484,17 @@ public class PaymentInstructionActivity extends AppCompatActivity {
                 long seconds = (millisUntilFinished % 60000) / 1000;
                 if (tvStatusText != null) {
                     tvStatusText.setText(String.format(Locale.getDefault(), "Trạng thái: Chờ thanh toán (%02d:%02d)", minutes, seconds));
+                }
+                if (millisUntilFinished <= 60000 && !hasShownWarning) {
+                    hasShownWarning = true;
+                    if (!isFinishing() && !isDestroyed()) {
+                        new androidx.appcompat.app.AlertDialog.Builder(PaymentInstructionActivity.this)
+                                .setTitle("Thông báo")
+                                .setMessage("Chú ý thời gian thanh toán còn 1 phút, xin vui lòng thanh toán")
+                                .setPositiveButton("Đóng", (dialog, which) -> dialog.dismiss())
+                                .setCancelable(false)
+                                .show();
+                    }
                 }
             }
 
