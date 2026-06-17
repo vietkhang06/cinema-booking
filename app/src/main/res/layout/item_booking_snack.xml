@@ -20,8 +20,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="centerCrop"
-            android:src="@drawable/gift_solid_full"
-            app:tint="#A13345" />
+            android:src="@drawable/gift_solid_full" />
     </com.google.android.material.card.MaterialCardView>
 
     <!-- Snack Details -->
