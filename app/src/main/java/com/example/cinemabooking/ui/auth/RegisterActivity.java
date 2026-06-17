@@ -1,9 +1,11 @@
 package com.example.cinemabooking.ui.auth;
 
+import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Patterns;
+import android.widget.RadioButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -18,9 +20,12 @@ import androidx.credentials.exceptions.GetCredentialException;
 import com.example.cinemabooking.R;
 import com.example.cinemabooking.core.base.BaseActivity;
 import com.example.cinemabooking.core.navigation.AppNavigator;
+import com.example.cinemabooking.data.repository.UserRepositoryImpl;
 import com.example.cinemabooking.di.ServiceProvider;
 import com.example.cinemabooking.domain.common.AuthCallback;
+import com.example.cinemabooking.domain.common.ResultCallback;
 import com.example.cinemabooking.domain.model.User;
+import com.example.cinemabooking.domain.repository.UserRepository;
 import com.example.cinemabooking.service.AuthenticationService;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -34,12 +39,18 @@ import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 
 public class RegisterActivity extends BaseActivity {
 
     private TextInputLayout tilEmail, tilPassword, tilConfirmPassword, tilPhone, tilFullName;
-    private TextInputEditText edtEmail, edtPassword, edtConfirmPassword, edtPhone, edtFullName;
+    private TextInputEditText edtEmail, edtPassword, edtConfirmPassword, edtPhone, edtFullName, edtBirthDate;
+    private RadioButton rbMale, rbFemale;
 
     private MaterialButton btnRegister;
     private TextView tvBack;
@@ -47,6 +58,7 @@ public class RegisterActivity extends BaseActivity {
     private MaterialCardView btnFacebook, btnGoogle;
 
     private AuthenticationService authService;
+    private UserRepository userRepo;
 
     // Facebook
     private CallbackManager callbackManager;
@@ -60,6 +72,7 @@ public class RegisterActivity extends BaseActivity {
         setContentView(R.layout.activity_register);
 
         authService = ServiceProvider.getInstance().getAuthenticationService();
+        userRepo = new UserRepositoryImpl();
 
         credentialManager = CredentialManager.create(this);
         initViews();
@@ -79,6 +92,9 @@ public class RegisterActivity extends BaseActivity {
         edtConfirmPassword = findViewById(R.id.edtConfirmPassword);
         edtPhone = findViewById(R.id.edtPhone);
         edtFullName = findViewById(R.id.edtFullName);
+        edtBirthDate = findViewById(R.id.edtBirthDate);
+        rbMale = findViewById(R.id.rbMale);
+        rbFemale = findViewById(R.id.rbFemale);
 
         btnRegister = findViewById(R.id.btnRegister);
         tvBack = findViewById(R.id.tvBack);
@@ -123,6 +139,28 @@ public class RegisterActivity extends BaseActivity {
         btnFacebook.setOnClickListener(v -> signInWithFacebook());
 
         btnGoogle.setOnClickListener(v -> signInWithGoogle());
+
+        edtBirthDate.setOnClickListener(v -> showDatePicker());
+    }
+
+    private void showDatePicker() {
+        final Calendar c = Calendar.getInstance();
+        c.add(Calendar.YEAR, -16); // Đặt mặc định hiển thị cách đây 16 năm
+        long maxDate = c.getTimeInMillis();
+        
+        int year = c.get(Calendar.YEAR);
+        int month = c.get(Calendar.MONTH);
+        int day = c.get(Calendar.DAY_OF_MONTH);
+
+        DatePickerDialog datePickerDialog = new DatePickerDialog(
+                this,
+                (view, year1, monthOfYear, dayOfMonth) -> {
+                    String formattedDate = dayOfMonth + "/" + (monthOfYear + 1) + "/" + year1;
+                    edtBirthDate.setText(formattedDate);
+                },
+                year, month, day);
+        datePickerDialog.getDatePicker().setMaxDate(maxDate); // Chặn chọn ngày lớn hơn (người dùng phải >= 16 tuổi)
+        datePickerDialog.show();
     }
 
     private void attemptRegister() {
@@ -133,9 +171,40 @@ public class RegisterActivity extends BaseActivity {
         String password = getText(edtPassword);
         String confirmPassword = getText(edtConfirmPassword);
         String phone = getText(edtPhone);
+        String birthDate = getText(edtBirthDate);
+        String gender = rbMale.isChecked() ? "Nam" : "Nữ";
 
         if (TextUtils.isEmpty(fullName)) {
             tilFullName.setError("Vui lòng nhập họ và tên");
+            return;
+        }
+
+        if (TextUtils.isEmpty(birthDate)) {
+            showToast("Vui lòng chọn ngày sinh");
+            return;
+        }
+
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("d/M/yyyy", Locale.US);
+            sdf.setLenient(false);
+            Date dateOfBirth = sdf.parse(birthDate);
+            if (dateOfBirth != null) {
+                Calendar dob = Calendar.getInstance();
+                dob.setTime(dateOfBirth);
+                Calendar today = Calendar.getInstance();
+
+                int age = today.get(Calendar.YEAR) - dob.get(Calendar.YEAR);
+                if (today.get(Calendar.DAY_OF_YEAR) < dob.get(Calendar.DAY_OF_YEAR)) {
+                    age--;
+                }
+
+                if (age < 16) {
+                    showToast("Bạn phải từ 16 tuổi trở lên");
+                    return;
+                }
+            }
+        } catch (ParseException e) {
+            showToast("Ngày sinh không đúng định dạng");
             return;
         }
 
@@ -176,9 +245,21 @@ public class RegisterActivity extends BaseActivity {
         authService.signUpWithEmailAndPassword(email, password, phone, fullName, new AuthCallback() {
             @Override
             public void onSuccess(User data) {
-                showToast("Đăng ký thành công! Vui lòng đăng nhập.");
-                // Chuyển về LoginActivity, xóa RegisterActivity khỏi back stack
-                AppNavigator.goToLogin(RegisterActivity.this);
+                data.birthDate = birthDate;
+                data.gender = gender;
+                userRepo.updateUser(data, new ResultCallback<User>() {
+                    @Override
+                    public void onSuccess(User updatedUser) {
+                        showToast("Đăng ký thành công! Vui lòng đăng nhập.");
+                        AppNavigator.goToLogin(RegisterActivity.this);
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        btnRegister.setEnabled(true);
+                        showToast("Lỗi cập nhật thông tin: " + message);
+                    }
+                });
             }
 
             @Override

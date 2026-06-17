@@ -115,6 +115,41 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
+                    android:text="Ngày sinh"
+                    android:textColor="#1B141E"
+                    android:textSize="14sp" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilBirthDate"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    app:boxBackgroundMode="filled"
+                    app:boxBackgroundColor="#F4F6F8"
+                    app:boxCornerRadiusBottomEnd="12dp"
+                    app:boxCornerRadiusBottomStart="12dp"
+                    app:boxCornerRadiusTopEnd="12dp"
+                    app:boxCornerRadiusTopStart="12dp"
+                    app:boxStrokeWidth="0dp"
+                    app:boxStrokeWidthFocused="0dp"
+                    app:hintEnabled="false"
+                    app:startIconDrawable="@drawable/calendar_days_solid_full"
+                    app:startIconTint="#8A92A6">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/edtBirthDate"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Chọn ngày sinh"
+                        android:focusable="false"
+                        android:cursorVisible="false"
+                        android:inputType="none" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
                     android:text="Email"
                     android:textColor="#1B141E"
                     android:textSize="14sp" />
@@ -144,7 +179,40 @@
                         android:inputType="textEmailAddress" />
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <TextView
+    <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:text="Số điện thoại"
+                    android:textColor="#1B141E"
+                    android:textSize="14sp" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilPhone"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    app:boxBackgroundMode="filled"
+                    app:boxBackgroundColor="#F4F6F8"
+                    app:boxCornerRadiusBottomEnd="12dp"
+                    app:boxCornerRadiusBottomStart="12dp"
+                    app:boxCornerRadiusTopEnd="12dp"
+                    app:boxCornerRadiusTopStart="12dp"
+                    app:boxStrokeWidth="0dp"
+                    app:boxStrokeWidthFocused="0dp"
+                    app:hintEnabled="false"
+                    app:startIconDrawable="@drawable/phone_solid_full"
+                    app:startIconTint="#8A92A6">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/edtPhone"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Số điện thoại"
+                        android:inputType="phone" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+    <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
@@ -179,7 +247,7 @@
                         android:inputType="textPassword" />
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <TextView
+    <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
@@ -214,38 +282,35 @@
                         android:inputType="textPassword" />
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <TextView
+    <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:text="Số điện thoại"
+                    android:text="Giới tính"
                     android:textColor="#1B141E"
                     android:textSize="14sp" />
 
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/tilPhone"
+                <RadioGroup
+                    android:id="@+id/rgGender"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="28dp"
-                    app:boxBackgroundMode="filled"
-                    app:boxBackgroundColor="#F4F6F8"
-                    app:boxCornerRadiusBottomEnd="12dp"
-                    app:boxCornerRadiusBottomStart="12dp"
-                    app:boxCornerRadiusTopEnd="12dp"
-                    app:boxCornerRadiusTopStart="12dp"
-                    app:boxStrokeWidth="0dp"
-                    app:boxStrokeWidthFocused="0dp"
-                    app:hintEnabled="false"
-                    app:startIconDrawable="@drawable/phone_solid_full"
-                    app:startIconTint="#8A92A6">
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="28dp">
 
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/edtPhone"
-                        android:layout_width="match_parent"
+                    <RadioButton
+                        android:id="@+id/rbMale"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:hint="Số điện thoại"
-                        android:inputType="phone" />
-                </com.google.android.material.textfield.TextInputLayout>
+                        android:text="Nam"
+                        android:checked="true"
+                        android:layout_marginEnd="28dp" />
+
+                    <RadioButton
+                        android:id="@+id/rbFemale"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Nữ" />
+                </RadioGroup>
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnRegister"
