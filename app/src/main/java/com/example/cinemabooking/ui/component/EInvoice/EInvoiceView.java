@@ -26,6 +26,8 @@ public class EInvoiceView extends FrameLayout {
 
     TextView invoiceIdTV, createDateTimeTV, movieNameTV, movieGernesTV, cinemaNameTV, showtimeTV,
             bookingSeatsTV, seatsPriceTV, snackTotalPriceTV, discountTV, totalPriceTV, paymentMethodTV, transactionIdTV;
+    TextView invoiceVoucherLabel, invoicePriceVoucher;
+    android.view.View layoutInvoiceVoucher;
     RecyclerView snackListView;
     ImageView invoiceIdQR, movieBannerImage;
 
@@ -41,6 +43,9 @@ public class EInvoiceView extends FrameLayout {
         snackTotalPriceTV = findViewById(R.id.invoice_snacks_total_price);
         discountTV = findViewById(R.id.invoice_price_discount);
         totalPriceTV = findViewById(R.id.invoice_price_total);
+        layoutInvoiceVoucher = findViewById(R.id.layout_invoice_voucher);
+        invoiceVoucherLabel = findViewById(R.id.invoice_voucher_label);
+        invoicePriceVoucher = findViewById(R.id.invoice_price_voucher);
         paymentMethodTV = findViewById(R.id.invoice_payment_method);
         transactionIdTV = findViewById(R.id.invoice_transaction_id);
 
@@ -74,7 +79,22 @@ public class EInvoiceView extends FrameLayout {
 //        snackTotalPriceTV.setText();
         discountTV.setText(String.format("%,dvnd",(int) invoiceDetail.booking.discount));
         totalPriceTV.setText(String.format("%,dvnd",(int) invoiceDetail.booking.total));
-        discountTV.setText(String.format("%,dvnd",(int) invoiceDetail.booking.discount));
+
+        if (invoiceDetail.booking.promoCode != null && !invoiceDetail.booking.promoCode.trim().isEmpty() && invoiceDetail.booking.discountVoucher > 0) {
+            if (layoutInvoiceVoucher != null) {
+                layoutInvoiceVoucher.setVisibility(android.view.View.VISIBLE);
+            }
+            if (invoiceVoucherLabel != null) {
+                invoiceVoucherLabel.setText("Voucher (" + invoiceDetail.booking.promoCode + ")");
+            }
+            if (invoicePriceVoucher != null) {
+                invoicePriceVoucher.setText(String.format(Locale.ENGLISH, "-%,.0f vnd", invoiceDetail.booking.discountVoucher));
+            }
+        } else {
+            if (layoutInvoiceVoucher != null) {
+                layoutInvoiceVoucher.setVisibility(android.view.View.GONE);
+            }
+        }
 
         paymentMethodTV.setText(invoiceDetail.booking.paymentMethod);
 //        transactionIdTV.setText(invoiceDetail.booking);

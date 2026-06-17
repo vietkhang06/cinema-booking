@@ -12,9 +12,6 @@ public final class BookingMapper {
         Booking model = new Booking();
         model.bookingId = dto.bookingId;
         model.userId = dto.userId;
-//        model.movieId = dto.movieId;
-//        model.cinemaId = dto.cinemaId;
-//        model.roomId = dto.roomId;
         model.showtimeId = dto.showtimeId;
         model.movieTitleSnapshot = dto.movieTitleSnapshot;
         model.movieImageUrlSnapshot = dto.movieImageUrlSnapshot;
@@ -37,6 +34,8 @@ public final class BookingMapper {
         model.createdAt = dto.createdAt;
         model.updatedAt = dto.updatedAt;
         model.deleted = dto.deleted;
+        model.promoCode = dto.promoCode;
+        model.discountVoucher = dto.discountVoucher;
         return model;
     }
 
@@ -45,9 +44,6 @@ public final class BookingMapper {
         BookingDTO dto = new BookingDTO();
         dto.bookingId = model.bookingId;
         dto.userId = model.userId;
-//        dto.movieId = model.movieId;
-//        dto.cinemaId = model.cinemaId;
-//        dto.roomId = model.roomId;
         dto.showtimeId = model.showtimeId;
         dto.movieTitleSnapshot = model.movieTitleSnapshot;
         dto.movieImageUrlSnapshot = model.movieImageUrlSnapshot;
@@ -70,6 +66,8 @@ public final class BookingMapper {
         dto.createdAt = model.createdAt;
         dto.updatedAt = model.updatedAt;
         dto.deleted = model.deleted;
+        dto.promoCode = model.promoCode;
+        dto.discountVoucher = model.discountVoucher;
         return dto;
     }
 }

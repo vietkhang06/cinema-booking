@@ -242,6 +242,35 @@
                             android:textSize="12sp" />
                     </LinearLayout>
 
+                    <!-- Voucher Info -->
+                    <LinearLayout
+                        android:id="@+id/layout_voucher_info"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="20dp"
+                        android:paddingBottom="8dp"
+                        android:visibility="gone">
+
+                        <TextView
+                            android:id="@+id/tv_voucher_label"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Voucher đã dùng"
+                            android:textColor="#616161"
+                            android:textSize="14sp" />
+
+                        <TextView
+                            android:id="@+id/tv_voucher_value"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="-0đ"
+                            android:textColor="#388E3C"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
                     <!-- Price Info -->
                     <LinearLayout
                         android:layout_width="match_parent"

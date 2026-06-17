@@ -39,6 +39,8 @@ public class TicketDetailActivity extends AppCompatActivity {
 
     private ImageView imgPoster, imgQr;
     private TextView tvTitle, tvCinema, tvDate, tvTime, tvRoom, tvSeats, tvBookingCode, tvTotal;
+    private View layoutVoucherInfo;
+    private TextView tvVoucherLabel, tvVoucherValue;
     private MaterialCardView ticketContainer;
     private MaterialButton btnDownload;
     private BookingService bookingService;
@@ -90,6 +92,9 @@ public class TicketDetailActivity extends AppCompatActivity {
         tvSeats = findViewById(R.id.tv_seats);
         tvBookingCode = findViewById(R.id.tv_booking_code);
         tvTotal = findViewById(R.id.tv_total);
+        layoutVoucherInfo = findViewById(R.id.layout_voucher_info);
+        tvVoucherLabel = findViewById(R.id.tv_voucher_label);
+        tvVoucherValue = findViewById(R.id.tv_voucher_value);
         ticketContainer = findViewById(R.id.ticket_container);
         btnDownload = findViewById(R.id.btn_download);
 
@@ -257,6 +262,14 @@ public class TicketDetailActivity extends AppCompatActivity {
         }
 
         tvTotal.setText(String.format("%,.0fđ", booking.total).replace(',', '.'));
+
+        if (booking.promoCode != null && !booking.promoCode.trim().isEmpty() && booking.discountVoucher > 0) {
+            if (layoutVoucherInfo != null) layoutVoucherInfo.setVisibility(View.VISIBLE);
+            if (tvVoucherLabel != null) tvVoucherLabel.setText("Voucher (" + booking.promoCode + ")");
+            if (tvVoucherValue != null) tvVoucherValue.setText(String.format("-%,.0fđ", booking.discountVoucher).replace(',', '.'));
+        } else {
+            if (layoutVoucherInfo != null) layoutVoucherInfo.setVisibility(View.GONE);
+        }
 
         // Generate QR Code: bookingId | userId | showtimeId | timestamp
         String qrContent = String.format("%s|%s|%s|%d", 

@@ -160,6 +160,33 @@ public class BookingService {
             }
         }
 
+        // Validate no empty seats in between
+        List<SeatDTO> allSeats = firestore.collection("seats")
+                .whereEqualTo("showtimeId", data.getShowtimeId())
+                .get()
+                .get()
+                .getDocuments()
+                .stream()
+                .map(doc -> {
+                    try {
+                        return SeatDTO.builder()
+                                .seatId(doc.getId())
+                                .showtimeId(doc.getString("showtimeId"))
+                                .seatCode(doc.getString("seatCode"))
+                                .rowName(doc.getString("rowName"))
+                                .columnNo(doc.getLong("columnNo") != null ? doc.getLong("columnNo").intValue() : 0)
+                                .status(doc.getString("status"))
+                                .heldBy(doc.getString("heldBy"))
+                                .heldUntil(doc.getLong("heldUntil") != null ? doc.getLong("heldUntil") : 0L)
+                                .build();
+                    } catch (Exception e) {
+                        return null;
+                    }
+                })
+                .filter(java.util.Objects::nonNull)
+                .collect(Collectors.toList());
+        validateNoEmptySeatInBetween(allSeats, data.getSeatIds());
+
         double seatTotal = 0;
         for (SeatDTO seat : seats) {
             double price = "VIP".equalsIgnoreCase(seat.getSeatType()) ? 75000 : 60000;
@@ -199,7 +226,9 @@ public class BookingService {
         String promoCode = data.getPromoCode();
         if (promoCode != null && !promoCode.trim().isEmpty()) {
             String code = promoCode.trim().toUpperCase();
-            if ("GALAXY50".equals(code)) {
+            if (data.getDiscountVoucher() > 0) {
+                discountVoucher = data.getDiscountVoucher();
+            } else if ("GALAXY50".equals(code)) {
                 discountVoucher = 50000;
             } else if ("WELCOME10".equals(code)) {
                 discountVoucher = seatTotal * 0.10;
@@ -256,6 +285,8 @@ public class BookingService {
                 .paymentCode(paymentCode)
                 .createdAt(System.currentTimeMillis())
                 .updatedAt(System.currentTimeMillis())
+                .promoCode(promoCode != null && !promoCode.trim().isEmpty() ? promoCode.trim().toUpperCase() : null)
+                .discountVoucher(discountVoucher)
                 .build();
 
         logger.info("[BOOKING_FLOW] Creating booking record: bookingId={}, userId={}, total={}, status=PENDING",
@@ -600,5 +631,46 @@ public class BookingService {
                                 .build(),
                         com.google.cloud.firestore.SetOptions.mergeFields("checkInAt", "updatedAt"))
                 .get();
+    }
+
+    private void validateNoEmptySeatInBetween(List<SeatDTO> allSeats, List<String> targetSeatIds) {
+        List<SeatDTO> selectedSeats = allSeats.stream()
+                .filter(s -> targetSeatIds.contains(s.getSeatId()))
+                .collect(Collectors.toList());
+
+        Map<String, List<SeatDTO>> selectedByRow = selectedSeats.stream()
+                .collect(Collectors.groupingBy(SeatDTO::getRowName));
+
+        Map<String, List<SeatDTO>> allByRow = allSeats.stream()
+                .collect(Collectors.groupingBy(SeatDTO::getRowName));
+
+        long now = System.currentTimeMillis();
+
+        for (Map.Entry<String, List<SeatDTO>> entry : selectedByRow.entrySet()) {
+            String rowName = entry.getKey();
+            List<SeatDTO> rowSelected = entry.getValue();
+            List<SeatDTO> rowAll = allByRow.getOrDefault(rowName, new ArrayList<>());
+
+            int minCol = rowSelected.stream().mapToInt(SeatDTO::getColumnNo).min().orElse(0);
+            int maxCol = rowSelected.stream().mapToInt(SeatDTO::getColumnNo).max().orElse(0);
+
+            if (minCol > 0 && maxCol > minCol) {
+                for (SeatDTO seat : rowAll) {
+                    int col = seat.getColumnNo();
+                    if (col > minCol && col < maxCol) {
+                        boolean isSelected = targetSeatIds.contains(seat.getSeatId());
+                        if (!isSelected) {
+                            boolean isAvailable = "available".equalsIgnoreCase(seat.getStatus())
+                                    || seat.getStatus() == null
+                                    || seat.getStatus().isEmpty()
+                                    || ("held".equalsIgnoreCase(seat.getStatus()) && seat.getHeldUntil() < now);
+                            if (isAvailable) {
+                                throw new ResponseStatusException(HttpStatus.CONFLICT, "Không được đặt vé nếu còn ghế trống ở giữa trong cùng một hàng!");
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }

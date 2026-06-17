@@ -144,6 +144,11 @@ public class SeatSelectionActivity extends AppCompatActivity {
                 return;
             }
 
+            if (hasEmptySeatInBetween(selected)) {
+                Toast.makeText(this, "Không được đặt vé nếu còn ghế trống ở giữa trong cùng một hàng!", Toast.LENGTH_LONG).show();
+                return;
+            }
+
             btnContinue.setEnabled(false);
             if (layoutLoading != null) layoutLoading.setVisibility(android.view.View.VISIBLE);
 
@@ -473,5 +478,72 @@ public class SeatSelectionActivity extends AppCompatActivity {
         List<SeatDTO> result = new ArrayList<>();
         for (SeatDTO s : seatList) if (s.isSelected) result.add(s);
         return result;
+    }
+
+    private boolean hasEmptySeatInBetween(List<SeatDTO> selected) {
+        java.util.Map<String, List<SeatDTO>> selectedByRow = new java.util.HashMap<>();
+        for (SeatDTO s : selected) {
+            if (s.rowName != null) {
+                if (!selectedByRow.containsKey(s.rowName)) {
+                    selectedByRow.put(s.rowName, new ArrayList<>());
+                }
+                selectedByRow.get(s.rowName).add(s);
+            }
+        }
+
+        java.util.Map<String, List<SeatDTO>> allByRow = new java.util.HashMap<>();
+        for (SeatDTO s : seatList) {
+            if (s.rowName != null) {
+                if (!allByRow.containsKey(s.rowName)) {
+                    allByRow.put(s.rowName, new ArrayList<>());
+                }
+                allByRow.get(s.rowName).add(s);
+            }
+        }
+
+        long now = System.currentTimeMillis();
+
+        for (java.util.Map.Entry<String, List<SeatDTO>> entry : selectedByRow.entrySet()) {
+            String rowName = entry.getKey();
+            List<SeatDTO> rowSelected = entry.getValue();
+            List<SeatDTO> rowAll = allByRow.get(rowName);
+            if (rowAll == null) continue;
+
+            int minCol = Integer.MAX_VALUE;
+            int maxCol = Integer.MIN_VALUE;
+            for (SeatDTO s : rowSelected) {
+                if (s.columnNo != null) {
+                    if (s.columnNo < minCol) minCol = s.columnNo;
+                    if (s.columnNo > maxCol) maxCol = s.columnNo;
+                }
+            }
+
+            if (minCol != Integer.MAX_VALUE && maxCol != Integer.MIN_VALUE && maxCol > minCol) {
+                for (SeatDTO seat : rowAll) {
+                    if (seat.columnNo != null) {
+                        int col = seat.columnNo;
+                        if (col > minCol && col < maxCol) {
+                            boolean isSel = false;
+                            for (SeatDTO sel : rowSelected) {
+                                if (sel.seatId != null && sel.seatId.equals(seat.seatId)) {
+                                    isSel = true;
+                                    break;
+                                }
+                            }
+                            if (!isSel) {
+                                boolean isAvailable = "available".equalsIgnoreCase(seat.status)
+                                        || seat.status == null
+                                        || seat.status.isEmpty()
+                                        || ("held".equalsIgnoreCase(seat.status) && (seat.heldUntil != null && seat.heldUntil < now));
+                                if (isAvailable) {
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
 }

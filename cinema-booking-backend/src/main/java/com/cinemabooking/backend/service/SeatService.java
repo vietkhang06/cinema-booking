@@ -173,6 +173,18 @@ public class SeatService {
             // Read all docs in transaction
             List<DocumentSnapshot> snapshots = transaction.getAll(refs.toArray(new DocumentReference[0])).get();
             
+            // Retrieve all seats for this showtime to check for gaps
+            List<SeatDTO> allSeats = firestore.collection(COLLECTION)
+                    .whereEqualTo("showtimeId", showtimeId)
+                    .get()
+                    .get()
+                    .getDocuments()
+                    .stream()
+                    .map(this::mapToDTO)
+                    .filter(java.util.Objects::nonNull)
+                    .collect(Collectors.toList());
+            validateNoEmptySeatInBetween(allSeats, seatIds);
+            
             for (DocumentSnapshot doc : snapshots) {
                 if (!doc.exists()) {
                     throw new RuntimeException("Seat " + doc.getId() + " does not exist");
@@ -289,6 +301,47 @@ public class SeatService {
         } catch (Exception e) {
             logger.warn("Error mapping seat doc {}: {}", doc.getId(), e.getMessage());
             return null;
+        }
+    }
+
+    private void validateNoEmptySeatInBetween(List<SeatDTO> allSeats, List<String> targetSeatIds) {
+        List<SeatDTO> selectedSeats = allSeats.stream()
+                .filter(s -> targetSeatIds.contains(s.getSeatId()))
+                .collect(Collectors.toList());
+
+        java.util.Map<String, List<SeatDTO>> selectedByRow = selectedSeats.stream()
+                .collect(Collectors.groupingBy(SeatDTO::getRowName));
+
+        java.util.Map<String, List<SeatDTO>> allByRow = allSeats.stream()
+                .collect(Collectors.groupingBy(SeatDTO::getRowName));
+
+        long now = System.currentTimeMillis();
+
+        for (java.util.Map.Entry<String, List<SeatDTO>> entry : selectedByRow.entrySet()) {
+            String rowName = entry.getKey();
+            List<SeatDTO> rowSelected = entry.getValue();
+            List<SeatDTO> rowAll = allByRow.getOrDefault(rowName, new ArrayList<>());
+
+            int minCol = rowSelected.stream().mapToInt(SeatDTO::getColumnNo).min().orElse(0);
+            int maxCol = rowSelected.stream().mapToInt(SeatDTO::getColumnNo).max().orElse(0);
+
+            if (minCol > 0 && maxCol > minCol) {
+                for (SeatDTO seat : rowAll) {
+                    int col = seat.getColumnNo();
+                    if (col > minCol && col < maxCol) {
+                        boolean isSelected = targetSeatIds.contains(seat.getSeatId());
+                        if (!isSelected) {
+                            boolean isAvailable = "available".equalsIgnoreCase(seat.getStatus())
+                                    || seat.getStatus() == null
+                                    || seat.getStatus().isEmpty()
+                                    || ("held".equalsIgnoreCase(seat.getStatus()) && seat.getHeldUntil() < now);
+                            if (isAvailable) {
+                                throw new RuntimeException("Không được đặt vé nếu còn ghế trống ở giữa trong cùng một hàng!");
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

@@ -554,6 +554,7 @@ public class BookingConfirmActivity extends AppCompatActivity {
                 paymentMethod
         );
         request.promoCode = appliedPromoCode;
+        request.discountVoucher = discountVoucher;
         request.useStars = isStarsApplied;
 
         BookingApiService bookingApi = RetrofitClient.getInstance()

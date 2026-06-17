@@ -31,6 +31,8 @@ public class BookingDTO {
     public Long updatedAt;
     public Boolean deleted;
     public int pointsConsumed;
+    public String promoCode;
+    public double discountVoucher;
 
     public BookingDTO() {
     }
