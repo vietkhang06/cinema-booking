@@ -284,6 +284,7 @@ public class BookingConfirmActivity extends AppCompatActivity {
                             currentUser = user;
                             applyTierDiscount();
                             updateStarsUI();
+                            checkAndApplyVouchers(); // Tự động lấy voucher
                         }
                     }
 
@@ -293,6 +294,52 @@ public class BookingConfirmActivity extends AppCompatActivity {
                     }
                 }
         );
+    }
+
+    private String appliedVoucherId = "";
+
+    private void checkAndApplyVouchers() {
+        if (currentUser == null) return;
+        
+        FirebaseFirestore.getInstance()
+                .collection("vouchers")
+                .whereEqualTo("userId", currentUser.uid)
+                .whereEqualTo("isUsed", false)
+                .get()
+                .addOnSuccessListener(snapshot -> {
+                    if (snapshot != null && !snapshot.isEmpty()) {
+                        // Tự động chọn voucher có giá trị cao nhất
+                        double maxDiscount = 0;
+                        com.google.firebase.firestore.DocumentSnapshot bestVoucher = null;
+                        
+                        for (com.google.firebase.firestore.DocumentSnapshot doc : snapshot.getDocuments()) {
+                            Double discount = doc.getDouble("discountValue");
+                            if (discount != null && discount > maxDiscount) {
+                                maxDiscount = discount;
+                                bestVoucher = doc;
+                            }
+                        }
+                        
+                        if (bestVoucher != null) {
+                            appliedVoucherId = bestVoucher.getId();
+                            String type = bestVoucher.getString("voucherType");
+                            
+                            // Phân biệt Voucher giảm thẳng (200k) và giảm % (10%)
+                            if (maxDiscount > 100) {
+                                discountVoucher = maxDiscount;
+                            } else {
+                                discountVoucher = (total + totalSnacksPrice) * (maxDiscount / 100.0);
+                            }
+                            
+                            if (tvAppliedPromo != null) {
+                                tvAppliedPromo.setText(String.format(Locale.getDefault(), "Voucher ví: -%,.0f đ", discountVoucher));
+                                tvAppliedPromo.setVisibility(android.view.View.VISIBLE);
+                            }
+                            updateTotalPrice();
+                            Toast.makeText(this, "Hệ thống tự động áp dụng Voucher từ ví của bạn!", Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });
     }
 
     private void applyTierDiscount() {
@@ -369,18 +416,82 @@ public class BookingConfirmActivity extends AppCompatActivity {
         android.widget.EditText edtPromoCode = view.findViewById(R.id.edtPromoCode);
         android.widget.Button btnApplyPromo = view.findViewById(R.id.btnApplyPromo);
         TextView tvPromoStatus = view.findViewById(R.id.tvPromoStatus);
+        android.widget.Spinner spinnerVouchers = view.findViewById(R.id.spinnerVouchers);
 
         if (!appliedPromoCode.isEmpty() && edtPromoCode != null) {
             edtPromoCode.setText(appliedPromoCode);
         }
 
+        final java.util.List<DocumentSnapshot> myVouchers = new ArrayList<>();
+
+        if (spinnerVouchers != null && currentUser != null) {
+            FirebaseFirestore.getInstance().collection("vouchers")
+                    .whereEqualTo("userId", currentUser.uid)
+                    .whereEqualTo("isUsed", false)
+                    .get()
+                    .addOnSuccessListener(snapshot -> {
+                        myVouchers.clear();
+                        List<String> voucherNames = new ArrayList<>();
+                        voucherNames.add("--- Chọn Voucher cá nhân ---");
+
+                        if (snapshot != null && !snapshot.isEmpty()) {
+                            myVouchers.addAll(snapshot.getDocuments());
+                            for (DocumentSnapshot doc : myVouchers) {
+                                String type = doc.getString("voucherType");
+                                Double discount = doc.getDouble("discountValue");
+                                if (discount == null) discount = 0.0;
+                                
+                                String name = "Voucher hệ thống";
+                                if ("WELCOME_VOUCHER".equals(type)) name = "Quà Tân Binh";
+                                
+                                voucherNames.add(String.format(Locale.getDefault(), "%s (-%,.0f đ)", name, discount));
+                            }
+                        }
+
+                        android.widget.ArrayAdapter<String> adapter = new android.widget.ArrayAdapter<>(
+                                this, android.R.layout.simple_spinner_dropdown_item, voucherNames);
+                        spinnerVouchers.setAdapter(adapter);
+                    });
+        }
+
         if (btnApplyPromo != null) {
             btnApplyPromo.setOnClickListener(v -> {
+                if (spinnerVouchers != null && spinnerVouchers.getSelectedItemPosition() > 0) {
+                    // Người dùng đã chọn Voucher cá nhân trong Dropdown
+                    int selectedIndex = spinnerVouchers.getSelectedItemPosition() - 1;
+                    DocumentSnapshot selectedVoucher = myVouchers.get(selectedIndex);
+                    
+                    appliedVoucherId = selectedVoucher.getId();
+                    String type = selectedVoucher.getString("voucherType");
+                    Double discount = selectedVoucher.getDouble("discountValue");
+                    if (discount == null) discount = 0.0;
+
+                    if (discount > 100) {
+                        discountVoucher = discount;
+                    } else {
+                        discountVoucher = (total + totalSnacksPrice) * (discount / 100.0);
+                    }
+
+                    appliedPromoCode = ""; 
+                    if (tvAppliedPromo != null) {
+                        String name = "Voucher hệ thống";
+                        if ("WELCOME_VOUCHER".equals(type)) name = "Quà Tân Binh";
+                        tvAppliedPromo.setText(String.format(Locale.getDefault(), "Đã áp dụng: %s (-%,.0f đ)", name, discountVoucher));
+                        tvAppliedPromo.setVisibility(android.view.View.VISIBLE);
+                        tvAppliedPromo.setTextColor(0xFF4CAF50);
+                    }
+                    
+                    updateTotalPrice();
+                    dialog.dismiss();
+                    Toast.makeText(this, "Áp dụng Voucher cá nhân thành công!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 if (edtPromoCode == null) return;
 
                 String code = edtPromoCode.getText().toString().trim().toUpperCase(Locale.getDefault());
                 if (code.isEmpty()) {
-                    Toast.makeText(this, "Vui lòng nhập mã khuyến mãi!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Vui lòng chọn Voucher hoặc nhập mã khuyến mãi!", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
@@ -567,6 +678,13 @@ public class BookingConfirmActivity extends AppCompatActivity {
                     BookingDTO booking = response.body().getData();
                     isBookingConfirmed = true;
                     BookingTimerManager.getInstance().stopTimer(BookingConfirmActivity.this);
+                    
+                    // Đánh dấu Voucher đã sử dụng (để không xài lại được nữa)
+                    if (appliedVoucherId != null && !appliedVoucherId.isEmpty()) {
+                        FirebaseFirestore.getInstance().collection("vouchers")
+                                .document(appliedVoucherId)
+                                .update("isUsed", true, "usedAt", System.currentTimeMillis());
+                    }
 
                     if ("momo".equals(paymentMethod)) {
                         Toast.makeText(BookingConfirmActivity.this, "Thanh toán qua Ví MoMo thành công!", Toast.LENGTH_LONG).show();
