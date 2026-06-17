@@ -170,6 +170,8 @@ public class EditProfileActivity extends AuthActivity {
 
     }
 
+    // ZELIOUS TASK: Thu thập thông tin từ các ô text. 
+    // Đặc biệt, có logic convert ảnh Avatar từ Bitmap sang chuỗi Base64 để lưu thẳng xuống Firestore thay vì dùng Storage, giúp tối ưu băng thông. Sau khi lưu thành công, Update FirebaseAuth Profile nếu có đổi Tên.
     private void saveChanges() {
         String name = usernameInputTV.getText().toString().trim();
         String phone = phoneInputTV.getText().toString().trim();

@@ -67,6 +67,9 @@ public class CinemaContentFragment extends Fragment implements CinemaFeedAdapter
         checkLoginState();
     }
 
+    // ZELIOUS TASK: Logic kiểm tra trạng thái đăng nhập để bảo vệ tab khỏi Guest.
+    // Hàm được gọi mỗi khi Fragment được mở lên (onResume). Dùng FirebaseAuth.getInstance().getCurrentUser() != null để kiểm tra.
+    // Nếu chưa đăng nhập -> ẩn giao diện (rvFeed.setVisibility(View.GONE)), hiện layoutLoginRequired (bao gồm nút Yêu cầu đăng nhập).
     private void checkLoginState() {
         boolean isLoggedIn = FirebaseAuth.getInstance().getCurrentUser() != null;
         if (isLoggedIn) {

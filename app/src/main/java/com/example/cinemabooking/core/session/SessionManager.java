@@ -26,6 +26,9 @@ public class SessionManager {
     /** SharedPreferences được mã hoá bằng AES-256 để lưu password an toàn */
     private SharedPreferences encryptedPrefs;
 
+    //Quản lý Session cục bộ.
+    // Chú ý: Cấu hình sử dụng EncryptedSharedPreferences (chuẩn mã hóa AES-256) từ thư viện androidx.security.crypto.
+    // Điều này giúp mã hóa token hoặc mật khẩu lưu dưới Local, chống dump memory hoặc root thiết bị để lấy cắp dữ liệu.
     public SessionManager(Context context) {
         sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         try {

@@ -47,6 +47,7 @@ public class ForgotPasswordActivity extends BaseActivity {
         btnSendReset.setOnClickListener(v -> sendResetEmail());
     }
 
+    // ZELIOUS TASK: Bắt lỗi ô nhập email, hiển thị loading, và gọi `authService.forgetAndResetPassword()`. Xử lý hiển thị Toast báo thành công hoặc thất bại.
     private void sendResetEmail() {
         tilEmail.setError(null);
 

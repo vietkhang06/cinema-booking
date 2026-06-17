@@ -64,6 +64,7 @@ public class CinemaFragment extends Fragment {
         loadCinemas();
     }
 
+    // ZELIOUS TASK: Gọi CinemaRepositoryImpl để lấy toàn bộ dữ liệu các rạp đang có trên hệ thống từ Firestore.
     private void loadCinemas() {
         tvEmpty.setVisibility(View.GONE);
         cinemaRepository.getAllCinemas(new ResultCallback<List<Cinema>>() {
@@ -88,6 +89,7 @@ public class CinemaFragment extends Fragment {
         });
     }
 
+    // ZELIOUS TASK: Chức năng lọc (Filter). Chỉ hiển thị những rạp có địa chỉ, quận, hoặc thành phố khớp với khu vực mà người dùng đang chọn (ví dụ: "Hà Nội", "TP.HCM").
     private void renderCinemas() {
         List<Cinema> filtered = new ArrayList<>();
         for (Cinema cinema : allCinemas) {
@@ -113,6 +115,7 @@ public class CinemaFragment extends Fragment {
                 || normalize(cinema.address).contains(normalizedLocation);
     }
 
+    // ZELIOUS TASK: Mở một BottomSheet popup (LocationBottomSheetFragment) để người dùng thay đổi khu vực tìm rạp.
     private void showLocationDialog() {
         LocationBottomSheetFragment sheet =
                 LocationBottomSheetFragment.newInstance(selectedLocation);

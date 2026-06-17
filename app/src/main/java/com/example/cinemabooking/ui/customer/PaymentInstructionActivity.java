@@ -291,7 +291,7 @@ public class PaymentInstructionActivity extends AppCompatActivity {
     }
 
     /**
-     * Kiểm tra và xử lý trạng thái payment. Guard paymentHandled đảm bảo
+     * ZELIOUS: Kiểm tra và xử lý trạng thái payment. Guard paymentHandled đảm bảo
      * chỉ xử lý 1 lần dù 2 listeners cùng fire.
      */
     private void checkPaymentStatus(String status) {
@@ -418,6 +418,9 @@ public class PaymentInstructionActivity extends AppCompatActivity {
         }
     }
 
+    // ZELIOUS TASK: Logic gửi thông báo khi thanh toán thành công/thất bại.
+    // Lấy userId hiện tại, tạo object Notification với type 'BOOKING_SUCCESS' hoặc 'BOOKING_FAILED'
+    // Sau đó gọi NotificationRepositoryImpl để đẩy Document này xuống Firestore.
     private void createNotification(String title, String message, String type) {
         String userId = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() != null ? 
                         com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid() : null;

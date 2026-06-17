@@ -140,6 +140,7 @@ public class AdminSelectUserActivity extends AppCompatActivity {
             adapter.notifyDataSetChanged();
         });
 
+        // ZELIOUS TASK: Màn hình search và pick nhiều User, truyền List UID ngược về màn hình gửi để Admin có thể "Gửi thông báo nhắm mục tiêu".
         btnConfirmSelection.setOnClickListener(v -> {
             ArrayList<String> uidList = new ArrayList<>(selectedUids);
             

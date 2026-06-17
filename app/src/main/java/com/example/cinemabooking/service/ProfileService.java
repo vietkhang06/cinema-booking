@@ -51,6 +51,7 @@ public class ProfileService {
         });
     }
 
+    // ZELIOUS TASK: Hoạt động như một proxy trung gian. Ví dụ getUserTotalSpending() sẽ query toàn bộ Booking có status = PAID (hoặc success/confirmed), sau đó cộng tổng cột totalPrice lại để tính tổng tiền đã chi tiêu.
     public void getUserTotalSpending(ResultCallback<Double> callback){
         com.google.firebase.auth.FirebaseUser fUser = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
         String uid = null;

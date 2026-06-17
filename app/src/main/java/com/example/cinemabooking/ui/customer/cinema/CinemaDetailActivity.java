@@ -184,6 +184,7 @@ public class CinemaDetailActivity extends BaseActivity {
         loadCinemaImage();
     }
 
+    // ZELIOUS TASK: Fetch lại thông tin mới nhất của rạp như: Tên, Địa chỉ, Hotline, Trạng thái hoạt động, Tọa độ bản đồ từ Firestore.
     private void loadCinemaFromFirestore() {
         if (TextUtils.isEmpty(cinemaId)) {
             return;
@@ -320,6 +321,7 @@ public class CinemaDetailActivity extends BaseActivity {
         startActivity(Intent.createChooser(intent, "Chia sẻ rạp phim"));
     }
 
+    // ZELIOUS TASK: Mở Google Maps thông qua Tọa độ Latitude/Longitude. Nếu không có tọa độ sẽ mở map theo chuỗi text Địa chỉ.
     private void openMap() {
         Uri uri;
         if (hasCoordinate()) {
@@ -492,6 +494,7 @@ public class CinemaDetailActivity extends BaseActivity {
         }
     }
 
+    // ZELIOUS TASK: Tải toàn bộ suất chiếu (Showtimes) thuộc về rạp này, và map (ghép) dữ liệu với danh sách Phim (Movies).
     private void loadShowtimesAndMovies() {
         if (TextUtils.isEmpty(cinemaId)) {
             return;
@@ -555,6 +558,7 @@ public class CinemaDetailActivity extends BaseActivity {
         });
     }
 
+    // ZELIOUS TASK: Phân loại (gom nhóm) các suất chiếu theo "Tên Phim + Định dạng (VD: 2D Phụ đề)" và hiển thị theo từng Ngày cụ thể (Hôm nay, Ngày mai,...).
     private void renderRealShowtimes(List<Showtime> showtimes, Map<String, Movie> movieMap) {
         layoutNowShowing.removeAllViews();
 

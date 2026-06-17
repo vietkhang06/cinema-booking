@@ -8,9 +8,10 @@ import com.google.firebase.auth.FirebaseUser;
 
 public class AuthActivity extends BaseActivity{
     FirebaseAuth.AuthStateListener authStateListener;
+    // ZELIOUS TASK: Lớp Base Activity dùng để bảo vệ các màn hình yêu cầu đăng nhập.
+    // Đăng ký AuthStateListener toàn cục. Nếu user bị null (mất session do Auth hết hạn hoặc đăng xuất), tự động đá văng về màn hình Login.
     @Override
     protected void onStart() {
-
         super.onStart();
         authStateListener = authState -> {
             FirebaseUser user = authState.getCurrentUser();

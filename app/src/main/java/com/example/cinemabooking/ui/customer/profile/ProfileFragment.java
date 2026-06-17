@@ -90,6 +90,8 @@ public class ProfileFragment extends Fragment {
         listenToNotifications();
     }
 
+    // ZELIOUS TASK: Lắng nghe số lượng thông báo chưa đọc.
+    // Kết nối với Firestore để realtime-update cái huy hiệu (badge) màu đỏ báo số "99+".
     private void listenToNotifications() {
         com.google.firebase.auth.FirebaseUser user = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) return;
@@ -135,6 +137,8 @@ public class ProfileFragment extends Fragment {
 
     // ── Load data ─────────────────────────────────────────────────────────────
 
+    // ZELIOUS TASK: Tải thông tin Profile của User từ Firestore thông qua ProfileService.
+    // Lấy Avatar định dạng Base64 và parse ngược lại thành byte[] để Glide hiển thị được hình ảnh.
     private void loadUserProfile() {
         profileService.getUserProfile(new ResultCallback<User>() {
             @Override
@@ -183,6 +187,8 @@ public class ProfileFragment extends Fragment {
         });
     }
 
+    // ZELIOUS TASK: Tính tổng tiền chi tiêu để thăng hạng.
+    // Gọi profileService kéo tổng tiền. Sau đó gọi updateSpendingUI() để render thanh ProgressBar.
     private void loadUserSpendingMilestone() {
         profileService.getUserTotalSpending(new ResultCallback<Double>() {
             @Override
@@ -199,6 +205,8 @@ public class ProfileFragment extends Fragment {
         });
     }
 
+    // ZELIOUS TASK: Cập nhật UI của thẻ Thành viên (Màu sắc, Huy hiệu).
+    // Dựa vào tổng tiền so sánh với mốc 2 triệu, 4 triệu để quyết định là hạng Đồng, Bạc, Vàng...
     private void updateSpendingUI() {
         if (!isAdded()) return;
 

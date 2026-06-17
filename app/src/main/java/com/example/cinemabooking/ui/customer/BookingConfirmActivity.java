@@ -612,6 +612,9 @@ public class BookingConfirmActivity extends AppCompatActivity {
         });
     }
 
+    // ZELIOUS: Logic gửi thông báo khi có kết quả API trả về.
+    // Lấy userId hiện tại, tạo object Notification với type 'BOOKING_SUCCESS' hoặc 'BOOKING_FAILED'
+    // Sau đó gọi NotificationRepositoryImpl để đẩy Document này xuống Firestore.
     private void createNotification(String title, String message, String type) {
         String userId = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() != null ?
                 com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid() : null;

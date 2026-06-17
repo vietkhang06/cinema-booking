@@ -95,7 +95,7 @@ public class LoginActivity extends BaseActivity {
                 authService.handleFacebookAccessToken(result.getAccessToken(), new AuthCallback() {
                     @Override
                     public void onSuccess(User user) {
-                        if ("admin".equals(user.role) || "staff".equals(user.role)) {
+                        if ("admin".equals(user.role)) {
                             AppNavigator.goToHomeByRole(LoginActivity.this, user.role);
                         } else if (fromBooking) {
                             finish();
@@ -390,7 +390,7 @@ public class LoginActivity extends BaseActivity {
                                                 + user.role);
                             }
 
-                            if ("admin".equals(user.role) || "staff".equals(user.role)) {
+                            if ("admin".equals(user.role)) {
                                 AppNavigator.goToHomeByRole(LoginActivity.this, user.role);
                             } else if (fromBooking) {
                                 finish();
@@ -418,7 +418,6 @@ public class LoginActivity extends BaseActivity {
             Log.e(TAG,
                     "HANDLE CREDENTIAL ERROR",
                     e);
-
             showToast(
                     "Lỗi xử lý Google Credential"
             );

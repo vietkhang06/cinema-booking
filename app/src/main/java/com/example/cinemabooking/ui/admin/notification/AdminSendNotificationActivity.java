@@ -197,6 +197,7 @@ public class AdminSendNotificationActivity extends AppCompatActivity {
                 .show();
     }
 
+    // ZELIOUS TASK: Tạo vòng lặp hoặc Batch đẩy Document Notification có type=SYSTEM (hoặc VOUCHER) vào collection `notifications` của TẤT CẢ user active được chọn.
     private void sendNotificationToFirestore(String title, String message, double discountValue) {
         ProgressDialog progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Đang gửi thông báo...");

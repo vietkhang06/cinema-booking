@@ -32,6 +32,7 @@ public class FirebaseTokenFilter extends OncePerRequestFilter {
     private static final java.util.concurrent.ConcurrentHashMap<String, Long> cacheTime = new java.util.concurrent.ConcurrentHashMap<>();
     private static final long CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes cache TTL
 
+    // ZELIOUS TASK: Lấy token từ header "Authorization" của request. Chặn/Bỏ qua nếu request không có Bearer token.
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
@@ -53,7 +54,7 @@ public class FirebaseTokenFilter extends OncePerRequestFilter {
                 return;
             }
 
-            // Verify token via Firebase Admin SDK
+            // ZELIOUS TASK: Xác thực token bằng Firebase Admin SDK. Đảm bảo token chưa hết hạn và do đúng Firebase phát hành.
             FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(token);
             
             String uid = decodedToken.getUid();
@@ -61,7 +62,7 @@ public class FirebaseTokenFilter extends OncePerRequestFilter {
             
             logger.debug("Token verified successfully: UID={}, Email={}", uid, email);
 
-            // Fetch and cache user role from Firestore
+            // ZELIOUS TASK: Truy vấn Role của user từ Firestore và sử dụng ConcurrentHashMap để Cache (lưu tạm) lại trong 5 phút. Việc này giúp giảm số lượng request (read) lên Firebase, tiết kiệm chi phí.
             String role = roleCache.get(uid);
             Long expiry = cacheTime.get(uid);
             long now = System.currentTimeMillis();
@@ -92,7 +93,7 @@ public class FirebaseTokenFilter extends OncePerRequestFilter {
                             new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_" + role.toUpperCase())
                     );
 
-            // Set authentication in SecurityContext
+            // ZELIOUS TASK: Nạp thông tin User UID và Role vào SecurityContext của Spring Security, giúp phân quyền (Admin/Customer) ở các API Controller.
             UsernamePasswordAuthenticationToken auth =
                     new UsernamePasswordAuthenticationToken(uid, decodedToken, authorities);
 

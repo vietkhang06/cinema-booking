@@ -115,6 +115,8 @@ public class AdminUserManagementActivity extends AppCompatActivity {
         });
     }
 
+    // ZELIOUS TASK: Lấy toàn bộ danh sách User từ Firestore có Role là 'customer' và chưa bị xóa (deleted = false).
+    // Hàm này được gọi khi Activity vừa khởi tạo để lấy dữ liệu gốc (fullCustomerList).
     private void loadCustomers() {
         userRepository.getAllUsers(new ResultCallback<List<User>>() {
             @Override
@@ -140,6 +142,9 @@ public class AdminUserManagementActivity extends AppCompatActivity {
         });
     }
 
+    // ZELIOUS TASK: Logic Lọc (Filter) và Tìm kiếm (Search) local (trên máy khách).
+    // Chạy vòng lặp qua fullCustomerList. Nếu user thỏa mãn điều kiện Tìm (tên, email, sdt) 
+    // VÀ thỏa mãn điều kiện Lọc (Hạng thành viên / Bị khóa) thì nhét vào filteredCustomerList để hiển thị.
     private void applyFiltersAndSearch() {
         filteredCustomerList.clear();
 
@@ -202,6 +207,8 @@ public class AdminUserManagementActivity extends AppCompatActivity {
         return "ID: " + user.uid;
     }
 
+    // ZELIOUS TASK: Hiển thị BottomSheet chứa thông tin chi tiết của 1 khách hàng khi Admin bấm vào row trên danh sách.
+    // Tại đây chứa các nút gọi ra các hàm hành động: Khóa, Đổi hạng, Chỉnh điểm, Xóa, Tặng Voucher.
     private void showCustomerDetailsBottomSheet(User user) {
         BottomSheetDialog dialog = new BottomSheetDialog(this);
         View view = LayoutInflater.from(this).inflate(R.layout.dialog_admin_customer_details, null);
@@ -386,6 +393,9 @@ public class AdminUserManagementActivity extends AppCompatActivity {
         dialog.show();
     }
 
+    // ZELIOUS TASK: Logic Cộng/Trừ điểm thủ công.
+    // Đọc input, bắt lỗi. Tính finalPoints. Nếu < 0 thì báo lỗi. Ngược lại thì Update lên Firestore.
+    // Đặc biệt: Phải ghi lại AuditLog để lưu lịch sử thao tác của Admin.
     private void adjustPointsFirebase(User user, Dialog dialog, EditText etAmount, boolean isAdd) {
         String inputStr = etAmount.getText().toString().trim();
         if (inputStr.isEmpty()) {
@@ -432,6 +442,9 @@ public class AdminUserManagementActivity extends AppCompatActivity {
                 .addOnFailureListener(e -> Toast.makeText(this, "Lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
+    // ZELIOUS TASK: Xóa khách hàng (Soft Delete).
+    // Thay vì xóa hẳn Document khỏi Firestore, ta chỉ update field 'deleted' = true.
+    // Điều này đảm bảo toàn vẹn dữ liệu (các hóa đơn cũ của khách vẫn có thể tra cứu được).
     private void showDeleteConfirmDialog(User user) {
         Dialog dialog = new Dialog(this);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -530,6 +543,8 @@ public class AdminUserManagementActivity extends AppCompatActivity {
         dialog.show();
     }
 
+    // ZELIOUS TASK: Logic gửi Voucher (Gom 3 thao tác vào 1 WriteBatch để đảm bảo tính nguyên vẹn).
+    // 1. Tạo Voucher. 2. Tạo Notification báo cho khách. 3. Tạo AuditLog lưu lịch sử Admin.
     private void sendVoucherToFirebase(User user, Dialog dialog, double discount, String message) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         com.google.firebase.firestore.WriteBatch batch = db.batch();
