@@ -56,10 +56,13 @@ public class CineCheckoutActivity extends FragmentActivity {
     private LinearLayout layoutVoucherInput, layoutStarInput;
     private Spinner spinnerProvince, spinnerCinema;
     private TextView tvCheckoutTotal, btnCheckoutPay;
+    private TextView tvAppliedPromo;
 
     // ── State ─────────────────────────────────────────────────────────────────
     private String selectedPayment = "zalopay"; // default
     private final DecimalFormat fmt = new DecimalFormat("#,###");
+    private String appliedPromoCode = "";
+    private double discountVoucher = 0;
 
     // ── Province → Cinema data (mock) ─────────────────────────────────────────
     private static final String[] PROVINCES = {
@@ -111,6 +114,7 @@ public class CineCheckoutActivity extends FragmentActivity {
         tvStarToggle      = findViewById(R.id.tvStarToggle);
         layoutVoucherInput = findViewById(R.id.layoutVoucherInput);
         layoutStarInput   = findViewById(R.id.layoutStarInput);
+        tvAppliedPromo    = findViewById(R.id.tvAppliedPromo);
 
         spinnerProvince = findViewById(R.id.spinnerProvince);
         spinnerCinema   = findViewById(R.id.spinnerCinema);
@@ -143,7 +147,9 @@ public class CineCheckoutActivity extends FragmentActivity {
             String primaryItemName = "";
             String primaryImageUrl = "";
             int totalQuantity = 0;
-            double totalPrice = CineCartManager.getInstance().getTotalPrice();
+            double basePrice = CineCartManager.getInstance().getTotalPrice();
+            double finalPrice = basePrice - discountVoucher;
+            if (finalPrice < 0) finalPrice = 0;
 
             if (items.size() > 0) {
                 CineCartManager.CartItem firstItem = items.get(0);
@@ -162,9 +168,10 @@ public class CineCheckoutActivity extends FragmentActivity {
                     primaryItemName,
                     primaryImageUrl,
                     totalQuantity,
-                    totalPrice,
+                    finalPrice,
                     selectedPayment.toUpperCase()
             );
+            request.promoCode = appliedPromoCode;
 
             btnCheckoutPay.setEnabled(false);
 
@@ -277,15 +284,103 @@ public class CineCheckoutActivity extends FragmentActivity {
             tvStarToggle.setText(visible ? "▼" : "▲");
         });
 
+        // Choose personal voucher
+        TextView btnSelectPersonalVoucher = findViewById(R.id.btnSelectPersonalVoucher);
+        if (btnSelectPersonalVoucher != null) {
+            btnSelectPersonalVoucher.setOnClickListener(v -> showPersonalVoucherDialog());
+        }
+
         // Apply voucher
         btnApplyVoucher.setOnClickListener(v -> {
-            String code = etVoucherCode.getText().toString().trim();
+            String code = etVoucherCode.getText().toString().trim().toUpperCase(java.util.Locale.getDefault());
             if (code.isEmpty()) {
                 Toast.makeText(this, "Vui lòng nhập mã voucher", Toast.LENGTH_SHORT).show();
                 return;
             }
-            // TODO: validate voucher code via API
-            Toast.makeText(this, "Mã \"" + code + "\" không hợp lệ hoặc đã hết hạn", Toast.LENGTH_SHORT).show();
+
+            double subtotal = CineCartManager.getInstance().getTotalPrice();
+            btnApplyVoucher.setEnabled(false);
+
+            FirebaseFirestore.getInstance()
+                    .collection("promotions")
+                    .whereEqualTo("code", code)
+                    .limit(1)
+                    .get()
+                    .addOnSuccessListener(snapshot -> {
+                        btnApplyVoucher.setEnabled(true);
+                        if (snapshot == null || snapshot.isEmpty()) {
+                            Toast.makeText(this, "Mã khuyến mãi không hợp lệ hoặc đã hết hạn!", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        com.google.firebase.firestore.DocumentSnapshot doc = snapshot.getDocuments().get(0);
+                        String status = doc.getString("status");
+                        Boolean deleted = doc.getBoolean("deleted");
+                        Long validFrom = doc.getLong("validFrom");
+                        Long validTo = doc.getLong("validTo");
+                        Long usageLimit = doc.getLong("usageLimit");
+                        Long usedCount = doc.getLong("usedCount");
+                        Double minAmount = doc.getDouble("minAmount");
+                        String discountType = doc.getString("discountType");
+                        Double discountValue = doc.getDouble("discountValue");
+                        Double maxDiscountAmount = doc.getDouble("maxDiscountAmount");
+                        String title = doc.getString("title");
+
+                        long now = System.currentTimeMillis();
+
+                        if (!"active".equalsIgnoreCase(status) || Boolean.TRUE.equals(deleted)) {
+                            Toast.makeText(this, "Mã khuyến mãi không còn hoạt động!", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        if (validFrom != null && now < validFrom) {
+                            Toast.makeText(this, "Chưa đến thời gian áp dụng!", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        if (validTo != null && now > validTo) {
+                            Toast.makeText(this, "Mã đã hết hạn!", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        if (usageLimit != null && usedCount != null && usedCount >= usageLimit) {
+                            Toast.makeText(this, "Đã hết lượt sử dụng!", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        if (minAmount != null && subtotal < minAmount) {
+                            Toast.makeText(this, String.format(java.util.Locale.getDefault(), "Đơn hàng phải tối thiểu %,.0f đ", minAmount), Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        double voucherValue = 0;
+                        if ("percentage".equalsIgnoreCase(discountType)) {
+                            double percent = discountValue != null ? discountValue : 0;
+                            voucherValue = subtotal * (percent / 100.0);
+                            if (maxDiscountAmount != null && maxDiscountAmount > 0) {
+                                voucherValue = Math.min(voucherValue, maxDiscountAmount);
+                            }
+                        } else {
+                            voucherValue = discountValue != null ? discountValue : 0;
+                        }
+
+                        if (voucherValue <= 0) {
+                            Toast.makeText(this, "Mã khuyến mãi không hợp lệ!", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        appliedPromoCode = code;
+                        discountVoucher = voucherValue;
+
+                        String promoLabel = (title != null && !title.trim().isEmpty()) ? title : code;
+                        if (tvAppliedPromo != null) {
+                            tvAppliedPromo.setText("Đã áp dụng: " + promoLabel + " (-" + fmt.format(voucherValue) + "đ)");
+                            tvAppliedPromo.setVisibility(android.view.View.VISIBLE);
+                        }
+
+                        Toast.makeText(this, "Áp dụng thành công! Giảm " + fmt.format(voucherValue) + "đ", Toast.LENGTH_SHORT).show();
+                        updateTotal();
+                    })
+                    .addOnFailureListener(e -> {
+                        btnApplyVoucher.setEnabled(true);
+                        Toast.makeText(this, "Lỗi kiểm tra khuyến mãi: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
         });
 
         // Apply stars
@@ -333,7 +428,64 @@ public class CineCheckoutActivity extends FragmentActivity {
 
     private void updateTotal() {
         double total = CineCartManager.getInstance().getTotalPrice();
+        total -= discountVoucher;
+        if (total < 0) total = 0;
         tvCheckoutTotal.setText(fmt.format(total) + "đ");
+    }
+
+    private void showPersonalVoucherDialog() {
+        String uid = FirebaseAuth.getInstance().getCurrentUser() != null ? FirebaseAuth.getInstance().getCurrentUser().getUid() : null;
+        if (uid == null) return;
+
+        btnApplyVoucher.setEnabled(false);
+        FirebaseFirestore.getInstance().collection("vouchers")
+                .whereEqualTo("userId", uid)
+                .whereEqualTo("isUsed", false)
+                .get()
+                .addOnSuccessListener(snapshot -> {
+                    btnApplyVoucher.setEnabled(true);
+                    if (snapshot == null || snapshot.isEmpty()) {
+                        Toast.makeText(this, "Bạn không có voucher cá nhân nào.", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    List<com.example.cinemabooking.domain.model.Voucher> list = new java.util.ArrayList<>();
+                    List<String> displayList = new java.util.ArrayList<>();
+                    for (com.google.firebase.firestore.DocumentSnapshot doc : snapshot.getDocuments()) {
+                        com.example.cinemabooking.domain.model.Voucher v = doc.toObject(com.example.cinemabooking.domain.model.Voucher.class);
+                        if (v != null) {
+                            v.voucherId = doc.getId();
+                            list.add(v);
+                            displayList.add("Voucher đền bù - Giảm " + v.discountValue + "%");
+                        }
+                    }
+
+                    new android.app.AlertDialog.Builder(this)
+                            .setTitle("Chọn Voucher Của Bạn")
+                            .setItems(displayList.toArray(new String[0]), (dialog, which) -> {
+                                com.example.cinemabooking.domain.model.Voucher selected = list.get(which);
+                                double subtotal = CineCartManager.getInstance().getTotalPrice();
+                                double discount = subtotal * (selected.discountValue / 100.0);
+
+                                appliedPromoCode = selected.voucherId; 
+                                discountVoucher = discount;
+                                
+                                etVoucherCode.setText(""); // Xoá chữ trong ô nhập để tránh hiểu nhầm là đang áp 2 mã
+
+                                if (tvAppliedPromo != null) {
+                                    tvAppliedPromo.setText("Đã áp dụng: Voucher cá nhân (-" + selected.discountValue + "%)");
+                                    tvAppliedPromo.setVisibility(android.view.View.VISIBLE);
+                                }
+                                Toast.makeText(this, "Đã áp dụng voucher cá nhân giảm " + selected.discountValue + "%", Toast.LENGTH_SHORT).show();
+                                updateTotal();
+                            })
+                            .setNegativeButton("Đóng", null)
+                            .show();
+                })
+                .addOnFailureListener(e -> {
+                    btnApplyVoucher.setEnabled(true);
+                    Toast.makeText(this, "Lỗi tải voucher: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
     }
 
     // ── Custom Spinner Adapter ────────────────────────────────────────────────
