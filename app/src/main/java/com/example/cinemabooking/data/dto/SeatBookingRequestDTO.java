@@ -8,6 +8,7 @@ public class SeatBookingRequestDTO {
     public List<SnackOrder> snackOrders;
     public String paymentMethod;
     public String promoCode;
+    public double discountVoucher;
     public Boolean useStars;
 
     public SeatBookingRequestDTO() {

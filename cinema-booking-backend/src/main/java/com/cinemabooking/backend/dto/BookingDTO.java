@@ -49,6 +49,8 @@ public class BookingDTO {
     private long updatedAt;
     private boolean deleted;
     private int pointsConsumed;
+    private String promoCode;
+    private double discountVoucher;
 
     private long paymentAt;
     private List<SnackOrderSnapshot> snackOrder;

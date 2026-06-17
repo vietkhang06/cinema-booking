@@ -27,6 +27,8 @@ public class Booking {
     public Long createdAt;
     public Long updatedAt;
     public Boolean deleted;
+    public String promoCode;
+    public double discountVoucher;
 
     public Booking() {
     }
