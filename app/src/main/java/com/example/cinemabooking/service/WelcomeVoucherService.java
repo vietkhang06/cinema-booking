@@ -24,18 +24,20 @@ public class WelcomeVoucherService {
         String promoCode = "NEW_" + shortUid;
 
         java.util.Map<String, Object> promo = new java.util.HashMap<>();
+        promo.put("promoId", promoRef.getId()); // Bổ sung ID để không bị lỗi
         promo.put("code", promoCode);
         promo.put("title", "Quà Tân Binh 200K");
         promo.put("discountType", "amount");
         promo.put("discountValue", 200000.0);
         promo.put("status", "active");
         promo.put("deleted", false);
-        promo.put("usageLimit", 1L);
-        promo.put("usedCount", 0L);
+        promo.put("usageLimit", 1); // Sử dụng Integer thay vì Long (1L) để khớp với Model
+        promo.put("usedCount", 0);
         promo.put("targetRole", "all");
         promo.put("userId", userId); // Liên kết với tài khoản
         promo.put("createdAt", currentTime);
         promo.put("validFrom", currentTime);
+        promo.put("validTo", currentTime + (30L * 24 * 60 * 60 * 1000)); // Hạn dùng 30 ngày
         
         batch.set(promoRef, promo);
 
