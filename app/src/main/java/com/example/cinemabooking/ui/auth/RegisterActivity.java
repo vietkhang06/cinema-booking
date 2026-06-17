@@ -159,7 +159,7 @@ public class RegisterActivity extends BaseActivity {
 
     private void showDatePicker() {
         final Calendar c = Calendar.getInstance();
-        c.add(Calendar.YEAR, -16); // Đặt mặc định hiển thị cách đây 16 năm
+        c.add(Calendar.YEAR, -16); //mặc định hiển thị cách đây 16 năm
         long maxDate = c.getTimeInMillis();
         
         int year = c.get(Calendar.YEAR);

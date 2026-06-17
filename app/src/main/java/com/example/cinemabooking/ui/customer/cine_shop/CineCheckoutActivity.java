@@ -456,7 +456,12 @@ public class CineCheckoutActivity extends FragmentActivity {
                         if (v != null) {
                             v.voucherId = doc.getId();
                             list.add(v);
-                            displayList.add("Voucher đền bù - Giảm " + v.discountValue + "%");
+                            if (v.discountValue != null && v.discountValue > 100) {
+                                String typeName = "WELCOME_GIFT".equals(v.voucherType) ? "Chào mừng" : "Cá nhân";
+                                displayList.add("Voucher " + typeName + " - Giảm " + fmt.format(v.discountValue) + "đ");
+                            } else {
+                                displayList.add("Voucher đền bù - Giảm " + v.discountValue + "%");
+                            }
                         }
                     }
 
@@ -465,7 +470,16 @@ public class CineCheckoutActivity extends FragmentActivity {
                             .setItems(displayList.toArray(new String[0]), (dialog, which) -> {
                                 com.example.cinemabooking.domain.model.Voucher selected = list.get(which);
                                 double subtotal = CineCartManager.getInstance().getTotalPrice();
-                                double discount = subtotal * (selected.discountValue / 100.0);
+                                double discount;
+                                String discountText;
+
+                                if (selected.discountValue != null && selected.discountValue > 100) {
+                                    discount = selected.discountValue;
+                                    discountText = fmt.format(discount) + "đ";
+                                } else {
+                                    discount = subtotal * (selected.discountValue / 100.0);
+                                    discountText = selected.discountValue + "%";
+                                }
 
                                 appliedPromoCode = selected.voucherId; 
                                 discountVoucher = discount;
@@ -473,10 +487,10 @@ public class CineCheckoutActivity extends FragmentActivity {
                                 etVoucherCode.setText(""); // Xoá chữ trong ô nhập để tránh hiểu nhầm là đang áp 2 mã
 
                                 if (tvAppliedPromo != null) {
-                                    tvAppliedPromo.setText("Đã áp dụng: Voucher cá nhân (-" + selected.discountValue + "%)");
+                                    tvAppliedPromo.setText("Đã áp dụng: Voucher cá nhân (-" + discountText + ")");
                                     tvAppliedPromo.setVisibility(android.view.View.VISIBLE);
                                 }
-                                Toast.makeText(this, "Đã áp dụng voucher cá nhân giảm " + selected.discountValue + "%", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(this, "Đã áp dụng voucher cá nhân giảm " + discountText, Toast.LENGTH_SHORT).show();
                                 updateTotal();
                             })
                             .setNegativeButton("Đóng", null)
