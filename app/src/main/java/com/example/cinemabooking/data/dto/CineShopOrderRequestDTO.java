@@ -6,6 +6,7 @@ public class CineShopOrderRequestDTO {
     private int quantity;
     private double totalPrice;
     private String paymentMethod;
+    public String promoCode;
 
     public CineShopOrderRequestDTO(String itemName, String itemImageUrl, int quantity, double totalPrice, String paymentMethod) {
         this.itemName = itemName;

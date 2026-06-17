@@ -170,6 +170,18 @@ public class BookingController {
                         .update("status", "success")
                         .get();
 
+                String promoCode = shopDoc.getString("promoCode");
+                if (promoCode != null && !promoCode.isEmpty()) {
+                    try {
+                        com.google.cloud.firestore.DocumentSnapshot voucherDoc = firestore.collection("vouchers").document(promoCode).get().get();
+                        if (voucherDoc.exists()) {
+                            firestore.collection("vouchers").document(promoCode).update("isUsed", true).get();
+                        }
+                    } catch (Exception e) {
+                        log.error("Failed to update personal voucher status", e);
+                    }
+                }
+
                 // Also update payments document status to SUCCESS
                 try {
                     List<com.google.cloud.firestore.QueryDocumentSnapshot> payments = firestore.collection("payments")
