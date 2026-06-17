@@ -141,6 +141,20 @@ public class RegisterActivity extends BaseActivity {
         btnGoogle.setOnClickListener(v -> signInWithGoogle());
 
         edtBirthDate.setOnClickListener(v -> showDatePicker());
+
+        clearErrorOnFocus(edtFullName, tilFullName);
+        clearErrorOnFocus(edtEmail, tilEmail);
+        clearErrorOnFocus(edtPassword, tilPassword);
+        clearErrorOnFocus(edtConfirmPassword, tilConfirmPassword);
+        clearErrorOnFocus(edtPhone, tilPhone);
+    }
+
+    private void clearErrorOnFocus(TextInputEditText edt, TextInputLayout til) {
+        edt.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus && til.getError() != null) {
+                til.setError(null);
+            }
+        });
     }
 
     private void showDatePicker() {
@@ -237,6 +251,11 @@ public class RegisterActivity extends BaseActivity {
 
         if (TextUtils.isEmpty(phone)) {
             tilPhone.setError("Nhập số điện thoại");
+            return;
+        }
+
+        if (!phone.matches("^0\\d{9}$")) {
+            tilPhone.setError("Số điện thoại không hợp lệ (gồm 10 số và bắt đầu bằng 0)");
             return;
         }
 
