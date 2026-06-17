@@ -7,7 +7,7 @@
 # Giới thiệu
 
 Đây là đồ án môn **Ngôn Ngữ Lập Trình Java - SE330.Q21**, được thực hiện bởi **Nhóm 8**.
-Đề tài xây dựng một hệ thống **Cinema Booking App** hỗ trợ đầy đủ các vai trò **Customer**, **Staff** và **Admin**, bao gồm các chức năng đặt vé, quản lý suất chiếu, quản lý rạp, thanh toán, quét mã vé và đồng bộ dữ liệu theo thời gian thực.
+Đề tài xây dựng một hệ thống **Cinema Booking App** hỗ trợ đầy đủ các vai trò **Customer** và **Admin**, bao gồm các chức năng đặt vé, quản lý suất chiếu, quản lý rạp, thanh toán và đồng bộ dữ liệu theo thời gian thực.
 
 Mục tiêu của đồ án là áp dụng kiến thức Java vào một hệ thống thực tế, từ thiết kế kiến trúc phần mềm, xây dựng giao diện Android, đến phát triển backend Spring Boot và tích hợp Firebase.
 
@@ -18,10 +18,10 @@ Mục tiêu của đồ án là áp dụng kiến thức Java vào một hệ th
 | STT | Họ và tên            | Vai trò                                                   
 | --- | ------------         | ------------------
 | 1   | Đoàn Việt Khang      | Nhóm trưởng 
-| 2   | Phạm Ngọc Gia Khang  | Developer          
-| 3   | Huỳnh Long Bảo Khanh | Developer          
-| 4   | Lương Phúc Khang     | Developer          
-| 5   | Huỳnh Gia Khang      | Developer          
+| 2   | Phạm Ngọc Gia Khang  | Thành viên          
+| 3   | Huỳnh Long Bảo Khanh | Thành viên          
+| 4   | Lương Phúc Khang     | Thành viên          
+| 5   | Huỳnh Gia Khang      | Thành viên          
 
 # Tổng quan chức năng chính
 
@@ -46,16 +46,6 @@ Mục tiêu của đồ án là áp dụng kiến thức Java vào một hệ th
 * Quản lý thanh toán
 * Xem báo cáo, thống kê và log hệ thống
 * Quản lý người dùng
-
-## 3. Chức năng dành cho Staff
-
-* Tra cứu booking
-* Quét mã QR vé
-* Hỗ trợ khách tại quầy
-* Xử lý ghế bị lỗi / giữ ghế / khóa ghế
-* Hỗ trợ thanh toán tại quầy
-* Xem lịch chiếu, thống kê vận hành
-* Ghi nhận lịch sử thao tác và audit log
 
 # Tech Stack
 
@@ -133,11 +123,9 @@ Trong đồ án này, Java được sử dụng ở nhiều tầng khác nhau:
 ---------------
 # Tính năng nổi bật
 
-* Phân quyền 3 vai trò: Customer / Staff / Admin
 * Đặt vé theo suất chiếu và sơ đồ ghế
 * Khóa ghế realtime để tránh tranh chấp
 * Thanh toán và theo dõi lịch sử giao dịch
-* Staff hỗ trợ quét QR và xử lý tại quầy
 * Admin quản lý toàn bộ hệ thống
 * CineShop và các tiện ích đi kèm
 * Đồng bộ dữ liệu giữa nhiều thiết bị / nhiều vai trò
@@ -156,22 +144,14 @@ cd CinemaBooking
 ## 2. Mở ứng dụng Android
 
 * Mở thư mục gốc của project bằng Android Studio
-* Sync Gradle
-* Cấu hình `google-services.json` trong thư mục `app/`
 
 ## 3. Mở backend
 
 * Mở thư mục `cinema-booking-backend/` bằng IntelliJ IDEA hoặc từ terminal
-* Chạy backend bằng Maven
+* Thêm biến môi trường FIREBASE_SERVICE_ACCOUNT_BASE64 để chạy
 
-```bash
-cd cinema-booking-backend
-mvn clean spring-boot:run
-```
-
-## 4. Cấu hình Firebase
-
-* Thêm Android app vào Firebase project
-* Tải `google-services.json`
-* Thêm SHA-1 / SHA-256 nếu cần dùng Google Sign-In / Firebase Auth
+> Khuyến nghị cho giảng viên và người xem:
+>
+> Để trải nghiệm nhanh ứng dụng, vui lòng sử dụng nhánh `cloud-render`.
+> Nhánh này đã được cấu hình sẵn để kết nối tới Backend triển khai trên Render, giúp chạy và kiểm thử ứng dụng mà không cần cài đặt hoặc khởi động Backend Spring Boot cục bộ.
 

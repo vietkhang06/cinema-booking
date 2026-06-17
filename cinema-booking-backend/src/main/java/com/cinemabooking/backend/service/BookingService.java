@@ -61,8 +61,8 @@ public class BookingService {
         DocumentReference showtimeRef = firestore.collection("showtimes").document(data.getShowtimeId());
         batch.update(showtimeRef, "bookedSeatsCount", FieldValue.increment(data.getSeatIds().size()));
 
-        // Đồng bộ thời gian giữ ghế (heldUntil) với thời gian hết hạn của Booking (createdAt + 7.5 phút)
-        long expireTime = data.getCreatedAt() + 450000;
+        // Đồng bộ thời gian giữ ghế (heldUntil) với thời gian hết hạn của Booking (createdAt + 5 phút)
+        long expireTime = data.getCreatedAt() + 300000;
         for (String seatId : data.getSeatIds()) {
             batch.update(firestore.collection("seats").document(seatId),
                     "heldUntil", expireTime
@@ -74,7 +74,7 @@ public class BookingService {
     }
 
     public BookingDTO getPendingActiveBooking(String userId, String showtimeId) throws ExecutionException, InterruptedException {
-        long limitTime = System.currentTimeMillis() - 450000; // 7.5 phút
+        long limitTime = System.currentTimeMillis() - 300000; // 5 phút
         List<QueryDocumentSnapshot> docs = firestore.collection(COLLECTION)
                 .whereEqualTo("userId", userId)
                 .whereEqualTo("showtimeId", showtimeId)
@@ -287,6 +287,10 @@ public class BookingService {
             BookingDTO booking = bookingSnap.toObject(BookingDTO.class);
             if (booking == null) {
                 throw new RuntimeException("Booking data is invalid");
+            }
+
+            if ("CANCELLED".equalsIgnoreCase(booking.getBookingStatus())) {
+                throw new RuntimeException("Booking has already been cancelled due to timeout!");
             }
 
             // Check if seats are already booked/held by others
