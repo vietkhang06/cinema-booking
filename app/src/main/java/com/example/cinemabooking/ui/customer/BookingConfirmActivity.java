@@ -425,9 +425,8 @@ public class BookingConfirmActivity extends AppCompatActivity {
         final java.util.List<DocumentSnapshot> myVouchers = new ArrayList<>();
 
         if (spinnerVouchers != null && currentUser != null) {
-            FirebaseFirestore.getInstance().collection("vouchers")
+            FirebaseFirestore.getInstance().collection("promotions")
                     .whereEqualTo("userId", currentUser.uid)
-                    .whereEqualTo("isUsed", false)
                     .get()
                     .addOnSuccessListener(snapshot -> {
                         myVouchers.clear();
@@ -435,16 +434,27 @@ public class BookingConfirmActivity extends AppCompatActivity {
                         voucherNames.add("--- Chọn Voucher cá nhân ---");
 
                         if (snapshot != null && !snapshot.isEmpty()) {
-                            myVouchers.addAll(snapshot.getDocuments());
-                            for (DocumentSnapshot doc : myVouchers) {
-                                String type = doc.getString("voucherType");
-                                Double discount = doc.getDouble("discountValue");
-                                if (discount == null) discount = 0.0;
-                                
-                                String name = "Voucher hệ thống";
-                                if ("WELCOME_VOUCHER".equals(type)) name = "Quà Tân Binh";
-                                
-                                voucherNames.add(String.format(Locale.getDefault(), "%s (-%,.0f đ)", name, discount));
+                            for (DocumentSnapshot doc : snapshot.getDocuments()) {
+                                // Lọc các mã hợp lệ (chưa dùng hết, chưa xoá, đang active)
+                                Long usageLimit = doc.getLong("usageLimit");
+                                Long usedCount = doc.getLong("usedCount");
+                                Boolean deleted = doc.getBoolean("deleted");
+                                String status = doc.getString("status");
+
+                                boolean isValid = "active".equalsIgnoreCase(status) && !Boolean.TRUE.equals(deleted);
+                                if (usageLimit != null && usedCount != null && usedCount >= usageLimit) {
+                                    isValid = false;
+                                }
+
+                                if (isValid) {
+                                    myVouchers.add(doc);
+                                    String title = doc.getString("title");
+                                    Double discount = doc.getDouble("discountValue");
+                                    if (discount == null) discount = 0.0;
+                                    if (title == null) title = "Voucher cá nhân";
+                                    
+                                    voucherNames.add(String.format(Locale.getDefault(), "%s (-%,.0f đ)", title, discount));
+                                }
                             }
                         }
 
@@ -461,22 +471,22 @@ public class BookingConfirmActivity extends AppCompatActivity {
                     int selectedIndex = spinnerVouchers.getSelectedItemPosition() - 1;
                     DocumentSnapshot selectedVoucher = myVouchers.get(selectedIndex);
                     
-                    appliedVoucherId = selectedVoucher.getId();
-                    String type = selectedVoucher.getString("voucherType");
+                    String code = selectedVoucher.getString("code");
+                    String title = selectedVoucher.getString("title");
                     Double discount = selectedVoucher.getDouble("discountValue");
+                    String discountType = selectedVoucher.getString("discountType");
                     if (discount == null) discount = 0.0;
 
-                    if (discount > 100) {
-                        discountVoucher = discount;
-                    } else {
+                    appliedPromoCode = code; // Gán mã cho Request gửi lên Backend
+                    
+                    if ("percentage".equalsIgnoreCase(discountType)) {
                         discountVoucher = (total + totalSnacksPrice) * (discount / 100.0);
+                    } else {
+                        discountVoucher = discount;
                     }
 
-                    appliedPromoCode = ""; 
                     if (tvAppliedPromo != null) {
-                        String name = "Voucher hệ thống";
-                        if ("WELCOME_VOUCHER".equals(type)) name = "Quà Tân Binh";
-                        tvAppliedPromo.setText(String.format(Locale.getDefault(), "Đã áp dụng: %s (-%,.0f đ)", name, discountVoucher));
+                        tvAppliedPromo.setText(String.format(Locale.getDefault(), "Đã áp dụng: %s (-%,.0f đ)", title, discountVoucher));
                         tvAppliedPromo.setVisibility(android.view.View.VISIBLE);
                         tvAppliedPromo.setTextColor(0xFF4CAF50);
                     }
@@ -484,134 +494,9 @@ public class BookingConfirmActivity extends AppCompatActivity {
                     updateTotalPrice();
                     dialog.dismiss();
                     Toast.makeText(this, "Áp dụng Voucher cá nhân thành công!", Toast.LENGTH_SHORT).show();
-                    return;
+                } else {
+                    Toast.makeText(this, "Vui lòng chọn một Voucher!", Toast.LENGTH_SHORT).show();
                 }
-
-                if (edtPromoCode == null) return;
-
-                String code = edtPromoCode.getText().toString().trim().toUpperCase(Locale.getDefault());
-                if (code.isEmpty()) {
-                    Toast.makeText(this, "Vui lòng chọn Voucher hoặc nhập mã khuyến mãi!", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                double subtotal = total + totalSnacksPrice;
-
-                btnApplyPromo.setEnabled(false);
-                if (tvPromoStatus != null) {
-                    tvPromoStatus.setVisibility(android.view.View.VISIBLE);
-                    tvPromoStatus.setText("Đang kiểm tra mã khuyến mãi...");
-                }
-
-                FirebaseFirestore.getInstance()
-                        .collection("promotions") // nếu collection của bạn tên khác, đổi ở đây
-                        .whereEqualTo("code", code)
-                        .limit(1)
-                        .get()
-                        .addOnSuccessListener(snapshot -> {
-                            btnApplyPromo.setEnabled(true);
-
-                            if (snapshot == null || snapshot.isEmpty()) {
-                                showPromoInvalid(tvPromoStatus, "Mã khuyến mãi không hợp lệ hoặc đã hết hạn!");
-                                return;
-                            }
-
-                            DocumentSnapshot doc = snapshot.getDocuments().get(0);
-
-                            String status = doc.getString("status");
-                            Boolean deleted = doc.getBoolean("deleted");
-                            Long validFrom = doc.getLong("validFrom");
-                            Long validTo = doc.getLong("validTo");
-                            Long usageLimit = doc.getLong("usageLimit");
-                            Long usedCount = doc.getLong("usedCount");
-                            Double minAmount = doc.getDouble("minAmount");
-                            String targetRole = doc.getString("targetRole");
-                            String discountType = doc.getString("discountType");
-                            Double discountValue = doc.getDouble("discountValue");
-                            Double maxDiscountAmount = doc.getDouble("maxDiscountAmount");
-                            String title = doc.getString("title");
-
-                            long now = System.currentTimeMillis();
-
-                            if (!"active".equalsIgnoreCase(status)) {
-                                showPromoInvalid(tvPromoStatus, "Mã khuyến mãi không còn hoạt động!");
-                                return;
-                            }
-
-                            if (Boolean.TRUE.equals(deleted)) {
-                                showPromoInvalid(tvPromoStatus, "Mã khuyến mãi đã bị xoá!");
-                                return;
-                            }
-
-                            if (validFrom != null && now < validFrom) {
-                                showPromoInvalid(tvPromoStatus, "Mã khuyến mãi chưa đến thời gian áp dụng!");
-                                return;
-                            }
-
-                            if (validTo != null && now > validTo) {
-                                showPromoInvalid(tvPromoStatus, "Mã khuyến mãi đã hết hạn!");
-                                return;
-                            }
-
-                            if (usageLimit != null && usedCount != null && usedCount >= usageLimit) {
-                                showPromoInvalid(tvPromoStatus, "Mã khuyến mãi đã hết lượt sử dụng!");
-                                return;
-                            }
-
-                            if (minAmount != null && subtotal < minAmount) {
-                                showPromoInvalid(tvPromoStatus,
-                                        String.format(Locale.getDefault(),
-                                                "Đơn hàng phải tối thiểu %,.0f đ để áp dụng mã này!", minAmount));
-                                return;
-                            }
-
-                            if (!isPromoTargetMatch(targetRole)) {
-                                showPromoInvalid(tvPromoStatus, "Mã khuyến mãi không áp dụng cho tài khoản của bạn!");
-                                return;
-                            }
-
-                            double voucherValue = 0;
-
-                            if ("percentage".equalsIgnoreCase(discountType)) {
-                                double percent = discountValue != null ? discountValue : 0;
-                                voucherValue = subtotal * (percent / 100.0);
-
-                                if (maxDiscountAmount != null && maxDiscountAmount > 0) {
-                                    voucherValue = Math.min(voucherValue, maxDiscountAmount);
-                                }
-                            } else if ("fixed".equalsIgnoreCase(discountType)
-                                    || "amount".equalsIgnoreCase(discountType)) {
-                                voucherValue = discountValue != null ? discountValue : 0;
-                            }
-
-                            if (voucherValue <= 0) {
-                                showPromoInvalid(tvPromoStatus, "Mã khuyến mãi không hợp lệ!");
-                                return;
-                            }
-
-                            discountVoucher = voucherValue;
-                            appliedPromoCode = code;
-
-                            if (tvAppliedPromo != null) {
-                                String promoLabel = (title != null && !title.trim().isEmpty())
-                                        ? title
-                                        : code;
-
-                                tvAppliedPromo.setText(
-                                        String.format(Locale.getDefault(),
-                                                "Đã áp dụng: %s (-%,.0f đ)", promoLabel, voucherValue)
-                                );
-                                tvAppliedPromo.setTextColor(0xFF4CAF50);
-                            }
-
-                            updateTotalPrice();
-                            dialog.dismiss();
-                            Toast.makeText(this, "Áp dụng mã khuyến mãi thành công!", Toast.LENGTH_SHORT).show();
-                        })
-                        .addOnFailureListener(e -> {
-                            btnApplyPromo.setEnabled(true);
-                            showPromoInvalid(tvPromoStatus, "Không thể kiểm tra khuyến mãi: " + e.getMessage());
-                        });
             });
         }
 
@@ -679,13 +564,6 @@ public class BookingConfirmActivity extends AppCompatActivity {
                     isBookingConfirmed = true;
                     BookingTimerManager.getInstance().stopTimer(BookingConfirmActivity.this);
                     
-                    // Đánh dấu Voucher đã sử dụng (để không xài lại được nữa)
-                    if (appliedVoucherId != null && !appliedVoucherId.isEmpty()) {
-                        FirebaseFirestore.getInstance().collection("vouchers")
-                                .document(appliedVoucherId)
-                                .update("isUsed", true, "usedAt", System.currentTimeMillis());
-                    }
-
                     if ("momo".equals(paymentMethod)) {
                         Toast.makeText(BookingConfirmActivity.this, "Thanh toán qua Ví MoMo thành công!", Toast.LENGTH_LONG).show();
                         Intent intent = new Intent(BookingConfirmActivity.this, TicketDetailActivity.class);

@@ -15,18 +15,31 @@ public class WelcomeVoucherService {
 
         WriteBatch batch = db.batch();
         long currentTime = System.currentTimeMillis();
-        // 1. Khởi tạo thẻ Voucher 200,000đ
-        DocumentReference voucherRef = db.collection("vouchers").document();
-        Voucher voucher = new Voucher();
-        voucher.voucherId = voucherRef.getId();
-        voucher.userId = userId;
-        voucher.voucherType = "WELCOME_VOUCHER";
-        voucher.discountValue = 200000.0;
-        voucher.isUsed = false;
-        voucher.createdAt = currentTime;
-        batch.set(voucherRef, voucher);
 
-        // 2. Khởi tạo Thông báo gửi tới hộp thư khách hàng
+        // Tạo voucher (lưu vào bảng promotions)
+        DocumentReference promoRef = db.collection("promotions").document();
+        
+        // Sinh ngẫu nhiên mã code 6 ký tự dạng NEW_XXXXXX
+        String shortUid = userId.length() > 6 ? userId.substring(0, 6).toUpperCase() : userId.toUpperCase();
+        String promoCode = "NEW_" + shortUid;
+
+        java.util.Map<String, Object> promo = new java.util.HashMap<>();
+        promo.put("code", promoCode);
+        promo.put("title", "Quà Tân Binh 200K");
+        promo.put("discountType", "amount");
+        promo.put("discountValue", 200000.0);
+        promo.put("status", "active");
+        promo.put("deleted", false);
+        promo.put("usageLimit", 1L);
+        promo.put("usedCount", 0L);
+        promo.put("targetRole", "all");
+        promo.put("userId", userId); // Liên kết với tài khoản
+        promo.put("createdAt", currentTime);
+        promo.put("validFrom", currentTime);
+        
+        batch.set(promoRef, promo);
+
+        // Tạo thông báo
         DocumentReference notifRef = db.collection(FirestoreCollections.NOTIFICATIONS).document();
         Notification notif = new Notification();
         notif.notificationId = notifRef.getId();

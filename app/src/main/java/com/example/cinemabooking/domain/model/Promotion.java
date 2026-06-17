@@ -18,6 +18,7 @@ public class Promotion {
     public Long createdAt;
     public Long updatedAt;
     public Boolean deleted;
+    public String userId;
 
     public Promotion() {
     }

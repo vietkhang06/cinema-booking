@@ -99,9 +99,9 @@ public class MyPromotionListActivity extends AppCompatActivity {
                         if (p.deleted == null || !p.deleted) {
                             // Check active status, time validity, and usage limit
                             boolean isActive = "active".equalsIgnoreCase(p.status)
-                                    && p.validFrom <= now
-                                    && p.validTo >= now
-                                    && (p.usageLimit == null || p.usedCount < p.usageLimit);
+                                    && (p.validFrom == null || p.validFrom <= now)
+                                    && (p.validTo == null || p.validTo >= now)
+                                    && (p.usageLimit == null || p.usageLimit <= 0 || (p.usedCount != null && p.usedCount < p.usageLimit));
 
                             if (isActive) {
                                 // Check role applicability
@@ -115,7 +115,15 @@ public class MyPromotionListActivity extends AppCompatActivity {
                                 }
 
                                 if (isRoleMatch) {
-                                    activePromoList.add(p);
+                                    // Check if it's a global promo (userId == null) or belongs to current user
+                                    String currentUid = null;
+                                    if (com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() != null) {
+                                        currentUid = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid();
+                                    }
+
+                                    if (p.userId == null || p.userId.trim().isEmpty() || p.userId.equals(currentUid)) {
+                                        activePromoList.add(p);
+                                    }
                                 }
                             }
                         }
@@ -176,7 +184,7 @@ public class MyPromotionListActivity extends AppCompatActivity {
             holder.tvDesc.setText(p.description != null ? p.description : "");
 
             // Expiry Date
-            String dateEnd = p.validTo > 0 ? dateFormat.format(new Date(p.validTo)) : "";
+            String dateEnd = (p.validTo != null && p.validTo > 0) ? dateFormat.format(new Date(p.validTo)) : "Không thời hạn";
             holder.tvValidity.setText("HSD: " + dateEnd);
 
             // Target Role badge

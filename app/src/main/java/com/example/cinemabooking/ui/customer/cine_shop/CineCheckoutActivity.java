@@ -60,6 +60,10 @@ public class CineCheckoutActivity extends FragmentActivity {
     // ── State ─────────────────────────────────────────────────────────────────
     private String selectedPayment = "zalopay"; // default
     private final DecimalFormat fmt = new DecimalFormat("#,###");
+    
+    private double discountVoucher = 0;
+    private String appliedPromoCode = null;
+    private String appliedPromoId = null;
 
     // ── Province → Cinema data (mock) ─────────────────────────────────────────
     private static final String[] PROVINCES = {
@@ -158,11 +162,14 @@ public class CineCheckoutActivity extends FragmentActivity {
                 totalQuantity += item.quantity;
             }
 
+            double checkoutTotal = CineCartManager.getInstance().getTotalPrice() - discountVoucher;
+            if (checkoutTotal < 0) checkoutTotal = 0;
+
             CineShopOrderRequestDTO request = new CineShopOrderRequestDTO(
                     primaryItemName,
                     primaryImageUrl,
                     totalQuantity,
-                    totalPrice,
+                    checkoutTotal,
                     selectedPayment.toUpperCase()
             );
 
@@ -176,6 +183,12 @@ public class CineCheckoutActivity extends FragmentActivity {
                     if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                         CineShopOrderResponseDTO orderResponse = response.body().getData();
                         if (orderResponse != null) {
+                            if (appliedPromoId != null && !appliedPromoId.isEmpty()) {
+                                FirebaseFirestore.getInstance().collection("promotions")
+                                        .document(appliedPromoId)
+                                        .update("usedCount", com.google.firebase.firestore.FieldValue.increment(1));
+                            }
+
                             Toast.makeText(CineCheckoutActivity.this, "Đặt hàng thành công! Vui lòng hoàn tất thanh toán. 🎉", Toast.LENGTH_LONG).show();
                             CineCartManager.getInstance().clear();
 
@@ -279,13 +292,94 @@ public class CineCheckoutActivity extends FragmentActivity {
 
         // Apply voucher
         btnApplyVoucher.setOnClickListener(v -> {
-            String code = etVoucherCode.getText().toString().trim();
+            String code = etVoucherCode.getText().toString().trim().toUpperCase(java.util.Locale.getDefault());
             if (code.isEmpty()) {
                 Toast.makeText(this, "Vui lòng nhập mã voucher", Toast.LENGTH_SHORT).show();
                 return;
             }
-            // TODO: validate voucher code via API
-            Toast.makeText(this, "Mã \"" + code + "\" không hợp lệ hoặc đã hết hạn", Toast.LENGTH_SHORT).show();
+            
+            double subtotal = CineCartManager.getInstance().getTotalPrice();
+
+            btnApplyVoucher.setEnabled(false);
+            FirebaseFirestore.getInstance().collection("promotions")
+                    .whereEqualTo("code", code)
+                    .limit(1)
+                    .get()
+                    .addOnSuccessListener(snapshot -> {
+                        btnApplyVoucher.setEnabled(true);
+                        if (snapshot == null || snapshot.isEmpty()) {
+                            Toast.makeText(this, "Mã không hợp lệ hoặc đã hết hạn", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        
+                        com.google.firebase.firestore.DocumentSnapshot doc = snapshot.getDocuments().get(0);
+                        String status = doc.getString("status");
+                        Boolean deleted = doc.getBoolean("deleted");
+                        Long validFrom = doc.getLong("validFrom");
+                        Long validTo = doc.getLong("validTo");
+                        Long usageLimit = doc.getLong("usageLimit");
+                        Long usedCount = doc.getLong("usedCount");
+                        Double minAmount = doc.getDouble("minAmount");
+                        String discountType = doc.getString("discountType");
+                        Double discountValue = doc.getDouble("discountValue");
+                        Double maxDiscountAmount = doc.getDouble("maxDiscountAmount");
+                        String userId = doc.getString("userId");
+                        
+                        long now = System.currentTimeMillis();
+                        if (!"active".equalsIgnoreCase(status) || Boolean.TRUE.equals(deleted)) {
+                            Toast.makeText(this, "Mã đã bị xoá hoặc ngưng hoạt động", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        if (validFrom != null && now < validFrom) {
+                            Toast.makeText(this, "Mã chưa đến thời gian áp dụng", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        if (validTo != null && now > validTo) {
+                            Toast.makeText(this, "Mã đã hết hạn", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        if (usageLimit != null && usageLimit > 0 && usedCount != null && usedCount >= usageLimit) {
+                            Toast.makeText(this, "Mã đã hết lượt sử dụng", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        if (minAmount != null && subtotal < minAmount) {
+                            Toast.makeText(this, "Đơn hàng chưa đạt giá trị tối thiểu", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        
+                        String currentUid = FirebaseAuth.getInstance().getCurrentUser() != null ? FirebaseAuth.getInstance().getCurrentUser().getUid() : null;
+                        if (userId != null && !userId.trim().isEmpty() && !userId.equals(currentUid)) {
+                            Toast.makeText(this, "Mã không áp dụng cho tài khoản của bạn", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        double voucherValue = 0;
+                        if ("percentage".equalsIgnoreCase(discountType)) {
+                            double percent = discountValue != null ? discountValue : 0;
+                            voucherValue = subtotal * (percent / 100.0);
+                            if (maxDiscountAmount != null && maxDiscountAmount > 0) {
+                                voucherValue = Math.min(voucherValue, maxDiscountAmount);
+                            }
+                        } else {
+                            voucherValue = discountValue != null ? discountValue : 0;
+                        }
+
+                        if (voucherValue <= 0) {
+                            Toast.makeText(this, "Mã không hợp lệ", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        discountVoucher = voucherValue;
+                        appliedPromoCode = code;
+                        appliedPromoId = doc.getId();
+                        
+                        updateTotal();
+                        Toast.makeText(this, "Áp dụng thành công: Giảm " + fmt.format(discountVoucher) + "đ", Toast.LENGTH_SHORT).show();
+                    })
+                    .addOnFailureListener(e -> {
+                        btnApplyVoucher.setEnabled(true);
+                        Toast.makeText(this, "Lỗi kiểm tra voucher: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
         });
 
         // Apply stars
@@ -332,7 +426,8 @@ public class CineCheckoutActivity extends FragmentActivity {
     // ── Total ─────────────────────────────────────────────────────────────────
 
     private void updateTotal() {
-        double total = CineCartManager.getInstance().getTotalPrice();
+        double total = CineCartManager.getInstance().getTotalPrice() - discountVoucher;
+        if (total < 0) total = 0;
         tvCheckoutTotal.setText(fmt.format(total) + "đ");
     }
 
