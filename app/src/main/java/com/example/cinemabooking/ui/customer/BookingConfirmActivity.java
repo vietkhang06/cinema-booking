@@ -46,6 +46,7 @@ public class BookingConfirmActivity extends AppCompatActivity {
 
     private TextView tvTimer;
     private BookingTimerManager.TimerListener timerListener;
+    // Bien cuc bo khai bao
     private boolean hasShownWarning = false;
 
     // Phase 3 Promotion Fields
@@ -100,7 +101,7 @@ public class BookingConfirmActivity extends AppCompatActivity {
         } else {
             BookingTimerManager.getInstance().restoreTimer(this);
         }
-
+// Ham dem nguoc thoi gian
         timerListener = new BookingTimerManager.TimerListener() {
             @Override
             public void onTick(long millisUntilFinished) {
